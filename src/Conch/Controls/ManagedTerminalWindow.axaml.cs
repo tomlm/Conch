@@ -293,8 +293,15 @@ namespace Conch.Controls
             Dispatcher.UIThread.Post(RestoreTerminalFocus, DispatcherPriority.Background);
         }
 
+        /// <summary>
+        /// Raised when the hosted process exits, before <see cref="CloseOnProcessExit"/> is honoured.
+        /// </summary>
+        public event EventHandler<ProcessExitedEventArgs>? ProcessExited;
+
         private void OnTerminalControlProcessExited(object? sender, ProcessExitedEventArgs e)
         {
+            ProcessExited?.Invoke(this, e);
+
             if (CloseOnProcessExit)
             {
                 Close();

@@ -10,8 +10,6 @@ namespace Conch.ViewModel
 
         public ToolsViewModel Tools { get; init; }
 
-        public HashSet<string> InstalledToolIds { get; } = new HashSet<string>();
-
         public AppViewModel()
         {
             Tools = new ToolsViewModel();

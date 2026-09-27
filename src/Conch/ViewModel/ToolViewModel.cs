@@ -71,6 +71,69 @@ namespace Conch.ViewModel
 
         public string Uninstall => GetInstallDefinitionForCurrentPlatform()?.Uninstall ?? string.Empty;
 
+        /// <summary>
+        /// Optional shell command that exits zero when this app is already present.
+        /// </summary>
+        public string? Detect => GetInstallDefinitionForCurrentPlatform()?.Detect;
+
+        public bool HasInstall => !string.IsNullOrWhiteSpace(Install);
+
+        public bool HasUninstall => !string.IsNullOrWhiteSpace(Uninstall);
+
+        /// <summary>
+        /// Which platform entry this registration resolved to on the current machine.
+        /// </summary>
+        public ToolPlatform ResolvedPlatform
+        {
+            get
+            {
+                if (Platforms == null)
+                {
+                    return ToolPlatform.None;
+                }
+
+                if (OperatingSystem.IsWindows())
+                {
+                    if (Platforms.Windows != null) return ToolPlatform.Windows;
+                    if (Platforms.Linux != null) return ToolPlatform.Linux;
+                }
+                else if (OperatingSystem.IsLinux() && Platforms.Linux != null)
+                {
+                    return ToolPlatform.Linux;
+                }
+                else if (OperatingSystem.IsMacOS() && Platforms.MacOS != null)
+                {
+                    return ToolPlatform.MacOS;
+                }
+
+                return Platforms.Default != null ? ToolPlatform.Default : ToolPlatform.None;
+            }
+        }
+
+        /// <summary>
+        /// True when this registration only describes a Linux build but we are on Windows, so its
+        /// commands have to run inside WSL.
+        /// </summary>
+        public bool RunsUnderWsl => OperatingSystem.IsWindows() && ResolvedPlatform == ToolPlatform.Linux;
+
+        /// <summary>
+        /// Whether the app was found on this machine. Maintained by the detector, not the file.
+        /// </summary>
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(InstallStateText))]
+        private bool _isInstalled;
+
+        /// <summary>
+        /// True once detection has actually run, so the UI can distinguish "absent" from "unknown".
+        /// </summary>
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(InstallStateText))]
+        private bool _isDetected;
+
+        public string InstallStateText => !IsDetected
+            ? "Checking..."
+            : IsInstalled ? "Installed" : "Not installed";
+
         public string PlatformSummary
         {
             get
@@ -160,6 +223,8 @@ namespace Conch.ViewModel
                 return null;
             }
 
+            // On Windows a Linux-only registration still resolves, and its commands are then run
+            // through WSL; see RunsUnderWsl.
             var specific = OperatingSystem.IsWindows() ? Platforms.Windows ?? Platforms.Linux
                 : OperatingSystem.IsLinux() ? Platforms.Linux
                 : OperatingSystem.IsMacOS() ? Platforms.MacOS

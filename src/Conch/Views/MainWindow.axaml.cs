@@ -1,19 +1,20 @@
-using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Interactivity;
-using Conch.Controls;
-using Conch.Utilities;
+using Conch.Services;
 using Conch.ViewModel;
 
 namespace Conch.Views
 {
     public partial class MainWindow : Window
     {
+        private AppLauncher? _launcher;
+
         public MainWindow()
         {
             InitializeComponent();
         }
+
+        private AppLauncher Apps => _launcher ??= new AppLauncher(Windows);
 
         private void OnExit(object sender, RoutedEventArgs e)
         {
@@ -37,16 +38,8 @@ namespace Conch.Views
 
         private void OnNewTerminal(object? sender, RoutedEventArgs e)
         {
-            var terminalWindow = new ManagedTerminalWindow
-            {
-                Width = 80,
-                Height = 25,
-                FontFamily = "Cascadia Mono",
-                CloseOnProcessExit = true
-            };
-            terminalWindow.Show(Windows);
+            Apps.LaunchShell();
         }
-
 
         private async void OnCustomTerminal(object? sender, RoutedEventArgs e)
         {
@@ -55,89 +48,8 @@ namespace Conch.Views
 
             if (result == true && !string.IsNullOrWhiteSpace(dialog.CommandLine))
             {
-                var commandLine = dialog.CommandLine.Trim();
-                var parts = ParseCommandLine(commandLine);
-                string process = "cmd.exe";
-                List<string> args = new List<string>();
-                if (parts.Count > 0)
-                {
-                    var processPath = PathUtils.ResolveOnPath(parts[0]);
-                    if (processPath != null)
-                    {
-                        if (String.Equals(Path.GetExtension(processPath), ".exe", StringComparison.OrdinalIgnoreCase))
-                        {
-                            process = processPath;
-                            args = parts.GetRange(1, parts.Count - 1).ToList();
-                        }
-                        else if (String.Equals(Path.GetExtension(processPath), ".cmd", StringComparison.OrdinalIgnoreCase))
-                        {
-                            process = "cmd.exe";
-                            args.Add("/c");
-                            args.Add(processPath);
-                            args.AddRange(parts.GetRange(1, parts.Count - 1));
-                        }
-                        else
-                        {
-                            // for non-exe files, try to run via wsl
-                            process = "wsl";
-                            args = parts;
-                        }
-                    }
-                    else
-                    {
-                        process = "wsl";
-                        args = parts;
-                    }
-                }
-
-                var terminalWindow = new ManagedTerminalWindow
-                {
-                    Process = process,
-                    ProcessArgs = args,
-                    Title = process,
-                    Width = 80,
-                    Height = 25,
-                    FontFamily = "Cascadia Mono",
-                    CloseOnProcessExit = true
-                };
-                terminalWindow.Show(Windows);
+                Apps.LaunchCommandLine(dialog.CommandLine);
             }
-        }
-
-
-
-        private static List<string> ParseCommandLine(string commandLine)
-        {
-            var args = new List<string>();
-            var current = "";
-            var inQuotes = false;
-
-            foreach (var c in commandLine)
-            {
-                if (c == '"')
-                {
-                    inQuotes = !inQuotes;
-                }
-                else if (c == ' ' && !inQuotes)
-                {
-                    if (!string.IsNullOrEmpty(current))
-                    {
-                        args.Add(current);
-                        current = "";
-                    }
-                }
-                else
-                {
-                    current += c;
-                }
-            }
-
-            if (!string.IsNullOrEmpty(current))
-            {
-                args.Add(current);
-            }
-
-            return args;
         }
     }
 }

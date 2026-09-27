@@ -17,13 +17,17 @@
 			<ListBox x:Name="ToolsListBox"
 					 SelectionMode="Single"
 					 ItemsSource="{Binding FilteredTools}"
+					 SelectedItem="{Binding SelectedTool}"
 					 HorizontalAlignment="Stretch"
 					 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
 					>
 				<ListBox.ItemTemplate>
 					<DataTemplate x:DataType="vm:ToolViewModel">
 						<StackPanel HorizontalAlignment="Stretch" Margin="0 0 1 0">
-							<TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+							<StackPanel Orientation="Horizontal" Spacing="1">
+								<TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+								<TextBlock Text="{Binding InstallStateText}" Foreground="Gray"/>
+							</StackPanel>
 							<TextBlock Text="{Binding Description}" TextWrapping="Wrap" MaxWidth="{Binding #ToolsListBox.Bounds.Width}"/>
 							<Separator/>
 						</StackPanel>
@@ -36,38 +40,46 @@
 						<Grid x:Name="DetailsContent"
 							  x:DataType="vm:ToolViewModel"
 							  ColumnDefinitions="Auto,*"
-							  RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
-							  DataContext="{Binding #ToolsListBox.SelectedItem}">
+							  RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
+							  DataContext="{Binding SelectedTool}">
 							<TextBlock Grid.Row="0" Grid.Column="0" Text="ID:" FontWeight="Bold" />
 							<TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Id}" TextWrapping="Wrap"/>
 							<TextBlock Grid.Row="1" Grid.Column="0" Text="Name:" FontWeight="Bold" />
 							<TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Name}" TextWrapping="Wrap"/>
-							<TextBlock Grid.Row="2" Grid.Column="0" Text="Version:" FontWeight="Bold" />
-							<TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Version}" TextWrapping="Wrap"/>
-							<TextBlock Grid.Row="3" Grid.Column="0" Text="Description:" FontWeight="Bold" />
-							<TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Description}" TextWrapping="Wrap"/>
-							<TextBlock Grid.Row="4" Grid.Column="0" Text="Keywords:" FontWeight="Bold" />
-							<TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding KeywordsText}" TextWrapping="Wrap"/>
-							<TextBlock Grid.Row="5" Grid.Column="0" Text="Platform:" FontWeight="Bold" />
-							<TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding PlatformSummary}" TextWrapping="Wrap"/>
-							<TextBlock Grid.Row="6" Grid.Column="0" Text="Command:" FontWeight="Bold" />
-							<TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding Command}" TextWrapping="Wrap"/>
-							<TextBlock Grid.Row="7" Grid.Column="0" Text="Docs:" FontWeight="Bold" />
-							<TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding Documentation}" TextWrapping="Wrap"/>
-							<TextBlock Grid.Row="8" Grid.Column="0" Text="Website:" FontWeight="Bold" />
-							<TextBlock Grid.Row="8" Grid.Column="1" Text="{Binding Website}" TextWrapping="Wrap"/>
-							<TextBlock Grid.Row="9" Grid.Column="0" Text="Source:" FontWeight="Bold" />
-							<TextBlock Grid.Row="9" Grid.Column="1" Text="{Binding Source}" TextWrapping="Wrap"/>
-							<TextBlock Grid.Row="10" Grid.Column="0" Text="Install:" FontWeight="Bold" />
-							<TextBlock Grid.Row="10" Grid.Column="1" Text="{Binding Install}" TextWrapping="Wrap"/>
-							<TextBlock Grid.Row="11" Grid.Column="0" Text="Uninstall:" FontWeight="Bold" />
-							<TextBlock Grid.Row="11" Grid.Column="1" Text="{Binding Uninstall}" TextWrapping="Wrap"/>
+							<TextBlock Grid.Row="2" Grid.Column="0" Text="Status:" FontWeight="Bold" />
+							<TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding InstallStateText}" TextWrapping="Wrap"/>
+							<TextBlock Grid.Row="3" Grid.Column="0" Text="Version:" FontWeight="Bold" />
+							<TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Version}" TextWrapping="Wrap"/>
+							<TextBlock Grid.Row="4" Grid.Column="0" Text="Description:" FontWeight="Bold" />
+							<TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Description}" TextWrapping="Wrap"/>
+							<TextBlock Grid.Row="5" Grid.Column="0" Text="Keywords:" FontWeight="Bold" />
+							<TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding KeywordsText}" TextWrapping="Wrap"/>
+							<TextBlock Grid.Row="6" Grid.Column="0" Text="Platform:" FontWeight="Bold" />
+							<TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding PlatformSummary}" TextWrapping="Wrap"/>
+							<TextBlock Grid.Row="7" Grid.Column="0" Text="Command:" FontWeight="Bold" />
+							<TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding Command}" TextWrapping="Wrap"/>
+							<TextBlock Grid.Row="8" Grid.Column="0" Text="Docs:" FontWeight="Bold" />
+							<TextBlock Grid.Row="8" Grid.Column="1" Text="{Binding Documentation}" TextWrapping="Wrap"/>
+							<TextBlock Grid.Row="9" Grid.Column="0" Text="Website:" FontWeight="Bold" />
+							<TextBlock Grid.Row="9" Grid.Column="1" Text="{Binding Website}" TextWrapping="Wrap"/>
+							<TextBlock Grid.Row="10" Grid.Column="0" Text="Source:" FontWeight="Bold" />
+							<TextBlock Grid.Row="10" Grid.Column="1" Text="{Binding Source}" TextWrapping="Wrap"/>
+							<TextBlock Grid.Row="11" Grid.Column="0" Text="Install:" FontWeight="Bold" />
+							<TextBlock Grid.Row="11" Grid.Column="1" Text="{Binding Install}" TextWrapping="Wrap"/>
+							<TextBlock Grid.Row="12" Grid.Column="0" Text="Uninstall:" FontWeight="Bold" />
+							<TextBlock Grid.Row="12" Grid.Column="1" Text="{Binding Uninstall}" TextWrapping="Wrap"/>
 						</Grid>
 					</StackPanel>
 				</ScrollViewer>
 			</Border>
 		</Grid>
-		<Button Grid.Row="2" Content="CLOSE" HorizontalAlignment="Center" Click="OnClose"/>
+		<StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center"
+					Spacing="{console:OnPlatform Default='8',Console='1'}">
+			<Button Content="RUN" Click="OnRun" IsEnabled="{Binding CanRun}"/>
+			<Button Content="INSTALL" Click="OnInstall" IsEnabled="{Binding CanInstall}"/>
+			<Button Content="UNINSTALL" Click="OnUninstall" IsEnabled="{Binding CanUninstall}"/>
+			<Button Content="RECHECK" Click="OnRecheck"/>
+			<Button Content="CLOSE" Click="OnClose"/>
+		</StackPanel>
 	</Grid>
 </wm:ManagedWindow>
-
