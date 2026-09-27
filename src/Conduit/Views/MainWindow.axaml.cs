@@ -87,7 +87,7 @@ namespace Conduit.Views
                 var terminalWindow = new ManagedTerminalWindow
                 {
                     Process = process,
-                    Args = args,
+                    ProcessArgs = args,
                     Title = process,
                     Width = 80,
                     Height = 25,

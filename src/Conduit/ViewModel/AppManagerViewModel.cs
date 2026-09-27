@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using CommunityToolkit.Mvvm.ComponentModel;
-using DynamicData;
+using Lucene.Net.Util;
 
 namespace Conduit.ViewModel
 {
