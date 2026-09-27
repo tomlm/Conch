@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Text.Json.Serialization;
 
-namespace Conduit.ViewModel
+namespace Conch.ViewModel
 {
     public partial class AppViewModel : ObservableObject
     {

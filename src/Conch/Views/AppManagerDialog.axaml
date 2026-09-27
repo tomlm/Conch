@@ -4,14 +4,14 @@
 				  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 				  xmlns:console="https://github.com/consolonia"
 				  xmlns:wm="using:Iciclecreek.Avalonia.WindowManager"
-				  xmlns:vm="clr-namespace:Conduit.ViewModel"
+				  xmlns:vm="clr-namespace:Conch.ViewModel"
 				  mc:Ignorable="d" d:DesignWidth="120" d:DesignHeight="40"
-				  x:Class="Conduit.Views.AppManagerDialog"
+				  x:Class="Conch.Views.AppManagerDialog"
 				  Title="Manage Apps"
 				  WindowState="Maximized"
 				  x:DataType="vm:AppManagerViewModel">
 	<Grid Margin="{console:OnPlatform Default='16', Console='1'}" RowDefinitions="Auto,*,Auto">
-		<TextBox Grid.Row="0" x:Name="SearchBox" Watermark="Search apps..." Text="{Binding SearchText}"/>
+		<TextBox Grid.Row="0" x:Name="SearchBox" PlaceholderText="Search apps..." Text="{Binding SearchText}"/>
 		<Grid Grid.Row="1"
 			  ColumnDefinitions="1*,1*" >
 			<ListBox x:Name="ToolsListBox"

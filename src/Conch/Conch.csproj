@@ -17,7 +17,10 @@
     <PackageReference Include="YamlConvert" Version="3.1.0" />
   </ItemGroup>
 
-   <ItemGroup Condition="'$(BuildingInsideVisualStudio)' == 'true'">
+  <!-- Ship the app registrations next to the executable so the catalog is populated
+       on a machine that has never reached the remote feed. -->
+  <ItemGroup>
+    <Content Include="Tools\**\*.yml" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

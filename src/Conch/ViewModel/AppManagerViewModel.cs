@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Lucene.Net.Util;
 
-namespace Conduit.ViewModel
+namespace Conch.ViewModel
 {
     /// <summary>
     /// View model for a tool

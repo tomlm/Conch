@@ -1,4 +1,4 @@
-﻿namespace Conduit.ViewModel
+﻿namespace Conch.ViewModel
 {
     public class PlatformInstallDefinitions
     {

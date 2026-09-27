@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace Conduit.ViewModel
+namespace Conch.ViewModel
 {
     /// <summary>
     /// View model for a tool

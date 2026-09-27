@@ -1,10 +1,10 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using Conduit.ViewModel;
-using Conduit.Views;
+using Conch.ViewModel;
+using Conch.Views;
 
-namespace Conduit
+namespace Conch
 {
     public partial class App : Application
     {

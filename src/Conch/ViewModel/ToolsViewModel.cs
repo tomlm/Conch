@@ -1,4 +1,5 @@
-﻿using Lucene.Net.Util;
+using Avalonia.Threading;
+using Conch.Utilities;
 using ObjectSearch;
 using System.Collections.ObjectModel;
 using System.Net.Http.Headers;
@@ -6,18 +7,32 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using YamlConverter;
 
-namespace Conduit.ViewModel
+namespace Conch.ViewModel
 {
+    /// <summary>
+    /// The catalog of registered applications, assembled from three layers (lowest priority
+    /// first): the catalog shipped alongside the executable, the per-user cache, and the
+    /// remote feed.
+    /// </summary>
     public class ToolsViewModel : ObservableCollection<ToolViewModel>
     {
+        private const string LogCategory = "Catalog";
+
         private readonly ObjectSearchEngine _toolSearch;
 
         private static readonly Uri ToolsFolderApiUri = new(
-            "https://api.github.com/repos/tomlm/Conduit/contents/src/Conduit/Tools?ref=main");
+            "https://api.github.com/repos/tomlm/Conch/contents/src/Conch/Tools?ref=main");
+
+        /// <summary>
+        /// Catalog shipped with the build. Guarantees a usable app list on a machine that has
+        /// never had network access, and on first run before the remote feed has been read.
+        /// </summary>
+        private static readonly string SeedToolsDirectory = Path.Combine(
+            AppContext.BaseDirectory,
+            "Tools");
 
         private static readonly string ToolsCacheDirectory = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "Conduit",
+            Log.StateDirectory,
             "Tools");
 
         public ToolsViewModel()
@@ -29,24 +44,27 @@ namespace Conduit.ViewModel
             {
                 lock (_toolSearch)
                 {
-                    if (e.NewItems != null)
-                    {
-                        _toolSearch.AddObjects(e.NewItems.Cast<ToolViewModel>());
-                    }
                     if (e.OldItems != null)
                     {
                         _toolSearch.RemoveObjects(e.OldItems.Cast<ToolViewModel>());
                     }
+                    if (e.NewItems != null)
+                    {
+                        _toolSearch.AddObjects(e.NewItems.Cast<ToolViewModel>());
+                    }
                 }
             };
 
-
             Directory.CreateDirectory(ToolsCacheDirectory);
 
-            // Populate synchronously from cache first (fast UI start)
+            // Populate synchronously so the UI starts with a catalog: shipped definitions first,
+            // then the cache on top so a previously refreshed definition wins over the one we shipped.
+            AddToolsFromDirectory(SeedToolsDirectory);
             AddToolsFromDirectory(ToolsCacheDirectory);
 
-            // Then refresh from GitHub in the background
+            Log.Info(LogCategory, $"Loaded {Count} tool definition(s) from disk.");
+
+            // Then refresh from the remote feed in the background
             _ = RefreshFromGitHubAsync();
         }
 
@@ -60,9 +78,29 @@ namespace Conduit.ViewModel
             {
                 return _toolSearch.Search<ToolViewModel>(query).Select(sr => sr.Value!).ToList();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Log.Error(LogCategory, $"Search for {query} failed", ex);
                 return Array.Empty<ToolViewModel>();
+            }
+        }
+
+        /// <summary>
+        /// Adds a tool, replacing any existing entry that has the same id.
+        /// </summary>
+        private void Upsert(ToolViewModel tool)
+        {
+            var existing = this.FirstOrDefault(t => string.Equals(t.Id, tool.Id, StringComparison.OrdinalIgnoreCase));
+            if (existing == null)
+            {
+                Add(tool);
+                return;
+            }
+
+            var index = IndexOf(existing);
+            if (index >= 0)
+            {
+                this[index] = tool;
             }
         }
 
@@ -70,13 +108,18 @@ namespace Conduit.ViewModel
         {
             if (!Directory.Exists(directory))
             {
+                Log.Info(LogCategory, $"No tool definitions at {directory}.");
                 return;
             }
 
-            this.AddRange(Directory.GetFiles(directory, "*.yml")
-                .Select(TryLoadToolFromFile)
-                .Where(tool => tool != null)!
-                .Cast<ToolViewModel>());
+            foreach (var file in Directory.GetFiles(directory, "*.yml").OrderBy(f => f, StringComparer.OrdinalIgnoreCase))
+            {
+                var tool = TryLoadToolFromFile(file);
+                if (tool != null)
+                {
+                    Upsert(tool);
+                }
+            }
         }
 
         private static ToolViewModel? TryLoadToolFromFile(string file)
@@ -90,7 +133,7 @@ namespace Conduit.ViewModel
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error loading tool definition from {file}: {ex.Message}");
+                Log.Error(LogCategory, $"Error loading tool definition from {file}", ex);
                 return null;
             }
         }
@@ -106,11 +149,11 @@ namespace Conduit.ViewModel
                 {
                     if ((int)listResponse.StatusCode == 403 && listResponse.Headers.TryGetValues("X-RateLimit-Remaining", out var remaining) && remaining.FirstOrDefault() == "0")
                     {
-                        Console.WriteLine("GitHub API rate limit exceeded while listing tools.");
+                        Log.Warning(LogCategory, "GitHub API rate limit exceeded while listing tools; keeping the local catalog.");
                     }
                     else
                     {
-                        Console.WriteLine($"GitHub tools list failed: {(int)listResponse.StatusCode} {listResponse.ReasonPhrase}");
+                        Log.Warning(LogCategory, $"Tools list failed: {(int)listResponse.StatusCode} {listResponse.ReasonPhrase} ({ToolsFolderApiUri}); keeping the local catalog.");
                     }
                     return;
                 }
@@ -119,21 +162,27 @@ namespace Conduit.ViewModel
                 var items = await JsonSerializer.DeserializeAsync<List<GitHubContentItem>>(listStream, cancellationToken: cancellationToken).ConfigureAwait(false);
                 if (items == null)
                 {
+                    Log.Warning(LogCategory, "Tools list returned no content.");
                     return;
                 }
 
                 var yamlItems = items
-                    .Where(i => i.DownloadUrl.LocalPath.EndsWith(".yml", StringComparison.OrdinalIgnoreCase) || i.DownloadUrl.LocalPath.EndsWith(".yaml", StringComparison.OrdinalIgnoreCase))
+                    .Where(i => i.DownloadUrl != null &&
+                        (i.DownloadUrl.LocalPath.EndsWith(".yml", StringComparison.OrdinalIgnoreCase) ||
+                         i.DownloadUrl.LocalPath.EndsWith(".yaml", StringComparison.OrdinalIgnoreCase)))
                     .ToList();
+
+                var updated = 0;
 
                 foreach (var item in yamlItems)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    var localPath = Path.Combine(ToolsCacheDirectory, Path.GetFileName(item.DownloadUrl.LocalPath));
+                    var downloadUrl = item.DownloadUrl!;
+                    var localPath = Path.Combine(ToolsCacheDirectory, Path.GetFileName(downloadUrl.LocalPath));
 
                     // Avoid re-downloading if unchanged (best-effort via ETag)
-                    var request = new HttpRequestMessage(HttpMethod.Get, item.DownloadUrl);
+                    var request = new HttpRequestMessage(HttpMethod.Get, downloadUrl);
                     if (File.Exists(localPath))
                     {
                         var etagPath = localPath + ".etag";
@@ -157,11 +206,11 @@ namespace Conduit.ViewModel
                     {
                         if ((int)fileResponse.StatusCode == 403 && fileResponse.Headers.TryGetValues("X-RateLimit-Remaining", out var dlRemaining) && dlRemaining.FirstOrDefault() == "0")
                         {
-                            Console.WriteLine("GitHub API rate limit exceeded while downloading tools.");
+                            Log.Warning(LogCategory, "GitHub API rate limit exceeded while downloading tools.");
                             return;
                         }
 
-                        Console.WriteLine($"GitHub download failed for {item.Name}: {(int)fileResponse.StatusCode} {fileResponse.ReasonPhrase}");
+                        Log.Warning(LogCategory, $"Download failed for {item.Name}: {(int)fileResponse.StatusCode} {fileResponse.ReasonPhrase}");
                         continue;
                     }
 
@@ -179,25 +228,22 @@ namespace Conduit.ViewModel
                         continue;
                     }
 
-                    // Replace existing with same id, else add.
-                    var existing = this.FirstOrDefault(t => string.Equals(t.Id, tool.Id, StringComparison.OrdinalIgnoreCase));
-                    if (existing != null)
-                    {
-                        var index = this.IndexOf(existing);
-                        if (index >= 0)
-                        {
-                            this[index] = tool;
-                        }
-                    }
-                    else
-                    {
-                        this.Add(tool);
-                    }
+                    // This collection is bound to the UI, so mutate it only on the UI thread.
+                    await Dispatcher.UIThread.InvokeAsync(() => Upsert(tool));
+                    updated++;
                 }
+
+                Log.Info(LogCategory, updated == 0
+                    ? "Catalog is up to date."
+                    : $"Refreshed {updated} tool definition(s) from the remote catalog.");
+            }
+            catch (OperationCanceledException)
+            {
+                // shutting down
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error refreshing tools from GitHub: {ex.Message}");
+                Log.Error(LogCategory, "Error refreshing tools from the remote catalog", ex);
             }
         }
 
@@ -206,7 +252,7 @@ namespace Conduit.ViewModel
             var http = new HttpClient();
 
             // GitHub API requires a User-Agent. Accept raw content for download URLs.
-            http.DefaultRequestHeaders.UserAgent.ParseAdd("Conduit/1.0");
+            http.DefaultRequestHeaders.UserAgent.ParseAdd("Conch/1.0");
             http.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github+json");
             http.DefaultRequestHeaders.Add("X-GitHub-Api-Version", "2022-11-28");
 
@@ -221,6 +267,5 @@ namespace Conduit.ViewModel
             [JsonPropertyName("download_url")]
             public Uri? DownloadUrl { get; set; }
         }
-
     }
 }

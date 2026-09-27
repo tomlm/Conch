@@ -5,7 +5,7 @@
         xmlns:console="https://github.com/consolonia"
         xmlns:wm="using:Iciclecreek.Avalonia.WindowManager"
         mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="150"
-        x:Class="Conduit.Views.CommandLineDialog"
+        x:Class="Conch.Views.CommandLineDialog"
         Title="Start Process"
         WindowStartupLocation="CenterOwner"
         CanResize="False">
@@ -13,7 +13,7 @@
 		<TextBlock Grid.Row="0" Text="Enter the command line to run:" />
 		<TextBox Grid.Row="1" 
            x:Name="CommandLineTextBox" 
-           Watermark="e.g., cmd.exe or /bin/bash"/>
+           PlaceholderText="e.g., cmd.exe or /bin/bash"/>
 		<StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="{console:OnPlatform Default='8',Console='1'}">
 			<Button Content="Start" Click="OnStartClicked" IsDefault="True" />
 			<Button Content="Cancel" Click="OnCancelClicked" IsCancel="True" />

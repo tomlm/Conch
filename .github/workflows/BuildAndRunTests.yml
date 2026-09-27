@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Conduit.slnx
+    - name: Checkout Conch.slnx
       uses: actions/checkout@v4
 
     - name: Setup .NET
@@ -26,10 +26,10 @@ jobs:
         dotnet-version: 10.0.x
 
     - name: Restore dependencies
-      run: dotnet restore src/Conduit.slnx
+      run: dotnet restore src/Conch.slnx
 
     - name: Build
-      run: dotnet build --no-restore src/Conduit.slnx --property WarningLevel=0
+      run: dotnet build --no-restore src/Conch.slnx --property WarningLevel=0
       
     - name: Test
-      run: dotnet test --no-build --verbosity normal src/Conduit.slnx
+      run: dotnet test --no-build --verbosity normal src/Conch.slnx

@@ -2,11 +2,11 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Interactivity;
-using Conduit.Controls;
-using Conduit.Utilities;
-using Conduit.ViewModel;
+using Conch.Controls;
+using Conch.Utilities;
+using Conch.ViewModel;
 
-namespace Conduit.Views
+namespace Conch.Views
 {
     public partial class MainWindow : Window
     {
@@ -26,6 +26,12 @@ namespace Conduit.Views
         private void OnManageApps(object? sender, RoutedEventArgs e)
         {
             var dialog = new AppManagerDialog((AppViewModel)this.DataContext!);
+            dialog.Show(Windows);
+        }
+
+        private void OnShowLog(object? sender, RoutedEventArgs e)
+        {
+            var dialog = new LogDialog();
             dialog.Show(Windows);
         }
 

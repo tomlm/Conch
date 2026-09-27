@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Conduit.ViewModel
+namespace Conch.ViewModel
 {
     public class InstallDefinition
     {

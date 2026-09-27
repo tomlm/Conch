@@ -8,7 +8,7 @@ using Iciclecreek.Avalonia.WindowManager;
 using Iciclecreek.Terminal;
 using System.Runtime.InteropServices;
 
-namespace Conduit.Controls
+namespace Conch.Controls
 {
     /// <summary>
     /// A Window that contains a TerminalControl and automatically handles window events

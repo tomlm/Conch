@@ -3,7 +3,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using static System.Net.Mime.MediaTypeNames;
 
-namespace Conduit.Utilities
+namespace Conch.Utilities
 {
     internal static class PathUtils
     {

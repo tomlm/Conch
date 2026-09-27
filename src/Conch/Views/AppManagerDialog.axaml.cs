@@ -2,15 +2,13 @@ using System;
 using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Conduit.ViewModel;
+using Conch.ViewModel;
 using Iciclecreek.Avalonia.WindowManager;
 
-namespace Conduit.Views;
+namespace Conch.Views;
 
 public partial class AppManagerDialog : ManagedWindow
 {
-    private AppViewModel? _appViewModel;
-
     public AppManagerDialog(AppViewModel appViewModel)
     {
         InitializeComponent();

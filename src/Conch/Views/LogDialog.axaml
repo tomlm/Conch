@@ -1,0 +1,29 @@
+<wm:ManagedWindow xmlns="https://github.com/avaloniaui"
+				  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+				  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+				  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+				  xmlns:console="https://github.com/consolonia"
+				  xmlns:wm="using:Iciclecreek.Avalonia.WindowManager"
+				  xmlns:util="clr-namespace:Conch.Utilities"
+				  mc:Ignorable="d" d:DesignWidth="120" d:DesignHeight="40"
+				  x:Class="Conch.Views.LogDialog"
+				  Title="Log"
+				  WindowState="Maximized">
+	<Grid Margin="{console:OnPlatform Default='16', Console='1'}" RowDefinitions="Auto,*,Auto">
+		<TextBlock Grid.Row="0" x:Name="LogPathText" TextWrapping="Wrap"/>
+		<ListBox Grid.Row="1"
+				 x:Name="EntriesListBox"
+				 SelectionMode="Single"
+				 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+			<ListBox.ItemTemplate>
+				<DataTemplate x:DataType="util:LogEntry">
+					<TextBlock Text="{Binding}" TextWrapping="Wrap"/>
+				</DataTemplate>
+			</ListBox.ItemTemplate>
+		</ListBox>
+		<StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center"
+					Spacing="{console:OnPlatform Default='8',Console='1'}">
+			<Button Content="CLOSE" Click="OnClose"/>
+		</StackPanel>
+	</Grid>
+</wm:ManagedWindow>

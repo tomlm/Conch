@@ -3,7 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Iciclecreek.Avalonia.WindowManager;
 
-namespace Conduit.Views;
+namespace Conch.Views;
 
 public partial class CommandLineDialog : ManagedWindow
 {
