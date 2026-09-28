@@ -26,12 +26,25 @@ namespace Conch.Infrastructure
     /// </remarks>
     internal sealed class SoftwareCursorConsole : CursesConsole
     {
+        /// <summary>
+        /// The bit that distinguishes "the terminal draws a pointer" from "it reports
+        /// mouse movement".
+        /// </summary>
+        /// <remarks>
+        /// ConsoleCapabilities nests these: SupportsMouseMove is SupportsMouseButtons
+        /// plus a bit, and SupportsMouseCursor is SupportsMouseMove plus another. So
+        /// clearing SupportsMouseCursor wholesale clears movement and buttons too, and
+        /// the result is no mouse at all rather than a pointer we draw ourselves.
+        /// Masking the difference removes only the claim about the pointer.
+        /// </remarks>
+        private const ConsoleCapabilities PointerIsDrawnForUs =
+            ConsoleCapabilities.SupportsMouseCursor & ~ConsoleCapabilities.SupportsMouseMove;
+
         public override void PrepareConsole()
         {
             base.PrepareConsole();
 
-            // Keep SupportsMouseMove: without it Consolonia draws nothing at all.
-            Capabilities &= ~ConsoleCapabilities.SupportsMouseCursor;
+            Capabilities &= ~PointerIsDrawnForUs;
         }
     }
 }
