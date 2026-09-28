@@ -9,9 +9,31 @@
     <AssemblyName>Conch</AssemblyName>
     <Product>Conch</Product>
     <Authors>Tom Laird-McConnell</Authors>
-    <!-- The TUI renderer never touches Skia or Vulkan; excluding them is a
-         separate change that needs testing on a real console first. -->
   </PropertyGroup>
+
+  <!-- Conch ships as a .NET global tool. Distro packaging lives in Conchix,
+       which is free to acquire it however suits an image. -->
+  <PropertyGroup>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>conch</ToolCommandName>
+    <PackageId>Conch</PackageId>
+    <IsPackable>true</IsPackable>
+    <Title>Conch</Title>
+    <Description>A TUI application shell: a windowing environment for terminal apps. Hosts multiple XTerm terminal windows in a single console session, with applications described by YAML registration files.</Description>
+    <PackageTags>tui;terminal;console;shell;window-manager;avalonia;consolonia;xterm</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/tomlm/Conch</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/tomlm/Conch</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>icon.png</PackageIcon>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" Visible="false" />
+    <None Include="..\..\icon.png" Pack="true" PackagePath="\" Visible="false" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Consolonia" Version="12.0.3.13" />
@@ -26,7 +48,32 @@
   <!-- Ship the app registrations next to the executable so the catalog is populated
        on a machine that has never reached the remote feed. -->
   <ItemGroup>
-    <Content Include="Tools\**\*.yml" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Pack="false" keeps these out of content/ and contentFiles/, which mean
+         nothing for a tool package. CopyToOutputDirectory still puts them in the
+         publish output, which is what lands next to the executable and what
+         AppContext.BaseDirectory resolves to. -->
+    <Content Include="Tools\**\*.yml" CopyToOutputDirectory="PreserveNewest" Pack="false" />
   </ItemGroup>
+
+  <!-- Avalonia drags SkiaSharp and HarfBuzz native binaries for every RID it has
+       ever supported, plus their Windows debug symbols: 232MB of native code and
+       300MB of .pdb, against 20MB for the rest of the app.
+
+       Conch draws through Consolonia's console renderer. It builds with
+       UseConsolonia(), never UsePlatformDetect(), so the Skia backend is never
+       initialised and these natives are never loaded. Dropping them is what makes
+       the tool package a sane download.
+
+       If a future change introduces a real Avalonia rendering path, this target is
+       the first thing to remove. -->
+  <Target Name="TrimUnusedNativeAssets" AfterTargets="ComputeResolvedFilesToPublishList">
+    <ItemGroup>
+      <ResolvedFileToPublish
+        Remove="@(ResolvedFileToPublish)"
+        Condition="$([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes')) AND (
+                   $([System.String]::Copy('%(ResolvedFileToPublish.Filename)').Contains('SkiaSharp')) OR
+                   $([System.String]::Copy('%(ResolvedFileToPublish.Filename)').Contains('HarfBuzz')) )" />
+    </ItemGroup>
+  </Target>
 
 </Project>
