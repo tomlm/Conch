@@ -1,0 +1,20 @@
+* text=auto
+
+# Anything that runs on Linux must keep LF. A CRLF postinst or unit file is a
+# broken package: the shebang becomes "#!/bin/sh\r" and nothing executes.
+*.sh              text eol=lf
+*.service         text eol=lf
+packaging/debian/postinst  text eol=lf
+packaging/debian/prerm     text eol=lf
+packaging/debian/control*  text eol=lf
+packaging/debian/copyright text eol=lf
+
+# App registrations are read on Linux too.
+*.yml             text eol=lf
+*.yaml            text eol=lf
+
+# Windows-side project files keep platform endings.
+*.csproj          text
+*.slnx            text
+*.axaml           text
+*.cs              text
