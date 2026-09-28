@@ -1,0 +1,43 @@
+[Unit]
+Description=Conch TUI shell on %I
+Documentation=https://github.com/tomlm/Conch
+After=systemd-user-sessions.service plymouth-quit-wait.service
+After=rc-local.service
+# Take over the tty from the ordinary login prompt.
+Conflicts=getty@%i.service
+Before=getty.target
+IgnoreOnIsolate=yes
+# 0 = never stop retrying. On an appliance a shell that gives up leaves a dead
+# console, which is worse than a restart loop an admin can see in the journal.
+StartLimitBurst=0
+
+[Service]
+# idle keeps the shell from painting over boot output still being written.
+Type=idle
+ExecStart=/usr/bin/conch
+
+# Conch is the session on an appliance: if it dies there is nothing else to
+# use, so bring it straight back. RestartSec keeps a crash loop from spinning.
+Restart=always
+RestartSec=1
+
+# Bind to the tty named by the instance (conch@tty1 -> /dev/tty1).
+StandardInput=tty
+StandardOutput=tty
+StandardError=journal
+TTYPath=/dev/%I
+TTYReset=yes
+TTYVHangup=yes
+TTYVTDisallocate=yes
+UtmpIdentifier=%I
+
+# Kill only the shell; child terminal windows are cleaned up by their own exit.
+KillMode=process
+IgnoreSIGPIPE=no
+SendSIGHUP=yes
+
+Environment=TERM=xterm-256color
+EnvironmentFile=-/etc/default/conch
+
+[Install]
+WantedBy=getty.target

@@ -1,0 +1,25 @@
+Package: conch
+Version: @VERSION@
+Section: misc
+Priority: optional
+Architecture: @ARCH@
+Maintainer: Tom Laird-McConnell <thermous@iciclecreek.com>
+Installed-Size: @INSTALLED_SIZE@
+Depends: libc6, libgcc-s1, libstdc++6, zlib1g,
+ libssl3t64 | libssl3 | libssl1.1,
+ libicu76 | libicu74 | libicu72 | libicu71 | libicu70 | libicu67
+Recommends: kmscon
+Homepage: https://github.com/tomlm/Conch
+Description: TUI application shell for terminal applications
+ Conch is a windowing environment for terminal applications. It hosts
+ multiple XTerm terminal windows inside a single console session, so a
+ machine with no graphical stack still gets overlapping, movable,
+ resizable windows.
+ .
+ Applications are described by YAML registration files declaring how to
+ install, detect and launch them. A seed catalog ships with the package
+ and is refreshed from an upstream feed.
+ .
+ This package ships conch@.service, a getty-style template unit that runs
+ Conch on a tty. It is not enabled by default; enable conch@tty1.service
+ to take over the first console.

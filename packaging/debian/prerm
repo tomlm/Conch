@@ -1,0 +1,17 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+    remove|deconfigure)
+        if [ -d /run/systemd/system ]; then
+            # Stop any tty instance this package started.
+            for unit in $(systemctl list-units --no-legend --plain 'conch@*.service' 2>/dev/null | awk '{print $1}'); do
+                systemctl stop "$unit" || true
+            done
+        fi
+        ;;
+    upgrade|failed-upgrade)
+        ;;
+esac
+
+exit 0
