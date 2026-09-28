@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Conch": {
+      "commandName": "Project",
+      "commandLineArgs": "--software-cursor"
+    }
+  }
+}
