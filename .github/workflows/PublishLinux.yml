@@ -65,7 +65,9 @@ jobs:
 
       - name: Build .deb
         run: |
-          ./packaging/build-deb.sh \
+          # Invoked via bash rather than relying on the exec bit: git on Windows
+          # does not record mode changes, so a contributor can drop it silently.
+          bash ./packaging/build-deb.sh \
             --version ${{ steps.version.outputs.version }} \
             --arch ${{ matrix.arch }} \
             --publish-dir publish/${{ matrix.arch }} \
