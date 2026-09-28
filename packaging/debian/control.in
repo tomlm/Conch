@@ -5,9 +5,7 @@ Priority: optional
 Architecture: @ARCH@
 Maintainer: Tom Laird-McConnell <thermous@iciclecreek.com>
 Installed-Size: @INSTALLED_SIZE@
-Depends: libc6, libgcc-s1, libstdc++6, zlib1g,
- libssl3t64 | libssl3 | libssl1.1,
- libicu76 | libicu74 | libicu72 | libicu71 | libicu70 | libicu67
+Depends: libc6, libgcc-s1, libstdc++6, zlib1g, libssl3t64 | libssl3 | libssl1.1, libicu76 | libicu74 | libicu72 | libicu71 | libicu70 | libicu67
 Recommends: kmscon
 Homepage: https://github.com/tomlm/Conch
 Description: TUI application shell for terminal applications

@@ -60,6 +60,16 @@ Under Conchix the unit is not used directly — kmscon owns the tty and launches
 as the session. The unit is what makes Conch usable on a plain Linux console without
 kmscon at all.
 
+## Lintian
+
+Two classes of finding are expected and not defects:
+
+- `embedded-library` and `unstripped-binary-or-object` on `libSkiaSharp.so`,
+  `libHarfBuzzSharp.so` and the .NET native shims. These are prebuilt binaries from
+  NuGet; unbundling them would mean giving up the self-contained publish.
+- `systemd-service-file-refers-to-unusual-wantedby-target getty.target`. That is the
+  point of the unit.
+
 ## Known gaps
 
 - **Runs as root.** There is no dedicated `conch` user yet, and no decision on the

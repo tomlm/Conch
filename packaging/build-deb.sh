@@ -109,8 +109,8 @@ install -m 0644 "$SCRIPT_DIR/debian/copyright" "$ROOT/usr/share/doc/conch/copyri
 
 printf 'conch (%s) unstable; urgency=medium\n\n  * Release %s.\n\n -- Tom Laird-McConnell <thermous@iciclecreek.com>  %s\n' \
     "$VERSION" "$VERSION" "$(date -R)" \
-    | gzip -9n > "$ROOT/usr/share/doc/conch/changelog.Debian.gz"
-chmod 0644 "$ROOT/usr/share/doc/conch/changelog.Debian.gz"
+    | gzip -9n > "$ROOT/usr/share/doc/conch/changelog.gz"
+chmod 0644 "$ROOT/usr/share/doc/conch/changelog.gz"
 
 INSTALLED_KB="$(du -sk "$ROOT" | cut -f1)"
 
