@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Conch.Utilities;
 
 namespace Conch.ViewModel
 {
@@ -67,14 +68,14 @@ namespace Conch.ViewModel
             ? string.Empty
             : string.Join(", ", Keywords);
 
-        public string Install => GetInstallDefinitionForCurrentPlatform()?.Install ?? string.Empty;
+        public string Install => GetInstallDefinitionFor(Host.Current)?.Install ?? string.Empty;
 
-        public string Uninstall => GetInstallDefinitionForCurrentPlatform()?.Uninstall ?? string.Empty;
+        public string Uninstall => GetInstallDefinitionFor(Host.Current)?.Uninstall ?? string.Empty;
 
         /// <summary>
         /// Optional shell command that exits zero when this app is already present.
         /// </summary>
-        public string? Detect => GetInstallDefinitionForCurrentPlatform()?.Detect;
+        public string? Detect => GetInstallDefinitionFor(Host.Current)?.Detect;
 
         public bool HasInstall => !string.IsNullOrWhiteSpace(Install);
 
@@ -83,38 +84,47 @@ namespace Conch.ViewModel
         /// <summary>
         /// Which platform entry this registration resolved to on the current machine.
         /// </summary>
-        public ToolPlatform ResolvedPlatform
+        public ToolPlatform ResolvedPlatform => ResolvePlatformFor(Host.Current);
+
+        /// <summary>
+        /// Which platform entry this registration resolves to on <paramref name="os"/>.
+        /// </summary>
+        public ToolPlatform ResolvePlatformFor(HostOs os)
         {
-            get
+            if (Platforms == null)
             {
-                if (Platforms == null)
-                {
-                    return ToolPlatform.None;
-                }
-
-                if (OperatingSystem.IsWindows())
-                {
-                    if (Platforms.Windows != null) return ToolPlatform.Windows;
-                    if (Platforms.Linux != null) return ToolPlatform.Linux;
-                }
-                else if (OperatingSystem.IsLinux() && Platforms.Linux != null)
-                {
-                    return ToolPlatform.Linux;
-                }
-                else if (OperatingSystem.IsMacOS() && Platforms.MacOS != null)
-                {
-                    return ToolPlatform.MacOS;
-                }
-
-                return Platforms.Default != null ? ToolPlatform.Default : ToolPlatform.None;
+                return ToolPlatform.None;
             }
+
+            switch (os)
+            {
+                case HostOs.Windows:
+                    if (Platforms.Windows != null) return ToolPlatform.Windows;
+                    // A Linux-only registration still resolves on Windows; its commands are then
+                    // routed through WSL. See RunsUnderWslOn.
+                    if (Platforms.Linux != null) return ToolPlatform.Linux;
+                    break;
+                case HostOs.Linux:
+                    if (Platforms.Linux != null) return ToolPlatform.Linux;
+                    break;
+                case HostOs.MacOS:
+                    if (Platforms.MacOS != null) return ToolPlatform.MacOS;
+                    break;
+            }
+
+            return Platforms.Default != null ? ToolPlatform.Default : ToolPlatform.None;
         }
 
         /// <summary>
         /// True when this registration only describes a Linux build but we are on Windows, so its
         /// commands have to run inside WSL.
         /// </summary>
-        public bool RunsUnderWsl => OperatingSystem.IsWindows() && ResolvedPlatform == ToolPlatform.Linux;
+        public bool RunsUnderWsl => RunsUnderWslOn(Host.Current);
+
+        /// <summary>
+        /// Whether this registration's commands must be routed through WSL on <paramref name="os"/>.
+        /// </summary>
+        public bool RunsUnderWslOn(HostOs os) => os == HostOs.Windows && ResolvePlatformFor(os) == ToolPlatform.Linux;
 
         /// <summary>
         /// Whether the app was found on this machine. Maintained by the detector, not the file.
@@ -216,20 +226,24 @@ namespace Conch.ViewModel
             }
         }
 
-        private InstallDefinition? GetInstallDefinitionForCurrentPlatform()
+        /// <summary>
+        /// The install entry this registration resolves to on <paramref name="os"/>.
+        /// </summary>
+        public InstallDefinition? GetInstallDefinitionFor(HostOs os)
         {
             if (Platforms == null)
             {
                 return null;
             }
 
-            // On Windows a Linux-only registration still resolves, and its commands are then run
-            // through WSL; see RunsUnderWsl.
-            var specific = OperatingSystem.IsWindows() ? Platforms.Windows ?? Platforms.Linux
-                : OperatingSystem.IsLinux() ? Platforms.Linux
-                : OperatingSystem.IsMacOS() ? Platforms.MacOS
-                : null;
-            return specific ?? Platforms.Default;
+            return ResolvePlatformFor(os) switch
+            {
+                ToolPlatform.Windows => Platforms.Windows,
+                ToolPlatform.Linux => Platforms.Linux,
+                ToolPlatform.MacOS => Platforms.MacOS,
+                ToolPlatform.Default => Platforms.Default,
+                _ => null,
+            };
         }
     }
 }

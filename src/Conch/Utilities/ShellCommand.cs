@@ -30,10 +30,14 @@ namespace Conch.Utilities
         /// Linux build, matching how a bare command line already falls back to WSL.
         /// </param>
         public static ResolvedCommand ForProcess(string command, IEnumerable<string> args, bool viaWsl = false)
+            => ForProcess(command, args, viaWsl, Host.Current);
+
+        /// <inheritdoc cref="ForProcess(string, IEnumerable{string}, bool)"/>
+        public static ResolvedCommand ForProcess(string command, IEnumerable<string> args, bool viaWsl, HostOs os)
         {
             var argList = args.ToList();
 
-            if (viaWsl && OperatingSystem.IsWindows())
+            if (viaWsl && os == HostOs.Windows)
             {
                 var wslArgs = new List<string> { "--", command };
                 wslArgs.AddRange(argList);
@@ -51,14 +55,18 @@ namespace Conch.Utilities
         /// quoting, so they cannot be executed as a bare process.
         /// </remarks>
         public static ResolvedCommand ForScript(string script, bool viaWsl = false)
+            => ForScript(script, viaWsl, Host.Current);
+
+        /// <inheritdoc cref="ForScript(string, bool)"/>
+        public static ResolvedCommand ForScript(string script, bool viaWsl, HostOs os)
         {
-            if (viaWsl && OperatingSystem.IsWindows())
+            if (viaWsl && os == HostOs.Windows)
             {
                 // -l so the login profile is read and the usual package tooling is on PATH.
                 return new ResolvedCommand("wsl", new List<string> { "--", "bash", "-lc", script });
             }
 
-            if (OperatingSystem.IsWindows())
+            if (os == HostOs.Windows)
             {
                 return new ResolvedCommand("cmd.exe", new List<string> { "/c", script });
             }
@@ -114,7 +122,10 @@ namespace Conch.Utilities
         /// <summary>
         /// The interactive shell to open for a plain terminal window.
         /// </summary>
-        public static string DefaultShell => OperatingSystem.IsWindows() ? "cmd.exe" : UnixShell;
+        public static string DefaultShell => DefaultShellFor(Host.Current);
+
+        /// <inheritdoc cref="DefaultShell"/>
+        public static string DefaultShellFor(HostOs os) => os == HostOs.Windows ? "cmd.exe" : UnixShell;
 
         private static string UnixShell =>
             File.Exists("/bin/bash") ? "/bin/bash" : "/bin/sh";
