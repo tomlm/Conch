@@ -1,0 +1,92 @@
+<wm:ManagedWindow xmlns="https://github.com/avaloniaui"
+				  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+				  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+				  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+				  xmlns:console="https://github.com/consolonia"
+				  xmlns:wm="using:Iciclecreek.Avalonia.WindowManager"
+				  xmlns:vm="clr-namespace:Conch.ViewModel"
+				  mc:Ignorable="d" d:DesignWidth="72" d:DesignHeight="24"
+				  x:Class="Conch.Views.AppLauncherDialog"
+				  Title="Apps"
+				  Width="72" Height="22"
+				  x:DataType="vm:AppLauncherViewModel">
+
+	<wm:ManagedWindow.Styles>
+		<!--
+		The tile. A constant shape carrying a name, the way a folder icon does: the
+		silhouette says nothing, the label does all the work, and keeping the shape
+		identical is what makes a grid of them scannable.
+
+		14 columns of interior fits every name in the catalog — asciiquarium, the
+		longest, is 12 — so nothing truncates today.
+		-->
+		<Style Selector="ListBoxItem.tile">
+			<Setter Property="Padding" Value="0"/>
+			<Setter Property="Margin" Value="1 0 1 0"/>
+		</Style>
+	</wm:ManagedWindow.Styles>
+
+	<Grid Margin="{console:OnPlatform Default='16', Console='1'}" RowDefinitions="Auto,*,Auto">
+
+		<TextBox Grid.Row="0" x:Name="FilterBox"
+				 PlaceholderText="Type to filter..."
+				 Text="{Binding SearchText}"/>
+
+		<Panel Grid.Row="1">
+			<!-- The grid of tiles. -->
+			<ListBox x:Name="AppsListBox"
+					 ItemsSource="{Binding Apps}"
+					 SelectedItem="{Binding SelectedApp}"
+					 SelectionMode="Single"
+					 DoubleTapped="OnAppDoubleTapped"
+					 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+				<ListBox.ItemsPanel>
+					<ItemsPanelTemplate>
+						<WrapPanel Orientation="Horizontal"/>
+					</ItemsPanelTemplate>
+				</ListBox.ItemsPanel>
+				<ListBox.Styles>
+					<Style Selector="ListBoxItem">
+						<Setter Property="Margin" Value="1 0 1 0"/>
+						<Setter Property="Padding" Value="0"/>
+					</Style>
+				</ListBox.Styles>
+				<ListBox.ItemTemplate>
+					<DataTemplate x:DataType="vm:ToolViewModel">
+						<Border BorderThickness="1" BorderBrush="Gray" Width="16" Height="3">
+							<TextBlock Text="{Binding Name}"
+									   HorizontalAlignment="Center"
+									   VerticalAlignment="Center"
+									   TextTrimming="CharacterEllipsis"
+									   MaxWidth="14"/>
+						</Border>
+					</DataTemplate>
+				</ListBox.ItemTemplate>
+			</ListBox>
+
+			<!--
+			The first thing anyone sees on a fresh image, where nothing is installed yet.
+			Worth saying where to go rather than showing an empty grid that reads as broken.
+			-->
+			<StackPanel x:Name="EmptyState"
+						IsVisible="{Binding IsEmpty}"
+						HorizontalAlignment="Center" VerticalAlignment="Center">
+				<TextBlock Text="No apps installed yet." HorizontalAlignment="Center"/>
+				<TextBlock Text="Choose MANAGE to browse and install some."
+						   HorizontalAlignment="Center"/>
+			</StackPanel>
+
+			<TextBlock x:Name="CheckingState"
+					   IsVisible="{Binding IsChecking}"
+					   Text="Looking for installed apps..."
+					   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+		</Panel>
+
+		<StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center"
+					Spacing="{console:OnPlatform Default='8',Console='1'}">
+			<Button Content="LAUNCH" Click="OnLaunch" IsDefault="True"/>
+			<Button Content="MANAGE" Click="OnManage"/>
+			<Button Content="CLOSE" Click="OnClose" IsCancel="True"/>
+		</StackPanel>
+	</Grid>
+</wm:ManagedWindow>

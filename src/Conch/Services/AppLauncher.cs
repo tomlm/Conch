@@ -55,7 +55,33 @@ namespace Conch.Services
             var command = ShellCommand.ForProcess(tool.Command, args, tool.RunsUnderWsl);
             Log.Info(LogCategory, $"Launching {tool.Id} as: {command}");
 
-            return Open(command, tool.Name, closeOnExit: true, tool.Width, tool.Height);
+            var window = Open(command, tool.Name, closeOnExit: true, tool.Width, tool.Height);
+
+            window.ProcessExited += (s, e) =>
+            {
+                var code = e.ExitCodeKnown ? e.ExitCode : -1;
+                if (code == 0)
+                {
+                    return;
+                }
+
+                Log.Warning(LogCategory, $"{tool.Id} exited with code {code}: {command}");
+
+                // Keep the window so whatever the app printed on its way out stays
+                // readable. Closing on a failure takes the error with it, which is how a
+                // missing dependency or an unusable terminal ends up looking like a window
+                // that flashed and vanished for no reason.
+                //
+                // This runs before ManagedTerminalWindow honours CloseOnProcessExit, so
+                // clearing it here is what keeps the window open.
+                window.CloseOnProcessExit = false;
+
+                // Say so in the chrome as well. A window that stays open after its app
+                // quit otherwise looks like an app that is merely idle.
+                window.Title = $"{tool.Name} - exited ({code})";
+            };
+
+            return window;
         }
 
         /// <summary>

@@ -24,6 +24,12 @@ namespace Conch.Views
             //lifetime!.Shutdown();
         }
 
+        private void OnShowLauncher(object? sender, RoutedEventArgs e)
+        {
+            var dialog = new AppLauncherDialog((AppViewModel)this.DataContext!);
+            dialog.Show(Windows);
+        }
+
         private void OnManageApps(object? sender, RoutedEventArgs e)
         {
             var dialog = new AppManagerDialog((AppViewModel)this.DataContext!);

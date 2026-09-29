@@ -19,8 +19,27 @@ public class ShellCommandTests
     {
         var command = ShellCommand.ForProcess("btop", new[] { "-p" }, viaWsl: true, os: HostOs.Windows);
 
+        // Through a login shell, so the command resolves on the same PATH that detection
+        // used. Launching it directly finds a different PATH, which is what made a snap
+        // report as installed and then fail to start.
         Assert.Equal("wsl", command.Process);
-        Assert.Equal(new[] { "--", "btop", "-p" }, command.Args);
+        Assert.Equal(new[] { "--", "bash", "-lc", "exec \"$0\" \"$@\"", "btop", "-p" }, command.Args);
+    }
+
+    [Fact]
+    public void WslArgumentsArePassedPositionallyRatherThanInterpolated()
+    {
+        // An argument with a space or a quote has to survive as one argument and must not
+        // be able to change what runs, so the command and its arguments go to the shell as
+        // positional parameters instead of being pasted into the script text.
+        var command = ShellCommand.ForProcess(
+            "nano",
+            new[] { "my notes.txt", "a\"; rm -rf /" },
+            viaWsl: true,
+            os: HostOs.Windows);
+
+        Assert.Equal("exec \"$0\" \"$@\"", command.Args[3]);
+        Assert.Equal(new[] { "nano", "my notes.txt", "a\"; rm -rf /" }, command.Args.Skip(4));
     }
 
     [Theory]

@@ -39,7 +39,17 @@ namespace Conch.Utilities
 
             if (viaWsl && os == HostOs.Windows)
             {
-                var wslArgs = new List<string> { "--", command };
+                // Through a login shell, so the command is looked up on the same PATH that
+                // detection used. bash -lc reads the login profile, which is where
+                // /snap/bin, ~/.local/bin, ~/.cargo/bin and ~/.dotnet/tools are added.
+                // Without it an app installed by snap is reported present and then fails
+                // to launch, which looks like a broken app rather than a missing path.
+                //
+                // 'exec "$0" "$@"' takes the command and its arguments as positional
+                // parameters rather than interpolating them into the script, so nothing
+                // needs shell-quoting and an argument containing spaces or quotes cannot
+                // change what runs.
+                var wslArgs = new List<string> { "--", "bash", "-lc", "exec \"$0\" \"$@\"", command };
                 wslArgs.AddRange(argList);
                 return new ResolvedCommand("wsl", wslArgs);
             }

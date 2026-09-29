@@ -11,7 +11,9 @@
 	<DockPanel>
 		<Menu DockPanel.Dock="Top">
 			<MenuItem Header="_Run">
-				<MenuItem Header="_App" Click="OnCustomTerminal"/>
+				<MenuItem Header="_Apps" Click="OnShowLauncher"/>
+				<Separator/>
+				<MenuItem Header="_Command" Click="OnCustomTerminal"/>
 				<MenuItem Header="_Terminal" Click="OnNewTerminal"/>
 				<Separator/>
 				<MenuItem Header="E_xit" Click="OnExit"/>
