@@ -27,21 +27,24 @@ namespace Conch.Services
         };
 
         /// <summary>
-        /// Through sudo, because logind will not authorise it otherwise.
+        /// Plainly first, and through sudo only if that is refused.
         /// </summary>
         /// <remarks>
-        /// systemd asks polkit whether a non-root user may power the machine down, and polkit
-        /// is not installed on Conchix: its image is built by mmdebstrap, which installs no
-        /// Recommends, and polkitd is a Recommends of systemd rather than a dependency. So a
-        /// bare `systemctl poweroff` from the session account fails authentication.
+        /// systemd asks polkit whether a non-root user may power the machine down, and the
+        /// answer depends on the machine. Where polkitd is installed -- Conchix, since
+        /// NetworkManager needs it, and most desktop systems -- logind authorises a local seat
+        /// user and the direct call simply works, with nothing to type. Where it is absent the
+        /// call fails authentication, and sudo is the way through for an account in the sudo
+        /// group.
         ///
-        /// The session account is in the sudo group, so sudo is the way through. It may ask
-        /// for a password, which is why these run in a visible terminal window rather than
-        /// silently in the background -- a prompt nobody can see is a hang.
+        /// Asking in that order means the common case costs no password prompt and the
+        /// uncommon one still works. Trying sudo first would prompt every time on a machine
+        /// that never needed it, which on an appliance is a password between the user and
+        /// turning their computer off.
         ///
-        /// Installing polkitd in the Conchix image would let logind authorise a local seat
-        /// user directly and make the sudo hop unnecessary. That belongs in the other repo.
+        /// Either way this runs in a visible terminal window rather than in the background,
+        /// because sudo may ask for a password and a prompt nobody can see is a hang.
         /// </remarks>
-        private static string Systemctl(string verb) => $"sudo systemctl {verb}";
+        private static string Systemctl(string verb) => $"systemctl {verb} || sudo systemctl {verb}";
     }
 }

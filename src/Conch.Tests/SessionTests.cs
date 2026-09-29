@@ -37,14 +37,20 @@ public class SessionTests
     }
 
     [Fact]
-    public void PoweringOffOnLinuxGoesThroughSudo()
+    public void PoweringOffOnLinuxTriesTheDirectRouteBeforeSudo()
     {
-        // systemd asks polkit whether a non-root user may power the machine down, and polkit
-        // is not in the Conchix image: mmdebstrap installs no Recommends, and polkitd is a
-        // Recommends of systemd rather than a dependency. A bare systemctl call from the
-        // session account fails authentication, so sudo is the way through.
-        Assert.Equal("sudo systemctl poweroff", SessionActions.PowerOffCommand(HostOs.Linux));
-        Assert.Equal("sudo systemctl reboot", SessionActions.RestartCommand(HostOs.Linux));
+        // Whether a non-root user may power the machine down is polkit's answer, and it
+        // differs per machine: with polkitd present -- Conchix, since NetworkManager needs
+        // it -- logind authorises a local seat user and there is nothing to type. Without it
+        // the call fails authentication and sudo is the way through.
+        //
+        // The order is the point. Reversing it would prompt for a password on every shutdown
+        // of a machine that never needed one, which on an appliance is a password between
+        // the user and turning their computer off.
+        Assert.Equal("systemctl poweroff || sudo systemctl poweroff",
+            SessionActions.PowerOffCommand(HostOs.Linux));
+        Assert.Equal("systemctl reboot || sudo systemctl reboot",
+            SessionActions.RestartCommand(HostOs.Linux));
     }
 
     [Fact]
