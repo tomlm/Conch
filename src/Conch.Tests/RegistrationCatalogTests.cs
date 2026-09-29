@@ -203,4 +203,35 @@ public class RegistrationCatalogTests
         Assert.Equal(80, tool.Cols);
         Assert.Equal(25, tool.Rows);
     }
+
+    [Theory]
+    [MemberData(nameof(RegistrationFiles))]
+    public void DeclaredRequirementsExistInTheCatalog(string fileName)
+    {
+        // A shipped registration naming a prerequisite that is not there is a broken install
+        // waiting to happen, and the failure would appear halfway through as a package manager
+        // error naming nothing recognisable. Unknown ids are tolerated at runtime -- the
+        // catalog refreshes from GitHub and can be ahead of the build -- so the seed files are
+        // where this is worth being strict.
+        var ids = Directory.GetFiles(ToolsDirectory, "*.yml")
+            .Select(f => Load(Path.GetFileName(f)).Id)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var required in Load(fileName).Requires)
+        {
+            Assert.True(ids.Contains(required), $"{fileName} requires '{required}', which no registration provides.");
+        }
+    }
+
+    [Fact]
+    public void ADotnetToolDeclaresWhichDotnetItNeeds()
+    {
+        // A global tool is framework-dependent and .NET's default roll-forward is Minor, which
+        // does not cross majors: a net8.0 tool on a machine with only the 10.x runtime does not
+        // run, it errors. So "requires: dotnet" would be a lie -- the major version is part of
+        // the requirement.
+        var editNet = Load("Edit.NET.yml");
+
+        Assert.Contains(editNet.Requires, r => r.StartsWith("dotnet.", StringComparison.OrdinalIgnoreCase));
+    }
 }

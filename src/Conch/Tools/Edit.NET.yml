@@ -21,3 +21,6 @@ keywords:
 
 roles:
   - text-editor
+
+requires:
+  - dotnet.10

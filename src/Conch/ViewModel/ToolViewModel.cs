@@ -85,6 +85,26 @@ namespace Conch.ViewModel
         [ObservableProperty]
         private ObservableCollection<string> _roles = new ObservableCollection<string>();
 
+        /// <summary>
+        /// Ids of other registrations that must be installed before this one can be.
+        /// </summary>
+        /// <remarks>
+        /// A prerequisite is an ordinary registration, not a second kind of thing: it has the
+        /// same per-platform install commands and the same detection, so the machinery that
+        /// installs an app is the machinery that installs what the app needs.
+        ///
+        /// This is what keeps a toolchain off the image. A .NET tool needs the SDK -- 610 MB
+        /// of it -- and baking that in would spend two thirds of the base system on one class
+        /// of app that most machines will never install. Declaring it instead means it arrives
+        /// the first time somebody actually wants it.
+        ///
+        /// An id naming nothing in the catalog is reported when the install is attempted rather
+        /// than at load, for the same reason an unknown role is kept: the catalog refreshes from
+        /// GitHub, and a registration may name a prerequisite published after this build.
+        /// </remarks>
+        [ObservableProperty]
+        private ObservableCollection<string> _requires = new ObservableCollection<string>();
+
         public string Install => GetInstallDefinitionFor(Host.Current)?.Install ?? string.Empty;
 
         public string Uninstall => GetInstallDefinitionFor(Host.Current)?.Uninstall ?? string.Empty;

@@ -1,9 +1,11 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Interactivity;
 using Conch.Services;
 using Conch.Utilities;
 using Conch.ViewModel;
+using Consolonia.Controls;
 using Iciclecreek.Avalonia.WindowManager;
 
 namespace Conch.Views;
@@ -13,12 +15,14 @@ public partial class AppManagerDialog : ManagedWindow
     private const string LogCategory = "Manager";
 
     private readonly AppManagerViewModel _viewModel;
+    private readonly AppViewModel _appViewModel;
     private AppLauncher? _launcher;
 
     public AppManagerDialog(AppViewModel appViewModel)
     {
         InitializeComponent();
 
+        _appViewModel = appViewModel;
         _viewModel = new AppManagerViewModel(appViewModel);
         DataContext = _viewModel;
 
@@ -75,7 +79,7 @@ public partial class AppManagerDialog : ManagedWindow
         }
     }
 
-    private void OnInstall(object? sender, RoutedEventArgs e)
+    private async void OnInstall(object? sender, RoutedEventArgs e)
     {
         var tool = _viewModel.SelectedTool;
         if (tool == null || !tool.HasInstall)
@@ -83,7 +87,74 @@ public partial class AppManagerDialog : ManagedWindow
             return;
         }
 
-        Apps.RunScript($"Install {tool.Name}", tool.Install, tool.RunsUnderWsl, exitCode => { _ = ReprobeAsync(tool); });
+        var plan = InstallPlan.For(tool, _appViewModel.Tools);
+
+        if (plan.HasUnknownRequirements)
+        {
+            // Almost always a registration naming a prerequisite this build's catalog has not
+            // caught up with. Say which, rather than failing partway through an install with a
+            // package manager error that names nothing recognisable.
+            await MessageBox.ShowDialog(
+                $"Install {tool.Name}",
+                $"{tool.Name} needs {string.Join(", ", plan.Missing)}, which is not in the catalog.",
+                MessageBoxStyle.Ok);
+            return;
+        }
+
+        var prerequisites = plan.Prerequisites.ToList();
+        if (prerequisites.Count > 0)
+        {
+            // Worth asking. A prerequisite can be far larger than the app -- the .NET SDK is
+            // 610 MB against a tool of a few -- and having that start unannounced because
+            // someone clicked Install on something small is a bad surprise.
+            var answer = await MessageBox.ShowDialog(
+                $"Install {tool.Name}",
+                $"{tool.Name} needs {string.Join(", ", prerequisites.Select(p => p.Name))}. Install {(prerequisites.Count == 1 ? "it" : "them")} too?",
+                MessageBoxStyle.YesNo);
+
+            if (answer != MessageBoxResult.Yes)
+            {
+                return;
+            }
+        }
+
+        RunPlan(plan.Steps, 0);
+    }
+
+    /// <summary>
+    /// Runs an install plan a step at a time, stopping at the first failure.
+    /// </summary>
+    /// <remarks>
+    /// Sequential rather than one combined script, so each step gets its own window with its
+    /// own output and exit code. Installing the SDK and then the tool are different operations
+    /// and failing halfway should say which half.
+    ///
+    /// Stopping on failure matters more than it looks: without the toolchain, the app's own
+    /// install would fail too, and the second error would bury the first one that explained it.
+    /// </remarks>
+    private void RunPlan(IReadOnlyList<ToolViewModel> steps, int index)
+    {
+        if (index >= steps.Count)
+        {
+            return;
+        }
+
+        var step = steps[index];
+        var label = index == steps.Count - 1 ? $"Install {step.Name}" : $"Install {step.Name} (needed first)";
+
+        Apps.RunScript(label, step.Install, step.RunsUnderWsl, exitCode =>
+        {
+            _ = ReprobeAsync(step);
+
+            if (exitCode == 0)
+            {
+                RunPlan(steps, index + 1);
+            }
+            else
+            {
+                Log.Warning("Install", $"{step.Id} failed with {exitCode}; stopping before {steps.Count - index - 1} remaining step(s).");
+            }
+        });
     }
 
     private void OnUninstall(object? sender, RoutedEventArgs e)
