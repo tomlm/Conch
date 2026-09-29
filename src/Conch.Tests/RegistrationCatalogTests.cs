@@ -1,3 +1,4 @@
+using Conch.Services.Roles;
 using Conch.Utilities;
 using Conch.ViewModel;
 using Xunit;
@@ -159,6 +160,39 @@ public class RegistrationCatalogTests
 
         Assert.True(tool.Cols >= 80, $"{fileName} asks for {tool.Cols} columns; 80 is the floor.");
         Assert.True(tool.Rows >= 24, $"{fileName} asks for {tool.Rows} rows; 24 is the floor.");
+    }
+
+    [Theory]
+    [MemberData(nameof(RegistrationFiles))]
+    public void DeclaredRolesAreOnesTheShellKnows(string fileName)
+    {
+        // A role is a slot the shell opens itself, so a name it does not recognise is a slot
+        // nothing will ever fill -- almost always a typo. This is a catalog check rather than
+        // a validation rule on purpose: ToolViewModel deliberately accepts unknown roles, so
+        // that publishing a new one does not break older builds reading the same feed. The
+        // shipped files are the place to be strict.
+        var tool = Load(fileName);
+
+        foreach (var role in tool.Roles)
+        {
+            Assert.True(ShellRoles.IsKnown(role), $"{fileName} declares unknown role '{role}'.");
+        }
+    }
+
+    [Fact]
+    public void EveryRoleTheShellOpensHasSomethingThatCanFillIt()
+    {
+        // Not every role needs a candidate -- network-config and audio-config have none, and
+        // built-ins cover the launcher, manager and file explorer. But text-editor and
+        // system-monitor are invoked by the shell with no built-in behind them, so if the
+        // catalog stops offering one the feature silently stops working.
+        var declared = Directory.GetFiles(ToolsDirectory, "*.yml")
+            .SelectMany(f => Load(Path.GetFileName(f)).Roles)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        Assert.Contains(ShellRoles.TextEditor, declared);
+        Assert.Contains(ShellRoles.SystemMonitor, declared);
+        Assert.Contains(ShellRoles.FileExplorer, declared);
     }
 
     [Fact]

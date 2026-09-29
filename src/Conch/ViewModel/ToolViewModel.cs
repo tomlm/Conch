@@ -68,6 +68,23 @@ namespace Conch.ViewModel
             ? string.Empty
             : string.Join(", ", Keywords);
 
+        /// <summary>
+        /// Well-known shell roles this app can fill, such as <c>text-editor</c>.
+        /// </summary>
+        /// <remarks>
+        /// A role is a slot the shell itself opens -- "show me this folder", "edit this
+        /// file" -- rather than something the user launches by name. Declaring one here
+        /// offers the app as a candidate; which candidate actually serves a role is the
+        /// user's choice, kept in settings. See <see cref="Services.Roles.ShellRoles"/>.
+        ///
+        /// An unrecognised name is kept rather than rejected. The catalog refreshes from
+        /// GitHub at startup, so an older build will meet roles that did not exist when it
+        /// shipped, and failing validation over one would make publishing a new role break
+        /// every copy of Conch already installed.
+        /// </remarks>
+        [ObservableProperty]
+        private ObservableCollection<string> _roles = new ObservableCollection<string>();
+
         public string Install => GetInstallDefinitionFor(Host.Current)?.Install ?? string.Empty;
 
         public string Uninstall => GetInstallDefinitionFor(Host.Current)?.Uninstall ?? string.Empty;

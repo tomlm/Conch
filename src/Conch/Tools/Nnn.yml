@@ -17,3 +17,6 @@ keywords:
   - tui
   - file manager
   - terminal
+
+roles:
+  - file-explorer

@@ -19,3 +19,6 @@ keywords:
   - cpu
   - memory
   - terminal
+
+roles:
+  - system-monitor
