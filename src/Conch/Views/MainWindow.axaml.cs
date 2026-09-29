@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Threading;
 using Conch.Services;
 using Conch.Services.Roles;
 using Conch.Utilities;
@@ -10,8 +11,13 @@ namespace Conch.Views
 {
     public partial class MainWindow : Window
     {
+        /// <summary>How often the network is actually sampled, in timer ticks of one second.</summary>
+        private const int NetworkSampleSeconds = 5;
+
         private AppLauncher? _launcher;
         private RoleRegistry? _roles;
+        private DispatcherTimer? _statusTimer;
+        private bool? _networkUp;
 
         public MainWindow()
         {
@@ -24,6 +30,68 @@ namespace Conch.Views
             PowerSeparator.IsVisible = ownsSession;
             RestartItem.IsVisible = ownsSession;
             ShutDownItem.IsVisible = ownsSession;
+
+            StartStatusArea();
+        }
+
+        /// <summary>
+        /// Drives the clock and the network indicator.
+        /// </summary>
+        /// <remarks>
+        /// One timer at one second, not two at different rates, and each indicator decides for
+        /// itself whether anything actually changed. That is the whole trick: this sits behind
+        /// a console redraw loop, where assigning the same string to a TextBlock still costs a
+        /// repaint of the desktop, so the clock writes only when the displayed minute turns and
+        /// the network is sampled only every fifth tick.
+        /// </remarks>
+        private void StartStatusArea()
+        {
+            UpdateClock();
+            UpdateNetwork();
+
+            var ticks = 0;
+            _statusTimer = new DispatcherTimer(
+                TimeSpan.FromSeconds(1), DispatcherPriority.Background, (_, _) =>
+                {
+                    UpdateClock();
+
+                    if (++ticks % NetworkSampleSeconds == 0)
+                    {
+                        UpdateNetwork();
+                    }
+                });
+
+            _statusTimer.Start();
+            Closed += (_, _) => _statusTimer?.Stop();
+        }
+
+        private void UpdateClock()
+        {
+            var now = DateTime.Now.ToString("HH:mm");
+            if (Clock.Text != now)
+            {
+                Clock.Text = now;
+            }
+        }
+
+        private async void UpdateNetwork()
+        {
+            // Off the UI thread: enumerating interfaces measures at about 30ms on Windows,
+            // which is roughly two frames of console redraw to answer a question nobody is
+            // waiting on.
+            var up = await NetworkStatus.IsUpAsync();
+
+            if (_networkUp == up)
+            {
+                return;
+            }
+
+            _networkUp = up;
+
+            // Words, not a glyph. The status area is two items wide and a symbol here would be
+            // one more thing that renders as a box on a console without the font for it --
+            // which is exactly the failure this project has already been through once.
+            NetworkIndicator.Content = up ? "net" : "no net";
         }
 
         private AppLauncher Apps => _launcher ??= new AppLauncher(Windows);
@@ -89,6 +157,36 @@ namespace Conch.Views
         {
             var dialog = new SettingsDialog(App, Roles);
             dialog.Show(Windows);
+        }
+
+        private void OnNetworkClicked(object? sender, RoutedEventArgs e)
+            => OpenRole(ShellRoles.NetworkConfig);
+
+        /// <summary>
+        /// Opens whatever serves <paramref name="role"/>, offering Settings when nothing does.
+        /// </summary>
+        /// <remarks>
+        /// Nothing available is an ordinary state, not an error -- network configuration has no
+        /// candidate at all on a machine with no network tool installed, which today includes
+        /// Conchix. Saying so and offering the place to fix it beats a click that does nothing.
+        /// </remarks>
+        private async void OpenRole(string role, string? argument = null)
+        {
+            if (Roles.TryInvoke(role, argument))
+            {
+                return;
+            }
+
+            var name = ShellRoles.DisplayName(role);
+            var answer = await MessageBox.ShowDialog(
+                name,
+                $"No app is set up for {name.ToLowerInvariant()}. Choose one in Settings?",
+                MessageBoxStyle.YesNo);
+
+            if (answer == MessageBoxResult.Yes)
+            {
+                new SettingsDialog(App, Roles).Show(Windows);
+            }
         }
 
         private void OnNewTerminal(object? sender, RoutedEventArgs e)

@@ -9,7 +9,13 @@
 		RequestedThemeVariant="Dark"
 		Title="Conch">
 	<DockPanel>
-		<Menu DockPanel.Dock="Top">
+		<!--
+		The menu and the status area share the top row: the menu takes what it needs and the
+		status sits hard right. A Grid rather than two docked children so the status cannot be
+		pushed off the edge by a long menu.
+		-->
+		<Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto">
+		<Menu Grid.Column="0">
 			<MenuItem Header="_Run">
 				<MenuItem Header="_Apps" Click="OnShowLauncher"/>
 				<Separator/>
@@ -37,6 +43,19 @@
 			</MenuItem>
 		</Menu>
 
+			<StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0 0 1 0"
+						Spacing="{console:OnPlatform Default='8',Console='1'}">
+				<!--
+				A button rather than a label: clicking it opens whatever serves network-config,
+				which is the thing you want the moment the indicator says the network is down.
+				-->
+				<Button x:Name="NetworkIndicator"
+						Click="OnNetworkClicked"
+						Theme="{DynamicResource ThemeNakedButton}"
+						ToolTip.Tip="Network"/>
+				<TextBlock x:Name="Clock" VerticalAlignment="Center"/>
+			</StackPanel>
+		</Grid>
 
 		<wm:WindowsPanel x:Name="Windows" Background="DarkGray"/>
 	</DockPanel>
