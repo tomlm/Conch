@@ -49,7 +49,28 @@ namespace Conch.Services
         public static IReadOnlyList<DriveRoot> Enumerate() => Enumerate(Host.Current);
 
         /// <inheritdoc cref="Enumerate()"/>
+        /// <remarks>
+        /// Never throws. Each platform's path already handles the failures it can name, but
+        /// this is the boundary and the caller is a window opening: losing a drive from the
+        /// list is a much better outcome than a file browser that will not open at all. A
+        /// transient failure here was seen once in a test run and could not be reproduced in
+        /// nine more, which is reason enough not to leave the shell's behaviour depending on
+        /// whatever it was.
+        /// </remarks>
         public static IReadOnlyList<DriveRoot> Enumerate(HostOs os)
+        {
+            try
+            {
+                return EnumerateCore(os);
+            }
+            catch (Exception ex)
+            {
+                Log.Warning("Files", $"Could not list drives: {ex.Message}");
+                return WithHome(Array.Empty<DriveRoot>());
+            }
+        }
+
+        private static IReadOnlyList<DriveRoot> EnumerateCore(HostOs os)
         {
             var roots = os switch
             {

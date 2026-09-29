@@ -1,0 +1,24 @@
+id: nmtui
+name: nmtui
+version: 1.0.0
+author: NetworkManager developers
+description: Configure network connections
+license: GPL-2.0-or-later
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y network-manager
+    uninstall: sudo apt-get remove -y network-manager
+command: nmtui
+args: ""
+source: https://gitlab.freedesktop.org/NetworkManager/NetworkManager
+website: https://networkmanager.dev/
+documentation: https://networkmanager.dev/docs/api/latest/nmtui.html
+keywords:
+  - tui
+  - network
+  - wifi
+  - ethernet
+  - terminal
+
+roles:
+  - network-config
