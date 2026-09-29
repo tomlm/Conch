@@ -6,9 +6,9 @@ description: Full text editor with TextMate themes
 license: MIT
 platforms:
   default:
-    install: dotnet tool install -g Edit.NET --prerelease
-    uninstall: dotnet tool uninstall -g Edit.NET
-command: Edit.NET
+    install: dotnet tool install -g editdotnet --prerelease
+    uninstall: dotnet tool uninstall -g editdotnet
+command: edit.net
 args: "%1? %2? %3? %4? %5?"
 source: https://github.com/consolonia/Edit.NET
 website: https://github.com/consolonia/Edit.NET

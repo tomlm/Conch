@@ -234,4 +234,31 @@ public class RegistrationCatalogTests
 
         Assert.Contains(editNet.Requires, r => r.StartsWith("dotnet.", StringComparison.OrdinalIgnoreCase));
     }
+
+    [Theory]
+    [MemberData(nameof(RegistrationFiles))]
+    public void TheCommandIsSpelledTheWayLinuxWillLookForIt(string fileName)
+    {
+        // Linux PATH lookup is case sensitive and Windows is not, so a capitalised command
+        // works on the developer's machine and fails on the appliance. Edit.NET was declared
+        // as "Edit.NET" and installs a binary called "edit.net": it resolved on Windows
+        // through a case-insensitive match on edit.net.cmd, and on Linux `command -v Edit.NET`
+        // found nothing -- so the app installed and then reported itself missing.
+        //
+        // Lowercase is not required of every tool, only that a command with no uppercase
+        // alternative is written as the file actually is. This checks the cheap version of
+        // that: a command containing uppercase is suspect unless the registration only
+        // targets Windows.
+        var tool = Load(fileName);
+
+        if (tool.Platforms?.Linux == null && tool.Platforms?.Default == null)
+        {
+            return;
+        }
+
+        Assert.True(
+            tool.Command == tool.Command.ToLowerInvariant(),
+            $"{fileName} declares command '{tool.Command}'; on Linux that is looked up exactly, "
+            + "so it must match the installed file's own spelling.");
+    }
 }
