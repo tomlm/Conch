@@ -7,6 +7,8 @@ using Avalonia.Threading;
 using Iciclecreek.Avalonia.WindowManager;
 using Iciclecreek.Terminal;
 using System.Runtime.InteropServices;
+using Conch.Utilities;
+using Avalonia.Reactive;
 
 namespace Conch.Controls
 {
@@ -278,7 +280,25 @@ namespace Conch.Controls
             _terminalControl.Bind(TerminalControl.TextDecorationsProperty, this.GetObservable(TextDecorationsProperty));
             _terminalControl.Bind(TerminalControl.SelectionBrushProperty, this.GetObservable(SelectionBrushProperty));
             _terminalControl.Bind(TerminalControl.ProcessProperty, this.GetObservable(ProcessProperty));
-            _terminalControl.Bind(TerminalControl.ProcessArgsProperty, this.GetObservable(ProcessArgsProperty));
+            // Conch escapes the arguments and the command line goes through untouched.
+            //
+            // The PTY layer's own formatter wraps EVERY argument in quotes -- Porta.Pty's
+            // WindowsArguments.Format is "\"" + arg.Replace("\"", "\"\"") + "\"" -- and
+            // wsl.exe parses its own raw command line instead of going through
+            // CommandLineToArgvW. A quoted "--exec" does not match its option table, so it
+            // stops treating it as an option and hands the whole line to the default shell.
+            // Measured against the real wsl.exe:
+            //
+            //   wsl "--exec" "bash" "-lc" "exec ""$0"" ""$@""" "btop"   exit 127
+            //   wsl --exec bash -lc "exec \"$0\" \"$@\"" btop        btop version: 1.3.0
+            //
+            // Off Windows this changes nothing: arguments reach the process as a real argv
+            // and WindowsCommandLine.EscapeAll hands them back untouched.
+            _terminalControl.VerbatimCommandLine = OperatingSystem.IsWindows();
+            this.GetObservable(ProcessArgsProperty).Subscribe(
+                new AnonymousObserver<IList<string>>(
+                    args => _terminalControl.ProcessArgs =
+                        WindowsCommandLine.EscapeAll(args ?? Array.Empty<string>())));
             _terminalControl.Bind(TerminalControl.BufferSizeProperty, this.GetObservable(BufferSizeProperty));
             Content = _terminalControl;
         }
