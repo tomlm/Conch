@@ -13,6 +13,11 @@ packaging/debian/copyright text eol=lf
 *.yml             text eol=lf
 *.yaml            text eol=lf
 
+# Captured system files, kept byte for byte. A fixture git has reformatted is no
+# longer a capture of anything: checked out with CRLF, every line of a mount table
+# ends in a filesystem type of "ext4\r" and matches nothing.
+src/Conch.Tests/Fixtures/** -text
+
 # Windows-side project files keep platform endings.
 *.csproj          text
 *.slnx            text

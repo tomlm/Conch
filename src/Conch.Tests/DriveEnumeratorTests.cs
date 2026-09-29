@@ -124,6 +124,20 @@ public class DriveEnumeratorTests
     }
 
     [Fact]
+    public void AFixtureThatHasBeenThroughAWindowsCheckoutStillParses()
+    {
+        // .gitattributes marks the fixture directory -text so this cannot happen, but the
+        // failure it prevents is silent and total: with CRLF, every line's filesystem type
+        // becomes "ext4\r", nothing matches, and the drive list is simply empty. Belt and
+        // braces on something with no symptom other than an empty list.
+        var withCrLf = ProcMounts.Replace("\n", "\r\n");
+
+        Assert.Equal(
+            DriveEnumerator.FromProcMounts(ProcMounts).Select(r => r.Path),
+            DriveEnumerator.FromProcMounts(withCrLf).Select(r => r.Path));
+    }
+
+    [Fact]
     public void GarbageInTheMountTableIsSkippedRatherThanThrowing()
     {
         Assert.Empty(DriveEnumerator.FromProcMounts("\n\nnot enough fields\n/dev/sda1\n"));

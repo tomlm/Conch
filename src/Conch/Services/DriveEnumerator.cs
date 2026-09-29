@@ -137,7 +137,11 @@ namespace Conch.Services
 
             foreach (var line in contents.Split('\n'))
             {
-                var fields = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                // Trimmed, because a carriage return would ride along on the last field and
+                // turn a filesystem type of "ext4" into "ext4\r", which matches nothing. Real
+                // /proc/mounts never has one, but a captured copy that has been through a
+                // checkout on Windows does.
+                var fields = line.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
                 if (fields.Length < 3)
                 {
                     continue;
