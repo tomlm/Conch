@@ -196,12 +196,6 @@ namespace Conch.ViewModel
         private int _rows = 25;
 
         /// <summary>
-        /// tool icon which 4 lines of 8 characters each
-        /// </summary>
-        [ObservableProperty]
-        private ObservableCollection<string> _icon = new ObservableCollection<string>();
-
-        /// <summary>
         /// Validates this model instance using data annotations.
         /// </summary>
         public void Validate()
