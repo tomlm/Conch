@@ -1,0 +1,107 @@
+<wm:ManagedWindow xmlns="https://github.com/avaloniaui"
+				  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+				  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+				  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+				  xmlns:console="https://github.com/consolonia"
+				  xmlns:wm="using:Iciclecreek.Avalonia.WindowManager"
+				  xmlns:vm="clr-namespace:Conch.ViewModel"
+				  mc:Ignorable="d" d:DesignWidth="76" d:DesignHeight="26"
+				  x:Class="Conch.Views.SettingsDialog"
+				  Title="Settings"
+				  Width="76" Height="26"
+				  x:DataType="vm:SettingsViewModel">
+
+	<Grid Margin="{console:OnPlatform Default='16', Console='1'}" RowDefinitions="*,Auto">
+
+		<TabControl Grid.Row="0">
+
+			<!--
+			Default Apps. One row per role: the slot the shell opens itself, and what the
+			user has chosen to fill it. A built-in is listed first and is the default.
+			-->
+			<TabItem Header="Default Apps">
+				<ScrollViewer>
+					<ItemsControl ItemsSource="{Binding Roles}">
+						<ItemsControl.ItemTemplate>
+							<DataTemplate x:DataType="vm:RoleSettingViewModel">
+								<Grid ColumnDefinitions="22,*" Margin="0 0 0 1">
+									<TextBlock Grid.Column="0"
+											   Text="{Binding DisplayName}"
+											   VerticalAlignment="Center"
+											   TextTrimming="CharacterEllipsis"/>
+
+									<ComboBox Grid.Column="1"
+											  ItemsSource="{Binding Choices}"
+											  SelectedItem="{Binding Selected}"
+											  DisplayMemberBinding="{Binding Label}"
+											  IsVisible="{Binding !IsEmpty}"
+											  HorizontalAlignment="Stretch"/>
+
+									<!--
+									Said plainly rather than shown as an empty dropdown: on a
+									fresh machine most roles are in this state, and an empty
+									control reads as broken rather than as nothing installed.
+									-->
+									<TextBlock Grid.Column="1"
+											   Text="(nothing installed can do this)"
+											   IsVisible="{Binding IsEmpty}"
+											   VerticalAlignment="Center"/>
+								</Grid>
+							</DataTemplate>
+						</ItemsControl.ItemTemplate>
+					</ItemsControl>
+				</ScrollViewer>
+			</TabItem>
+
+			<TabItem Header="Appearance">
+				<StackPanel Spacing="{console:OnPlatform Default='8',Console='1'}">
+					<Grid ColumnDefinitions="22,*">
+						<TextBlock Grid.Column="0" Text="Theme" VerticalAlignment="Center"/>
+						<ComboBox Grid.Column="1"
+								  ItemsSource="{Binding Themes}"
+								  SelectedItem="{Binding SelectedTheme}"
+								  HorizontalAlignment="Stretch"/>
+					</Grid>
+					<TextBlock Text="{Binding ThemeNote}" TextWrapping="Wrap"/>
+				</StackPanel>
+			</TabItem>
+
+			<!-- The first thing wanted when a bug report arrives. -->
+			<TabItem Header="About">
+				<ScrollViewer>
+					<Grid ColumnDefinitions="14,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+						<TextBlock Grid.Row="0" Grid.Column="0" Text="Conch"/>
+						<TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Version}"/>
+
+						<TextBlock Grid.Row="1" Grid.Column="0" Text="Runtime"/>
+						<TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Runtime}"/>
+
+						<TextBlock Grid.Row="2" Grid.Column="0" Text="System"/>
+						<TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding OperatingSystem}"
+								   TextTrimming="CharacterEllipsis"/>
+
+						<TextBlock Grid.Row="3" Grid.Column="0" Text="Session"/>
+						<TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Session}"/>
+
+						<TextBlock Grid.Row="5" Grid.Column="0" Text="Settings"/>
+						<TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding SettingsPath}"
+								   TextTrimming="CharacterEllipsis"/>
+
+						<TextBlock Grid.Row="6" Grid.Column="0" Text="Log"/>
+						<TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding LogPath}"
+								   TextTrimming="CharacterEllipsis"/>
+
+						<TextBlock Grid.Row="7" Grid.Column="0" Text="Catalog"/>
+						<TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding CatalogPath}"
+								   TextTrimming="CharacterEllipsis"/>
+					</Grid>
+				</ScrollViewer>
+			</TabItem>
+		</TabControl>
+
+		<StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center"
+					Spacing="{console:OnPlatform Default='8',Console='1'}">
+			<Button Content="CLOSE" Click="OnClose" IsDefault="True" IsCancel="True"/>
+		</StackPanel>
+	</Grid>
+</wm:ManagedWindow>

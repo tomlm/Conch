@@ -20,6 +20,7 @@
 			</MenuItem>
 			<MenuItem Header="_Tools">
 				<MenuItem Header="_Manage" Click="OnManageApps"/>
+				<MenuItem Header="_Settings" Click="OnShowSettings"/>
 				<Separator/>
 				<MenuItem Header="_Log" Click="OnShowLog"/>
 			</MenuItem>

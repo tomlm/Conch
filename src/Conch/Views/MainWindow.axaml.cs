@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Conch.Services;
+using Conch.Services.Roles;
 using Conch.Utilities;
 using Conch.ViewModel;
 using Consolonia.Controls;
@@ -10,6 +11,7 @@ namespace Conch.Views
     public partial class MainWindow : Window
     {
         private AppLauncher? _launcher;
+        private RoleRegistry? _roles;
 
         public MainWindow()
         {
@@ -25,6 +27,37 @@ namespace Conch.Views
         }
 
         private AppLauncher Apps => _launcher ??= new AppLauncher(Windows);
+
+        private AppViewModel App => (AppViewModel)this.DataContext!;
+
+        /// <summary>
+        /// What serves each role on this machine.
+        /// </summary>
+        /// <remarks>
+        /// Built here rather than alongside the rest of the view model because both halves of
+        /// it need the window: a built-in has to be shown on the <c>WindowsPanel</c>, and an
+        /// app has to be launched into one.
+        /// </remarks>
+        private RoleRegistry Roles => _roles ??= BuildRoles();
+
+        private RoleRegistry BuildRoles()
+        {
+            var registry = new RoleRegistry(
+                role => App.Tools
+                    .Where(t => t.Roles.Contains(role, StringComparer.OrdinalIgnoreCase))
+                    .Select(t => new ToolRoleProvider(t, (tool, values) => Apps.LaunchTool(tool, values))),
+                role => App.Settings.GetRoleChoice(role));
+
+            registry.RegisterBuiltIn(ShellRoles.AppLauncher, new BuiltInRoleProvider(
+                "builtin.launcher", "App Launcher",
+                _ => new AppLauncherDialog(App).Show(Windows)));
+
+            registry.RegisterBuiltIn(ShellRoles.AppManager, new BuiltInRoleProvider(
+                "builtin.manager", "Software Manager",
+                _ => new AppManagerDialog(App).Show(Windows)));
+
+            return registry;
+        }
 
         private void OnExit(object sender, RoutedEventArgs e)
         {
@@ -49,6 +82,12 @@ namespace Conch.Views
         private void OnShowLog(object? sender, RoutedEventArgs e)
         {
             var dialog = new LogDialog();
+            dialog.Show(Windows);
+        }
+
+        private void OnShowSettings(object? sender, RoutedEventArgs e)
+        {
+            var dialog = new SettingsDialog(App, Roles);
             dialog.Show(Windows);
         }
 
