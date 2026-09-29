@@ -23,7 +23,7 @@ public class ShellCommandTests
         // used. Launching it directly finds a different PATH, which is what made a snap
         // report as installed and then fail to start.
         Assert.Equal("wsl", command.Process);
-        Assert.Equal(new[] { "--", "bash", "-lc", "exec \"$0\" \"$@\"", "btop", "-p" }, command.Args);
+        Assert.Equal(new[] { "--exec", "bash", "-lc", "exec \"$0\" \"$@\"", "btop", "-p" }, command.Args);
     }
 
     [Fact]
@@ -80,8 +80,65 @@ public class ShellCommandTests
     }
 
     [Fact]
+    public void RenderedCommandEscapesQuotesInsideAnArgument()
+    {
+        // The WSL launcher passes a script that contains quotes. Rendered naively it came out
+        // as wsl --exec bash -lc "exec "$0" "$@"" btop -- unpasteable, and it reads as though
+        // the quoting were broken, in the log you are reading precisely because something is.
+        var command = new ResolvedCommand("bash", new List<string> { "-lc", "exec \"$0\" \"$@\"" });
+
+        Assert.Equal("bash -lc \"exec \\\"$0\\\" \\\"$@\\\"\"", command.ToString());
+    }
+
+    [Fact]
     public void RenderedCommandWithNoArgumentsIsJustTheProcess()
     {
         Assert.Equal("btop", new ResolvedCommand("btop", new List<string>()).ToString());
+    }
+
+    [Fact]
+    public void WslInvocationsUseExecRatherThanTheDefaultShell()
+    {
+        // `wsl -- cmd args` does not run cmd: wsl.exe joins the arguments into a command
+        // line for a shell, quoting only the ones containing whitespace, so any other
+        // argument is read as shell syntax. Measured against the real wsl.exe: a ';' in an
+        // argument started a second command, and '<' and '>' became redirections. --exec
+        // runs the command directly, with no shell to reinterpret anything.
+        var process = ShellCommand.ForProcess("btop", Array.Empty<string>(), viaWsl: true, os: HostOs.Windows);
+        var script = ShellCommand.ForScript("apt-get install -y btop", viaWsl: true, os: HostOs.Windows);
+
+        Assert.Equal("--exec", process.Args[0]);
+        Assert.Equal("--exec", script.Args[0]);
+        Assert.DoesNotContain("--", process.Args.Skip(1));
+        Assert.DoesNotContain("--", script.Args.Skip(1));
+    }
+
+    [Fact]
+    public void ScriptKeepsItsShellSyntaxInOneArgument()
+    {
+        // The install line is shell source and has to arrive as a single argument, or the
+        // '&&' joining its two halves is acted on by the wrong shell -- which ran the first
+        // half as a bare `sudo` and the second outside the login profile.
+        var command = ShellCommand.ForScript("apt-get update && apt-get install -y btop",
+            viaWsl: true, os: HostOs.Windows);
+
+        Assert.Equal(new[] { "--exec", "bash", "-lc", "apt-get update && apt-get install -y btop" },
+            command.Args);
+    }
+
+    [Fact]
+    public void TypedCommandLineRunsThroughAShellSoItsSyntaxStillMeansSomething()
+    {
+        // Someone typing a command line expects a pipe in it to be a pipe. The tokens alone
+        // cannot carry that: Tokenize has already taken the quotes off, so replaying them is
+        // no longer the string that was typed.
+        // A name nothing will resolve on either host, so this takes the same branch on the
+        // Windows developer machine and on the Linux build.
+        const string typed = "conch-no-such-command -la | grep conch";
+
+        var command = ShellCommand.ForCommandLine(typed);
+
+        Assert.Equal(typed, command.Args[^1]);
+        Assert.Contains("-lc", command.Args);
     }
 }

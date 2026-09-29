@@ -12,8 +12,15 @@ namespace Conch.Utilities
 
         // Arguments reach the process through ArgumentList, so this is only for logs; quote the
         // ones containing spaces so a logged command reads the way it actually ran.
+        //
+        // Inner quotes are escaped rather than left as they are. An argument that itself
+        // contains a quote -- the 'exec "$0" "$@"' the WSL launcher passes, for one -- rendered
+        // as a command nobody could paste back and that read as though the quoting were broken,
+        // during the very debugging session where the log is what you have to go on.
         private static string Quote(string arg)
-            => arg.Length == 0 || arg.Any(char.IsWhiteSpace) ? $"\"{arg}\"" : arg;
+            => arg.Length == 0 || arg.Any(char.IsWhiteSpace) || arg.Contains('"')
+                ? $"\"{arg.Replace("\\", "\\\\").Replace("\"", "\\\"")}\""
+                : arg;
     }
 
     /// <summary>
@@ -39,6 +46,22 @@ namespace Conch.Utilities
 
             if (viaWsl && os == HostOs.Windows)
             {
+                // --exec, not --. They are not two spellings of the same thing: with --,
+                // wsl.exe joins the arguments into a command line and hands it to a shell,
+                // quoting only the ones that contain whitespace. Everything else is read as
+                // shell syntax. Measured against the real wsl.exe, passing argv exactly:
+                //
+                //   --      /usr/bin/printf FMT hello    bash: %s: No such file or directory
+                //   --      /usr/bin/printf FMT 'a;b'    ran 'b' as a separate command
+                //   --exec  /usr/bin/printf FMT 'a;b'    <a;b>
+                //
+                // where FMT is the format string <%s> followed by an escaped newline.
+                // The '<' and '>' became redirections and the ';' a command separator,
+                // because none of those arguments contained a space to get them quoted. So
+                // -- cannot carry an argument through intact, and a registration argument
+                // holding shell syntax was being executed as shell syntax. --exec runs the
+                // command directly with no shell in the way.
+                //
                 // Through a login shell, so the command is looked up on the same PATH that
                 // detection used. bash -lc reads the login profile, which is where
                 // /snap/bin, ~/.local/bin, ~/.cargo/bin and ~/.dotnet/tools are added.
@@ -48,8 +71,9 @@ namespace Conch.Utilities
                 // 'exec "$0" "$@"' takes the command and its arguments as positional
                 // parameters rather than interpolating them into the script, so nothing
                 // needs shell-quoting and an argument containing spaces or quotes cannot
-                // change what runs.
-                var wslArgs = new List<string> { "--", "bash", "-lc", "exec \"$0\" \"$@\"", command };
+                // change what runs. Under -- the quotes in it were eaten before bash saw
+                // them and every launch died with 'bash: line 1: --: command not found'.
+                var wslArgs = new List<string> { "--exec", "bash", "-lc", "exec \"$0\" \"$@\"", command };
                 wslArgs.AddRange(argList);
                 return new ResolvedCommand("wsl", wslArgs);
             }
@@ -72,8 +96,12 @@ namespace Conch.Utilities
         {
             if (viaWsl && os == HostOs.Windows)
             {
-                // -l so the login profile is read and the usual package tooling is on PATH.
-                return new ResolvedCommand("wsl", new List<string> { "--", "bash", "-lc", script });
+                // -l so the login profile is read and the usual package tooling is on PATH,
+                // and --exec so the script reaches bash as one argument. Under -- it was
+                // joined into a command line and reinterpreted by a shell first, which left
+                // any token holding shell syntax but no space -- a URL with a '&' in it, a
+                // redirect, a ';' -- acting on the outer shell instead of the inner one.
+                return new ResolvedCommand("wsl", new List<string> { "--exec", "bash", "-lc", script });
             }
 
             if (os == HostOs.Windows)
@@ -108,8 +136,11 @@ namespace Conch.Utilities
 
             if (resolvedPath == null)
             {
-                // Not a Windows executable; assume it names a Linux tool.
-                return new ResolvedCommand("wsl", parts);
+                // Not a Windows executable; assume it names a Linux tool. Run it as the shell
+                // command it was typed as -- someone entering a command line expects a pipe or
+                // a redirect in it to mean what it says, and Tokenize has already taken the
+                // quotes off, so re-running the tokens is not the same string any more.
+                return ForScript(commandLine.Trim(), viaWsl: true, HostOs.Windows);
             }
 
             var extension = Path.GetExtension(resolvedPath);
@@ -126,7 +157,7 @@ namespace Conch.Utilities
                 return new ResolvedCommand("cmd.exe", args);
             }
 
-            return new ResolvedCommand("wsl", parts);
+            return ForScript(commandLine.Trim(), viaWsl: true, HostOs.Windows);
         }
 
         /// <summary>

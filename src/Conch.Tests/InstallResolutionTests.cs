@@ -211,7 +211,7 @@ public class InstallResolutionTests
         var command = ShellCommand.ForScript(def.Install, tool.RunsUnderWslOn(HostOs.Windows), HostOs.Windows);
 
         Assert.Equal("wsl", command.Process);
-        Assert.Equal(new[] { "--", "bash", "-lc", "sudo apt-get install -y ncdu" }, command.Args);
+        Assert.Equal(new[] { "--exec", "bash", "-lc", "sudo apt-get install -y ncdu" }, command.Args);
         Assert.DoesNotContain("cmd.exe", command.Process);
     }
 
@@ -228,7 +228,7 @@ public class InstallResolutionTests
         var command = ShellCommand.ForScript(def.Uninstall, tool.RunsUnderWslOn(HostOs.Windows), HostOs.Windows);
 
         Assert.Equal("wsl", command.Process);
-        Assert.Equal(new[] { "--", "bash", "-lc", "sudo apt-get remove -y ncdu" }, command.Args);
+        Assert.Equal(new[] { "--exec", "bash", "-lc", "sudo apt-get remove -y ncdu" }, command.Args);
     }
 
     [Fact]
