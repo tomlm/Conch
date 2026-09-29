@@ -23,6 +23,17 @@
 				<Separator/>
 				<MenuItem Header="_Log" Click="OnShowLog"/>
 			</MenuItem>
+			<MenuItem Header="_System">
+				<!--
+				Restart and Shut Down appear only when Conch was started as the session, so
+				a misclick on a machine that is merely running Conch cannot reboot it. See
+				CommandLineOptions.SessionFlag.
+				-->
+				<MenuItem Header="_Logout" Click="OnLogout"/>
+				<Separator x:Name="PowerSeparator"/>
+				<MenuItem x:Name="RestartItem" Header="_Restart" Click="OnRestart"/>
+				<MenuItem x:Name="ShutDownItem" Header="Shut _Down" Click="OnShutDown"/>
+			</MenuItem>
 		</Menu>
 
 

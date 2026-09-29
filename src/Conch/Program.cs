@@ -24,7 +24,17 @@ namespace Conch
                 e.SetObserved();
             };
 
+            // Read, not consumed: args still go on to Avalonia below, so a flag meant for the
+            // toolkit is not swallowed here.
+            var options = CommandLineOptions.Parse(args);
+            CommandLineOptions.SetCurrent(options);
+
             Log.Info("Shell", $"Conch starting ({Environment.OSVersion}, .NET {Environment.Version}).");
+
+            if (options.OwnsSession)
+            {
+                Log.Info("Shell", "Running as the session; shutdown and restart are available.");
+            }
 
             BuildAvaloniaApp()
                 .StartWithConsoleLifetime(args);
