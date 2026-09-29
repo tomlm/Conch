@@ -141,4 +141,32 @@ public class RegistrationCatalogTests
         Assert.DoesNotContain("apt-get", windows.Install, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("apt-get", windows.Uninstall, StringComparison.OrdinalIgnoreCase);
     }
+
+    [Theory]
+    [MemberData(nameof(RegistrationFiles))]
+    public void RegistrationAsksForAGridEveryTuiWillStartIn(string fileName)
+    {
+        // 80x24 is the floor several full-screen TUIs enforce rather than adapt to: btop
+        // prints "Terminal size too small" and exits at 79 columns or 23 rows, and it is
+        // the size the whole genre was written against. A registration asking for less
+        // gives that app a window it refuses to run in.
+        //
+        // These are grid, not window. ManagedTerminalWindow sizes the window around them,
+        // so what a registration asks for is what the process is handed -- the earlier
+        // arrangement passed them as window Width and Height, and the border and title bar
+        // came out of the app's share.
+        var tool = Load(fileName);
+
+        Assert.True(tool.Cols >= 80, $"{fileName} asks for {tool.Cols} columns; 80 is the floor.");
+        Assert.True(tool.Rows >= 24, $"{fileName} asks for {tool.Rows} rows; 24 is the floor.");
+    }
+
+    [Fact]
+    public void GridDefaultsToTheClassicTerminalSize()
+    {
+        var tool = new ToolViewModel();
+
+        Assert.Equal(80, tool.Cols);
+        Assert.Equal(25, tool.Rows);
+    }
 }

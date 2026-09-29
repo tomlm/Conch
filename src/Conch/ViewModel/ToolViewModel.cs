@@ -179,16 +179,21 @@ namespace Conch.ViewModel
         private string _args = string.Empty;
 
         /// <summary>
-        /// Desitred initial width of terminal
+        /// Columns of terminal grid the app wants. 80 unless the registration says otherwise.
         /// </summary>
+        /// <remarks>
+        /// Grid, not window. The window is sized around this, so an app asking for 80x25
+        /// gets 80x25 to write into rather than 80x25 minus the border and title bar --
+        /// which is below the floor several TUIs refuse to start under.
+        /// </remarks>
         [ObservableProperty]
-        private int _width = 80;
+        private int _cols = 80;
 
         /// <summary>
-        /// Desired initial height of terminal
+        /// Rows of terminal grid the app wants. 25 unless the registration says otherwise.
         /// </summary>
         [ObservableProperty]
-        private int _height = 25;
+        private int _rows = 25;
 
         /// <summary>
         /// tool icon which 4 lines of 8 characters each

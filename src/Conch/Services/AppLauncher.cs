@@ -55,7 +55,7 @@ namespace Conch.Services
             var command = ShellCommand.ForProcess(tool.Command, args, tool.RunsUnderWsl);
             Log.Info(LogCategory, $"Launching {tool.Id} as: {command}");
 
-            var window = Open(command, tool.Name, closeOnExit: true, tool.Width, tool.Height);
+            var window = Open(command, tool.Name, closeOnExit: true, tool.Cols, tool.Rows);
 
             window.ProcessExited += (s, e) =>
             {
@@ -96,7 +96,7 @@ namespace Conch.Services
             var command = ShellCommand.ForScript(script, viaWsl);
             Log.Info(LogCategory, $"{title}: {script}");
 
-            var window = Open(command, title, closeOnExit: false, width: 100, height: 30);
+            var window = Open(command, title, closeOnExit: false, cols: 100, rows: 30);
 
             window.ProcessExited += (s, e) =>
             {
@@ -116,14 +116,12 @@ namespace Conch.Services
             return window;
         }
 
-        private ManagedTerminalWindow Open(ResolvedCommand command, string? title, bool closeOnExit, int width = 80, int height = 25)
+        private ManagedTerminalWindow Open(ResolvedCommand command, string? title, bool closeOnExit, int cols = 80, int rows = 25)
         {
-            var window = new ManagedTerminalWindow
+            var window = new ManagedTerminalWindow(cols, rows)
             {
                 Process = command.Process,
                 ProcessArgs = command.Args,
-                Width = width,
-                Height = height,
                 FontFamily = DefaultFontFamily,
                 CloseOnProcessExit = closeOnExit,
             };

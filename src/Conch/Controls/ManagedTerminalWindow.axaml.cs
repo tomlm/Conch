@@ -58,6 +58,34 @@ namespace Conch.Controls
                 defaultValue: true);
 
         /// <summary>
+        /// Columns of terminal grid to give the hosted process. 80 by default.
+        /// </summary>
+        /// <remarks>
+        /// Not the window width. Window Width and Height are the whole window, chrome and
+        /// all -- a border and a title bar that no character ever occupies -- so setting
+        /// them to 80x25 hands the process a grid several columns and rows smaller. That
+        /// is a real failure rather than a cosmetic one: btop refuses to start below 80x24
+        /// with "Terminal size too small", and 80x25 of window is about 76x22 of grid
+        /// under the current theme.
+        ///
+        /// So the grid is stated here and the window is sized around it, which also means
+        /// the numbers stay right if the theme's border or title bar ever changes.
+        /// </remarks>
+        public static readonly StyledProperty<int> ColsProperty =
+            AvaloniaProperty.Register<ManagedTerminalWindow, int>(
+                nameof(Cols),
+                defaultValue: 80);
+
+        /// <summary>
+        /// Rows of terminal grid to give the hosted process. 25 by default.
+        /// </summary>
+        /// <remarks>See <see cref="ColsProperty"/> -- this is grid, not window height.</remarks>
+        public static readonly StyledProperty<int> RowsProperty =
+            AvaloniaProperty.Register<ManagedTerminalWindow, int>(
+                nameof(Rows),
+                defaultValue: 25);
+
+        /// <summary>
         /// Gets or sets the text decorations for the terminal.
         /// </summary>
         public TextDecorationLocation? TextDecorations
@@ -112,6 +140,24 @@ namespace Conch.Controls
         }
 
         /// <summary>
+        /// Gets or sets the columns of terminal grid given to the process.
+        /// </summary>
+        public int Cols
+        {
+            get => GetValue(ColsProperty);
+            set => SetValue(ColsProperty, value);
+        }
+
+        /// <summary>
+        /// Gets or sets the rows of terminal grid given to the process.
+        /// </summary>
+        public int Rows
+        {
+            get => GetValue(RowsProperty);
+            set => SetValue(RowsProperty, value);
+        }
+
+        /// <summary>
         /// Gets or sets the terminal options.
         /// </summary>
         public XTerm.Options.TerminalOptions? Options
@@ -127,7 +173,27 @@ namespace Conch.Controls
         }
 
         public ManagedTerminalWindow()
+            : this(80, 25)
         {
+        }
+
+        /// <summary>
+        /// Creates a window whose terminal grid is <paramref name="cols"/> by
+        /// <paramref name="rows"/> characters.
+        /// </summary>
+        /// <remarks>
+        /// The grid arrives through the constructor rather than an object initializer
+        /// because OnInitialized -- where the emulator is built at this size -- can run
+        /// before an initializer assigns anything, and a grid missed there is not a
+        /// failure anyone would see: the window simply comes up 80x25 and every later
+        /// number is consistent with it. Process and ProcessArgs dodge the same ordering
+        /// by being bound rather than read.
+        /// </remarks>
+        public ManagedTerminalWindow(int cols, int rows)
+        {
+            SetValue(ColsProperty, cols);
+            SetValue(RowsProperty, rows);
+
             this.Position = new PixelPoint(0, 0);
 
             // Set focus to terminal when window opens or is activated
@@ -147,6 +213,19 @@ namespace Conch.Controls
         {
             // Create the terminal control as content
             Options = this.Options ?? new XTerm.Options.TerminalOptions();
+
+            // The emulator is built at this size, and TerminalView reports it as its desired
+            // size when measured with no constraint -- which is what SizeToContent measures
+            // with. So the window ends up exactly this grid plus whatever the theme's chrome
+            // costs, instead of the grid ending up as the window minus the chrome.
+            //
+            // It matters before layout too. The process is spawned with the grid the emulator
+            // currently has, so this is the size the pty is opened at rather than a size it is
+            // resized to afterwards -- and a program that reads its window size once at
+            // startup only ever sees the first number.
+            Options.Cols = Cols;
+            Options.Rows = Rows;
+            SizeToContent = SizeToContent.WidthAndHeight;
             Options.WindowOptions.GetWinPosition = true;
             Options.WindowOptions.GetWinSizePixels = true;
             Options.WindowOptions.GetWinSizeChars = true;
