@@ -40,7 +40,18 @@ namespace Conch.Utilities
             => ForProcess(command, args, viaWsl, Host.Current);
 
         /// <inheritdoc cref="ForProcess(string, IEnumerable{string}, bool)"/>
-        public static ResolvedCommand ForProcess(string command, IEnumerable<string> args, bool viaWsl, HostOs os)
+        /// <param name="resolveOnPath">
+        /// How to look a bare command name up on PATH. Injected so the Windows behaviour can be
+        /// exercised from a build that is not running on Windows.
+        /// </param>
+
+        /// <inheritdoc cref="ForProcess(string, IEnumerable{string}, bool)"/>
+        public static ResolvedCommand ForProcess(
+            string command,
+            IEnumerable<string> args,
+            bool viaWsl,
+            HostOs os,
+            Func<string, string?>? resolveOnPath = null)
         {
             var argList = args.ToList();
 
@@ -78,7 +89,47 @@ namespace Conch.Utilities
                 return new ResolvedCommand("wsl", wslArgs);
             }
 
+            if (os == HostOs.Windows)
+            {
+                // Resolved here rather than left to the PTY layer, which searches PATH for the
+                // name, then name.com, then name.exe -- and nothing else. A .NET global tool
+                // installs a .cmd shim (Edit.NET arrives as edit.net.cmd), so the search failed,
+                // the layer fell back to cwd + the name, and the launch reported
+                // "Could not start terminal process <Conch's own directory>\Edit.NET".
+                //
+                // Detection had already found it, because that honours PATHEXT. An app listed
+                // as installed and then unable to start is the same shape of fault as the snap
+                // on a login-only PATH: two different answers to "where is this command".
+                var resolved = (resolveOnPath ?? PathUtils.ResolveOnPath)(command);
+                if (resolved != null)
+                {
+                    return ForWindowsExecutable(resolved, argList);
+                }
+            }
+
             return new ResolvedCommand(command, argList);
+        }
+
+        /// <summary>
+        /// Builds an invocation for an executable already resolved to a full path on Windows.
+        /// </summary>
+        /// <remarks>
+        /// A .cmd or .bat is a script, not an image CreateProcess can start, so it has to go
+        /// through the interpreter that understands it. Everything else is started directly.
+        /// </remarks>
+        private static ResolvedCommand ForWindowsExecutable(string resolvedPath, List<string> args)
+        {
+            var extension = Path.GetExtension(resolvedPath);
+
+            if (string.Equals(extension, ".cmd", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(extension, ".bat", StringComparison.OrdinalIgnoreCase))
+            {
+                var cmdArgs = new List<string> { "/c", resolvedPath };
+                cmdArgs.AddRange(args);
+                return new ResolvedCommand("cmd.exe", cmdArgs);
+            }
+
+            return new ResolvedCommand(resolvedPath, args);
         }
 
         /// <summary>
@@ -144,17 +195,11 @@ namespace Conch.Utilities
             }
 
             var extension = Path.GetExtension(resolvedPath);
-            if (string.Equals(extension, ".exe", StringComparison.OrdinalIgnoreCase))
-            {
-                return new ResolvedCommand(resolvedPath, rest);
-            }
-
-            if (string.Equals(extension, ".cmd", StringComparison.OrdinalIgnoreCase) ||
+            if (string.Equals(extension, ".exe", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(extension, ".cmd", StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(extension, ".bat", StringComparison.OrdinalIgnoreCase))
             {
-                var args = new List<string> { "/c", resolvedPath };
-                args.AddRange(rest);
-                return new ResolvedCommand("cmd.exe", args);
+                return ForWindowsExecutable(resolvedPath, rest);
             }
 
             return ForScript(commandLine.Trim(), viaWsl: true, HostOs.Windows);

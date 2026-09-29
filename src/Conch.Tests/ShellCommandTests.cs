@@ -141,4 +141,69 @@ public class ShellCommandTests
         Assert.Equal(typed, command.Args[^1]);
         Assert.Contains("-lc", command.Args);
     }
+
+    [Fact]
+    public void DotnetToolShimIsRunThroughTheInterpreterThatUnderstandsIt()
+    {
+        // A .NET global tool installs a .cmd shim -- Edit.NET arrives on disk as
+        // edit.net.cmd -- and a .cmd is a script, not an image CreateProcess can start.
+        const string shim = @"C:\Users\someone\.dotnet\tools\edit.net.cmd";
+
+        var command = ShellCommand.ForProcess("Edit.NET", new[] { "notes.txt" },
+            viaWsl: false, os: HostOs.Windows, resolveOnPath: _ => shim);
+
+        Assert.Equal("cmd.exe", command.Process);
+        Assert.Equal(new[] { "/c", shim, "notes.txt" }, command.Args);
+    }
+
+    [Fact]
+    public void BatchFileShimIsTreatedTheSameWay()
+    {
+        const string shim = @"C:\tools\thing.bat";
+
+        var command = ShellCommand.ForProcess("thing", Array.Empty<string>(),
+            viaWsl: false, os: HostOs.Windows, resolveOnPath: _ => shim);
+
+        Assert.Equal("cmd.exe", command.Process);
+        Assert.Equal(new[] { "/c", shim }, command.Args);
+    }
+
+    [Fact]
+    public void ResolvedExecutableIsStartedDirectly()
+    {
+        const string exe = @"C:\Program Files\thing\thing.exe";
+
+        var command = ShellCommand.ForProcess("thing", new[] { "-v" },
+            viaWsl: false, os: HostOs.Windows, resolveOnPath: _ => exe);
+
+        Assert.Equal(exe, command.Process);
+        Assert.Equal(new[] { "-v" }, command.Args);
+    }
+
+    [Fact]
+    public void UnresolvableCommandIsStillHandedOverByName()
+    {
+        // Nothing found on PATH: pass the name along rather than inventing a path. The
+        // process layer gets its own chance, and its failure names the command.
+        var command = ShellCommand.ForProcess("mystery", new[] { "-x" },
+            viaWsl: false, os: HostOs.Windows, resolveOnPath: _ => null);
+
+        Assert.Equal("mystery", command.Process);
+        Assert.Equal(new[] { "-x" }, command.Args);
+    }
+
+    [Fact]
+    public void PathResolutionDoesNotApplyToCommandsRunInsideWsl()
+    {
+        // The command lives in the WSL filesystem; a Windows PATH lookup has no business
+        // answering for it, and a hit would be the wrong binary entirely.
+        var resolverCalled = false;
+
+        var command = ShellCommand.ForProcess("btop", Array.Empty<string>(),
+            viaWsl: true, os: HostOs.Windows,
+            resolveOnPath: _ => { resolverCalled = true; return @"C:\nope\btop.exe"; });
+
+        Assert.False(resolverCalled);
+        Assert.Equal("wsl", command.Process);
+    }
 }
