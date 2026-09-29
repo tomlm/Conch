@@ -1,0 +1,82 @@
+<wm:ManagedWindow xmlns="https://github.com/avaloniaui"
+				  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+				  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+				  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+				  xmlns:console="https://github.com/consolonia"
+				  xmlns:wm="using:Iciclecreek.Avalonia.WindowManager"
+				  xmlns:vm="clr-namespace:Conch.ViewModel"
+				  xmlns:services="clr-namespace:Conch.Services"
+				  mc:Ignorable="d" d:DesignWidth="84" d:DesignHeight="26"
+				  x:Class="Conch.Views.FilesDialog"
+				  Title="Files"
+				  Width="84" Height="26"
+				  x:DataType="vm:FilesViewModel">
+
+	<Grid Margin="{console:OnPlatform Default='16', Console='1'}" RowDefinitions="Auto,*,Auto">
+
+		<!-- Where we are, and where else we could be. -->
+		<Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0 0 0 1">
+			<TextBlock Grid.Column="0"
+					   Text="{Binding CurrentPath}"
+					   VerticalAlignment="Center"
+					   TextTrimming="CharacterEllipsis"/>
+
+			<ComboBox Grid.Column="1"
+					  x:Name="RootsBox"
+					  ItemsSource="{Binding Roots}"
+					  SelectionChanged="OnRootChanged"
+					  MinWidth="18">
+				<ComboBox.ItemTemplate>
+					<DataTemplate x:DataType="services:DriveRoot">
+						<TextBlock Text="{Binding Label}"/>
+					</DataTemplate>
+				</ComboBox.ItemTemplate>
+			</ComboBox>
+		</Grid>
+
+		<Panel Grid.Row="1">
+			<ListBox x:Name="EntriesBox"
+					 ItemsSource="{Binding Entries}"
+					 SelectedItem="{Binding Selected}"
+					 DoubleTapped="OnEntryActivated"
+					 KeyDown="OnListKeyDown">
+				<ListBox.ItemTemplate>
+					<DataTemplate x:DataType="vm:FileEntryViewModel">
+						<!--
+						Name takes what is left, so a long filename trims rather than pushing
+						the size and date off the right edge where they cannot be read.
+						-->
+						<Grid ColumnDefinitions="*,8,16">
+							<TextBlock Grid.Column="0"
+									   Text="{Binding DisplayName}"
+									   TextTrimming="CharacterEllipsis"/>
+							<TextBlock Grid.Column="1"
+									   Text="{Binding SizeText}"
+									   HorizontalAlignment="Right"/>
+							<TextBlock Grid.Column="2"
+									   Text="{Binding ModifiedText}"
+									   HorizontalAlignment="Right"/>
+						</Grid>
+					</DataTemplate>
+				</ListBox.ItemTemplate>
+			</ListBox>
+
+			<!--
+			Said in words: an empty pane cannot distinguish "nothing here" from "could not
+			read it", and those want different reactions from the person looking.
+			-->
+			<TextBlock Text="{Binding Problem}"
+					   IsVisible="{Binding Problem, Converter={x:Static ObjectConverters.IsNotNull}}"
+					   HorizontalAlignment="Center"
+					   VerticalAlignment="Center"
+					   TextWrapping="Wrap"/>
+		</Panel>
+
+		<StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center"
+					Spacing="{console:OnPlatform Default='8',Console='1'}">
+			<Button Content="OPEN" Click="OnOpen" IsDefault="True"/>
+			<Button Content="UP" Click="OnUp"/>
+			<Button Content="CLOSE" Click="OnClose" IsCancel="True"/>
+		</StackPanel>
+	</Grid>
+</wm:ManagedWindow>

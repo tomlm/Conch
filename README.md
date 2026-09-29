@@ -44,6 +44,31 @@ one. An app declaring no placeholders launches immediately; one that declares th
 prompted for. Values beyond the declared placeholders are appended, so a registration
 declaring `%1?` still opens several files.
 
+## Roles
+
+A role is a job the shell asks something else to do — open a folder, edit a file,
+configure the network — rather than an app you pick by name. A registration offers
+itself for one by declaring it:
+
+```yaml
+roles:
+  - text-editor
+```
+
+`Tools → Settings` lists every role and what serves it. Some have an implementation
+built into Conch and that is the default; any of them can be pointed at an installed
+app instead. The roles are `app-launcher`, `file-explorer`, `app-manager`,
+`text-editor`, `system-monitor`, `network-config` and `audio-config`.
+
+Settings stores the choice, not the implementation, so uninstalling the app you chose
+falls back to the built-in rather than leaving the role broken.
+
+## Session
+
+`conch --session` tells Conch it *is* the session rather than one program among many,
+which adds Restart and Shut Down to the System menu. Logging out is always available.
+Conchix sets the flag through `CONCH_ARGS` in `/etc/default/conch`.
+
 ## Building
 
 ```sh

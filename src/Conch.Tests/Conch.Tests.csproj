@@ -25,4 +25,10 @@
              CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
+  <!-- Captured system files the tests read as fixtures. -->
+  <ItemGroup>
+    <Content Include="Fixtures\**\*"
+             CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

@@ -18,6 +18,7 @@
 		<Menu Grid.Column="0">
 			<MenuItem Header="_Run">
 				<MenuItem Header="_Apps" Click="OnShowLauncher"/>
+				<MenuItem Header="_Files" Click="OnShowFiles"/>
 				<Separator/>
 				<MenuItem Header="_Command" Click="OnCustomTerminal"/>
 				<MenuItem Header="_Terminal" Click="OnNewTerminal"/>

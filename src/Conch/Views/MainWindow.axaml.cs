@@ -124,6 +124,10 @@ namespace Conch.Views
                 "builtin.manager", "Software Manager",
                 _ => new AppManagerDialog(App).Show(Windows)));
 
+            registry.RegisterBuiltIn(ShellRoles.FileExplorer, new BuiltInRoleProvider(
+                "builtin.files", "Files",
+                path => new FilesDialog(path, OpenInEditor).Show(Windows)));
+
             return registry;
         }
 
@@ -161,6 +165,27 @@ namespace Conch.Views
 
         private void OnNetworkClicked(object? sender, RoutedEventArgs e)
             => OpenRole(ShellRoles.NetworkConfig);
+
+        private void OnShowFiles(object? sender, RoutedEventArgs e)
+            => OpenRole(ShellRoles.FileExplorer);
+
+        /// <summary>
+        /// Hands a file to whatever serves the text-editor role.
+        /// </summary>
+        /// <remarks>
+        /// Returns false rather than complaining, so the file browser can carry on being a file
+        /// browser; the prompt about configuring one is raised here, where Settings is reachable.
+        /// </remarks>
+        private bool OpenInEditor(string path)
+        {
+            if (Roles.TryInvoke(ShellRoles.TextEditor, path))
+            {
+                return true;
+            }
+
+            OpenRole(ShellRoles.TextEditor, path);
+            return false;
+        }
 
         /// <summary>
         /// Opens whatever serves <paramref name="role"/>, offering Settings when nothing does.
