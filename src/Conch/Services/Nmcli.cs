@@ -341,19 +341,7 @@ namespace Conch.Services
                 : args.Contains("connection") && (args.Contains("up") || args.Contains("down")) ? ActionTimeout
                 : ListTimeout;
 
-            var startInfo = new ProcessStartInfo
-            {
-                FileName = Program,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-            };
-
-            foreach (var arg in args)
-            {
-                startInfo.ArgumentList.Add(arg);
-            }
+            var startInfo = BackgroundProcess.StartInfo(Program, args);
 
             // So the output does not change shape with the session language. nmcli translates
             // the sentences it writes to stderr, and the parsers below are matched to what the
@@ -362,7 +350,7 @@ namespace Conch.Services
 
             try
             {
-                using var process = Process.Start(startInfo);
+                using var process = BackgroundProcess.Start(startInfo);
                 if (process == null)
                 {
                     return new NmcliResult(-1, string.Empty, "Could not start nmcli.");

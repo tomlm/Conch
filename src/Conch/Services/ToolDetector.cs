@@ -95,21 +95,9 @@ namespace Conch.Services
 
         private static async Task<bool> RunProbeAsync(ResolvedCommand command, CancellationToken cancellationToken)
         {
-            var startInfo = new ProcessStartInfo
-            {
-                FileName = command.Process,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-            };
+            var startInfo = BackgroundProcess.StartInfo(command.Process, command.Args);
 
-            foreach (var arg in command.Args)
-            {
-                startInfo.ArgumentList.Add(arg);
-            }
-
-            using var process = Process.Start(startInfo);
+            using var process = BackgroundProcess.Start(startInfo);
             if (process == null)
             {
                 return false;
