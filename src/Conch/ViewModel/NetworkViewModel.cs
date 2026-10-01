@@ -19,19 +19,21 @@ namespace Conch.ViewModel
         private const string LogCategory = "Network";
 
         private readonly Func<IReadOnlyList<string>, CancellationToken, Task<NmcliResult>> _run;
-        private readonly Action<string, string>? _runInTerminal;
+        private readonly Action<string, string, Action<int>>? _runInTerminal;
 
         /// <param name="run">
         /// Runs nmcli. Defaults to actually running it.
         /// </param>
         /// <param name="runInTerminal">
-        /// Opens a visible terminal window on a shell command, given a title and the command.
-        /// Used for the one action that may have to ask the person something -- joining a new
-        /// Wi-Fi network -- and supplied by the shell, so this class needs no launcher.
+        /// Opens a visible terminal window on a shell command, given a title, the command, and
+        /// what to do with its exit code once it finishes. Used for the actions that may have to
+        /// ask the person something -- joining a new Wi-Fi network, and anything polkit refused
+        /// -- and supplied by the shell, so this class needs no launcher. The callback is
+        /// expected on the UI thread.
         /// </param>
         public NetworkViewModel(
             Func<IReadOnlyList<string>, CancellationToken, Task<NmcliResult>>? run = null,
-            Action<string, string>? runInTerminal = null)
+            Action<string, string, Action<int>>? runInTerminal = null)
         {
             _run = run ?? Nmcli.RunAsync;
             _runInTerminal = runInTerminal;
@@ -183,9 +185,10 @@ namespace Conch.ViewModel
         /// Brings a saved connection up.
         /// </summary>
         /// <remarks>
-        /// Quietly, in the background, because it needs no authentication: NetworkManager's
-        /// polkit policy allows network-control to any active session, so this is the same
-        /// privilege as clicking a network in a desktop applet.
+        /// Quietly, in the background, because at the console it needs no authentication:
+        /// NetworkManager's polkit policy allows network-control to any active local session, so
+        /// this is the same privilege as clicking a network in a desktop applet. A session with
+        /// no seat -- SSH, WSL -- is refused, and the action is retried under sudo in a terminal.
         /// </remarks>
         public Task ActivateAsync(SavedConnection? connection, CancellationToken cancellationToken = default)
             => RunActionAsync(connection, Nmcli.UpArgs, "Connecting to", "is up.", cancellationToken);
@@ -240,9 +243,10 @@ namespace Conch.ViewModel
 
             var script = Nmcli.JoinWifiScript(network.Ssid);
             Log.Info(LogCategory, $"Joining {network.Ssid} in a terminal: {script}");
-            _runInTerminal($"Join {network.Ssid}", script);
+            _runInTerminal($"Join {network.Ssid}", script, exitCode => _ = AfterTerminalAsync(
+                exitCode, $"Joined {network.Ssid}.", $"Joining {network.Ssid}", cancellationToken));
 
-            Status = $"Joining {network.Ssid} in a terminal window. Rescan when it finishes.";
+            Status = $"Joining {network.Ssid} in a terminal window.";
         }
 
         /// <summary>
@@ -277,6 +281,18 @@ namespace Conch.ViewModel
             {
                 var result = await _run(args(connection.Uuid), cancellationToken).ConfigureAwait(true);
                 Status = result.Ok ? $"{connection.Name} {finishedVerb}" : result.Message;
+
+                // Refused for who asked rather than what was asked: a session polkit does not
+                // count as local. sudo can answer that, and a terminal is where it can ask.
+                if (result.IsNotAuthorized && _runInTerminal != null)
+                {
+                    var script = Nmcli.SudoScript(args(connection.Uuid));
+                    Log.Info(LogCategory, $"{startedVerb} {connection.Name} was refused; retrying in a terminal: {script}");
+                    _runInTerminal($"{startedVerb} {connection.Name}", script, exitCode => _ = AfterTerminalAsync(
+                        exitCode, $"{connection.Name} {finishedVerb}", $"{startedVerb} {connection.Name}", cancellationToken));
+
+                    Status = "NetworkManager wants an administrator for that here, so it continues in a terminal window.";
+                }
             }
             finally
             {
@@ -293,6 +309,30 @@ namespace Conch.ViewModel
             if (Status.Length == 0)
             {
                 Status = message;
+            }
+        }
+
+        /// <summary>
+        /// Re-reads everything once a terminal window has finished, and says how it went.
+        /// </summary>
+        /// <remarks>
+        /// Without this the window would go on showing the state from before the terminal opened,
+        /// and the person would have to know to ask for it again.
+        /// </remarks>
+        private async Task AfterTerminalAsync(
+            int exitCode, string succeeded, string attempted, CancellationToken cancellationToken)
+        {
+            // The window closed while the terminal was open; nothing here is on screen any more.
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+
+            await RefreshAsync(cancellationToken: cancellationToken).ConfigureAwait(true);
+
+            if (Status.Length == 0)
+            {
+                Status = exitCode == 0 ? succeeded : $"{attempted} did not finish (exit code {exitCode}).";
             }
         }
 

@@ -134,6 +134,11 @@
 
 		<StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center"
 					Spacing="{console:OnPlatform Default='8',Console='1'}">
+			<!--
+			Here rather than in a tab: it re-reads all three lists, and anything outside this window
+			(a cable, another terminal running nmcli) can change any of them.
+			-->
+			<Button Content="REFRESH" Click="OnRefresh" IsEnabled="{Binding !Busy}"/>
 			<Button Content="CLOSE" Click="OnClose" IsCancel="True"/>
 		</StackPanel>
 	</Grid>

@@ -62,7 +62,14 @@ public class NetworkViewModelTests
             return Task.FromResult(new NmcliResult(0, string.Empty, string.Empty));
         }
 
-        public void RunInTerminal(string title, string script) => Terminals.Add((title, script));
+        /// <summary>What each terminal window will be told when it finishes, in opening order.</summary>
+        public List<Action<int>> TerminalExits { get; } = new();
+
+        public void RunInTerminal(string title, string script, Action<int> onExit)
+        {
+            Terminals.Add((title, script));
+            TerminalExits.Add(onExit);
+        }
 
         public int CallsContaining(string text) => Calls.Count(c => c.Contains(text));
     }
@@ -214,6 +221,117 @@ public class NetworkViewModelTests
         Assert.Equal(
             "Error: Connection activation failed: Secrets were required, but not provided.",
             model.Status);
+    }
+
+    private const string NotAuthorized =
+        "Error: Connection activation failed: Not authorized to control networking.";
+
+    [Fact]
+    public async Task ARefusedActivationContinuesUnderSudoInATerminal()
+    {
+        // What a session with no seat gets -- measured from WSL, and SSH is the same. polkit
+        // falls through to auth_admin, which sudo can answer and a background call cannot.
+        var nmcli = FullyStocked().Answer("up", string.Empty, exitCode: 4, error: NotAuthorized);
+        var model = Model(nmcli);
+        await model.RefreshAsync();
+
+        await model.ActivateAsync(model.Connections.Single(c => c.Name == "Wired"));
+
+        var (title, script) = Assert.Single(nmcli.Terminals);
+        Assert.Equal("Connecting to Wired", title);
+        Assert.StartsWith("sudo nmcli ", script);
+        Assert.Contains("'up' 'uuid' '22222222-2222-4222-8222-222222222222'", script);
+        Assert.Contains("terminal window", model.Status);
+    }
+
+    [Fact]
+    public async Task ARefusedDeactivationTakesTheSameRoute()
+    {
+        var nmcli = FullyStocked().Answer("down", string.Empty, exitCode: 4, error: NotAuthorized);
+        var model = Model(nmcli);
+        await model.RefreshAsync();
+
+        await model.DeactivateAsync(model.Connections.First());
+
+        Assert.Contains("'down'", Assert.Single(nmcli.Terminals).Script);
+    }
+
+    [Fact]
+    public async Task AnActivationThatFailsForAnyOtherReasonStaysInTheWindow()
+    {
+        // A wrong secret or a missing lease is not something sudo would fix, and a terminal
+        // asking for a password over it would be both useless and alarming.
+        var nmcli = FullyStocked()
+            .Answer("up", string.Empty, exitCode: 4,
+                error: "Error: Connection activation failed: Secrets were required, but not provided.");
+        var model = Model(nmcli);
+        await model.RefreshAsync();
+
+        await model.ActivateAsync(model.Connections.First());
+
+        Assert.Empty(nmcli.Terminals);
+    }
+
+    [Fact]
+    public async Task WhenTheTerminalFinishesTheListsAreReadAgain()
+    {
+        // Otherwise the window goes on showing the state from before the terminal opened.
+        var nmcli = FullyStocked().Answer("up", string.Empty, exitCode: 4, error: NotAuthorized);
+        var model = Model(nmcli);
+        await model.RefreshAsync();
+        await model.ActivateAsync(model.Connections.Single(c => c.Name == "Wired"));
+        var before = nmcli.CallsContaining("device status");
+
+        nmcli.TerminalExits.Single()(0);
+
+        Assert.Equal(before + 1, nmcli.CallsContaining("device status"));
+        Assert.Equal("Wired is up.", model.Status);
+    }
+
+    [Fact]
+    public async Task ATerminalThatFailsSaysSo()
+    {
+        // Wrong sudo password three times, or the window closed: sudo exits 1, and the lists on
+        // their own would not say that anything was attempted.
+        var nmcli = FullyStocked().Answer("up", string.Empty, exitCode: 4, error: NotAuthorized);
+        var model = Model(nmcli);
+        await model.RefreshAsync();
+        await model.ActivateAsync(model.Connections.Single(c => c.Name == "Wired"));
+
+        nmcli.TerminalExits.Single()(1);
+
+        Assert.Equal("Connecting to Wired did not finish (exit code 1).", model.Status);
+    }
+
+    [Fact]
+    public async Task JoiningANewNetworkRereadsTheListsWhenTheTerminalFinishes()
+    {
+        var nmcli = FullyStocked();
+        var model = Model(nmcli);
+        await model.RefreshAsync();
+        await model.JoinAsync(model.Wifi.Single(n => n.Ssid == "New Place"));
+        var before = nmcli.CallsContaining("device status");
+
+        nmcli.TerminalExits.Single()(0);
+
+        Assert.Equal(before + 1, nmcli.CallsContaining("device status"));
+        Assert.Equal("Joined New Place.", model.Status);
+    }
+
+    [Fact]
+    public async Task ATerminalThatOutlivesTheWindowChangesNothing()
+    {
+        var nmcli = FullyStocked();
+        var model = Model(nmcli);
+        using var closing = new CancellationTokenSource();
+        await model.RefreshAsync(cancellationToken: closing.Token);
+        await model.JoinAsync(model.Wifi.Single(n => n.Ssid == "New Place"), closing.Token);
+        var calls = nmcli.Calls.Count;
+
+        closing.Cancel();
+        nmcli.TerminalExits.Single()(0);
+
+        Assert.Equal(calls, nmcli.Calls.Count);
     }
 
     [Fact]

@@ -86,6 +86,40 @@ public class NmcliTests
     }
 
     [Fact]
+    public void TwoProfilesWithOneNameAreToldApartByUuid()
+    {
+        // Measured: running the same `nmcli connection add` twice gives exactly this.
+        var connections = Nmcli.ParseConnections(
+            "test-dummy:fa9dd0bb-13dc-41ba-951a-98b89ccd3afa:dummy:\n"
+            + "test-dummy:2bec7587-b55d-48ce-84dd-8f422f59edc9:dummy:dummy0\n"
+            + "Wired:22222222-2222-4222-8222-222222222222:802-3-ethernet:");
+
+        Assert.Equal(
+            new[] { "test-dummy (fa9dd0bb)", "test-dummy (2bec7587) *", "Wired" },
+            connections.Select(c => c.DisplayName));
+    }
+
+    [Theory]
+    [InlineData("Error: Connection activation failed: Not authorized to control networking.", true)]
+    [InlineData("Error: Failed to add 'test-dummy' connection: Insufficient privileges", true)]
+    [InlineData("Error: Connection activation failed: Secrets were required, but not provided.", false)]
+    [InlineData("Error: NetworkManager is not running.", false)]
+    public void ARefusalIsToldApartFromAFailure(string error, bool refused)
+    {
+        // Both measured refusals exit 4, as does an ordinary activation failure, so only the
+        // words can tell them apart.
+        Assert.Equal(refused, new NmcliResult(4, string.Empty, error).IsNotAuthorized);
+    }
+
+    [Fact]
+    public void ARefusedActionIsRetriedUnderSudoWithEveryArgumentQuoted()
+    {
+        Assert.Equal(
+            "sudo nmcli '-w' '25' 'connection' 'up' 'uuid' 'abc'",
+            Nmcli.SudoScript(Nmcli.UpArgs("abc")));
+    }
+
+    [Fact]
     public void DevicesKeepTheirStateAndTheirConnection()
     {
         var devices = Nmcli.ParseDevices(Devices);

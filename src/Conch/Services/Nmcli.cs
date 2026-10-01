@@ -31,6 +31,22 @@ namespace Conch.Services
             }
         }
 
+        /// <summary>
+        /// True when NetworkManager refused because of who asked, rather than because of what.
+        /// </summary>
+        /// <remarks>
+        /// Matched on the words, because nmcli has no exit code for it: a refused activation
+        /// exits 4, the same as one that failed for any other reason. The words are stable
+        /// because <see cref="Nmcli.RunAsync"/> runs nmcli in the C locale. Measured on nmcli
+        /// 1.46, from a WSL session that polkit does not consider local:
+        ///
+        ///   connection up    Error: Connection activation failed: Not authorized to control networking.
+        ///   connection add   Error: Failed to add 'test-dummy' connection: Insufficient privileges
+        /// </remarks>
+        public bool IsNotAuthorized
+            => !Ok && (Error.Contains("Not authorized", StringComparison.OrdinalIgnoreCase)
+                || Error.Contains("Insufficient privileges", StringComparison.OrdinalIgnoreCase));
+
         private static string? FirstLine(string text)
             => text.Split('\n', StringSplitOptions.RemoveEmptyEntries)
                 .Select(l => l.Trim())
@@ -70,7 +86,21 @@ namespace Conch.Services
         /// </summary>
         public bool IsWifi => Type == WifiType;
 
-        public string DisplayName => IsActive ? Name + " *" : Name;
+        /// <summary>
+        /// True when another saved profile has the same name, which nmcli allows.
+        /// </summary>
+        /// <remarks>
+        /// Set by <see cref="Nmcli.ParseConnections"/>, the one place that sees the whole list.
+        /// It happens in ordinary use -- running the same <c>connection add</c> twice makes two
+        /// -- and two identical rows leave the person guessing which one CONNECT will act on.
+        /// </remarks>
+        public bool NameIsShared { get; init; }
+
+        /// <summary>The start of the UUID, which is enough to tell apart two profiles a person can see.</summary>
+        public string ShortUuid => Uuid.Length > 8 ? Uuid[..8] : Uuid;
+
+        public string DisplayName
+            => (NameIsShared ? $"{Name} ({ShortUuid})" : Name) + (IsActive ? " *" : string.Empty);
 
         public string Detail => IsActive ? $"{FriendlyType} on {Device}" : FriendlyType;
 
@@ -145,6 +175,11 @@ namespace Conch.Services
     /// creates a system profile, which does need an administrator -- and a text session has no
     /// polkit agent to ask. That one action therefore runs in a visible terminal window with
     /// sudo behind it; see <see cref="JoinWifiScript"/>.
+    ///
+    /// "Active" there means a session polkit counts as local, which is one with a seat. A login
+    /// at the Conchix console has seat0; SSH and WSL logins have none, and polkit falls through
+    /// to allow_any, which is auth_admin. There an activation is refused too, and goes the same
+    /// way as a first join; see <see cref="SudoScript"/>.
     /// </remarks>
     public static class Nmcli
     {
@@ -235,6 +270,18 @@ namespace Conch.Services
         }
 
         /// <summary>
+        /// The shell command that runs an nmcli action as an administrator, for a terminal window.
+        /// </summary>
+        /// <remarks>
+        /// Straight to sudo, unlike <see cref="JoinWifiScript"/>: this is only reached after the
+        /// plain attempt has already been refused, so trying it plainly again would only repeat
+        /// the refusal. Every argument is quoted, because a UUID is safe today and the next
+        /// caller's argument may not be.
+        /// </remarks>
+        public static string SudoScript(IReadOnlyList<string> args)
+            => $"sudo {Program} {string.Join(' ', args.Select(Quote))}";
+
+        /// <summary>
         /// Wraps <paramref name="value"/> so a shell hands it on exactly as it stands.
         /// </summary>
         /// <remarks>
@@ -251,7 +298,17 @@ namespace Conch.Services
 
         /// <summary>Reads the saved connection list.</summary>
         public static IReadOnlyList<SavedConnection> ParseConnections(string output)
-            => ParseLines(output, 4, f => new SavedConnection(f[0], f[1], f[2], f[3]));
+        {
+            var connections = ParseLines(output, 4, f => new SavedConnection(f[0], f[1], f[2], f[3]));
+
+            var shared = connections
+                .GroupBy(c => c.Name, StringComparer.Ordinal)
+                .Where(g => g.Count() > 1)
+                .Select(g => g.Key)
+                .ToHashSet(StringComparer.Ordinal);
+
+            return [.. connections.Select(c => shared.Contains(c.Name) ? c with { NameIsShared = true } : c)];
+        }
 
         /// <summary>
         /// Reads the access point list.

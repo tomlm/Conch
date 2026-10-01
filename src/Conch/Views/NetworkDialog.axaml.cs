@@ -1,5 +1,6 @@
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Threading;
 using Conch.Services;
 using Conch.ViewModel;
 using Iciclecreek.Avalonia.WindowManager;
@@ -62,8 +63,14 @@ namespace Conch.Views
             _closing.Dispose();
         }
 
-        private void RunInTerminal(string title, string script)
-            => Apps.RunScript(title, script, viaWsl: false);
+        // The exit arrives on whatever thread watched the process; the view model's lists are
+        // bound to this window and must be touched on the UI thread.
+        private void RunInTerminal(string title, string script, Action<int> onExit)
+            => Apps.RunScript(title, script, viaWsl: false,
+                exitCode => Dispatcher.UIThread.Post(() => onExit(exitCode)));
+
+        private async void OnRefresh(object? sender, RoutedEventArgs e)
+            => await _viewModel.RefreshAsync(cancellationToken: _closing.Token);
 
         private async void OnJoin(object? sender, RoutedEventArgs e)
             => await _viewModel.JoinAsync(_viewModel.SelectedWifi, _closing.Token);
