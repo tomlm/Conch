@@ -30,10 +30,8 @@ namespace Conch.Services.Roles
         public const string SystemMonitor = "system-monitor";
 
         /// <summary>
-        /// Configure networking. No built-in and, today, no candidate on Conchix: it runs
-        /// systemd-networkd rather than NetworkManager, so nmtui has nothing to talk to and
-        /// networkctl is command-line only. The role is defined so the slot exists when
-        /// something can fill it.
+        /// Configure networking. Built in: Network, which drives nmcli and therefore needs
+        /// NetworkManager; nmtui fills the role where that is not wanted.
         /// </summary>
         public const string NetworkConfig = "network-config";
 

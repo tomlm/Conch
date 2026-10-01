@@ -11,12 +11,17 @@ namespace Conch.Services.Roles
     public sealed class BuiltInRoleProvider : IRoleProvider
     {
         private readonly Action<string?> _open;
+        private readonly Func<bool>? _isAvailable;
 
-        public BuiltInRoleProvider(string id, string name, Action<string?> open)
+        /// <param name="isAvailable">
+        /// Whether this can serve the role on this machine, or null for one that always can.
+        /// </param>
+        public BuiltInRoleProvider(string id, string name, Action<string?> open, Func<bool>? isAvailable = null)
         {
             Id = id;
             Name = name;
             _open = open;
+            _isAvailable = isAvailable;
         }
 
         public string Id { get; }
@@ -25,8 +30,17 @@ namespace Conch.Services.Roles
 
         public bool IsBuiltIn => true;
 
-        /// <summary>Always. A built-in ships with the shell, so there is nothing to install.</summary>
-        public bool IsAvailable => true;
+        /// <summary>
+        /// True unless the built-in says otherwise.
+        /// </summary>
+        /// <remarks>
+        /// Shipping with the shell usually means there is nothing to install and nothing to
+        /// check. Not always: the network window is drawn by Conch but speaks to
+        /// NetworkManager, which does not exist on Windows or macOS, and a built-in that cannot
+        /// work here should fall back like any other unavailable provider rather than open a
+        /// window with nothing in it.
+        /// </remarks>
+        public bool IsAvailable => _isAvailable?.Invoke() ?? true;
 
         public void Invoke(string? argument) => _open(argument);
     }

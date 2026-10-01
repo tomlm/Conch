@@ -1,0 +1,140 @@
+<wm:ManagedWindow xmlns="https://github.com/avaloniaui"
+				  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+				  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+				  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+				  xmlns:console="https://github.com/consolonia"
+				  xmlns:wm="using:Iciclecreek.Avalonia.WindowManager"
+				  xmlns:vm="clr-namespace:Conch.ViewModel"
+				  xmlns:services="clr-namespace:Conch.Services"
+				  mc:Ignorable="d" d:DesignWidth="76" d:DesignHeight="26"
+				  x:Class="Conch.Views.NetworkDialog"
+				  Title="Network"
+				  Width="76" Height="26"
+				  x:DataType="vm:NetworkViewModel">
+
+	<Grid Margin="{console:OnPlatform Default='16', Console='1'}" RowDefinitions="*,Auto,Auto">
+
+		<!--
+		A tab each, with its own buttons inside it rather than one row of buttons at the
+		bottom: the actions genuinely differ per tab, and a CONNECT that means something
+		different depending on which list is showing is the kind of button people learn to
+		distrust.
+		-->
+		<TabControl Grid.Row="0">
+
+			<TabItem Header="Wi-Fi">
+				<Grid RowDefinitions="*,Auto">
+					<Panel Grid.Row="0">
+						<ListBox x:Name="WifiBox"
+								 ItemsSource="{Binding Wifi}"
+								 SelectedItem="{Binding SelectedWifi}"
+								 DoubleTapped="OnJoin"
+								 KeyDown="OnWifiKeyDown">
+							<ListBox.ItemTemplate>
+								<DataTemplate x:DataType="services:WifiNetwork">
+									<!-- Name takes what is left; signal and security are narrow and fixed. -->
+									<Grid ColumnDefinitions="*,6,14">
+										<TextBlock Grid.Column="0"
+												   Text="{Binding DisplayName}"
+												   TextTrimming="CharacterEllipsis"/>
+										<TextBlock Grid.Column="1"
+												   Text="{Binding SignalText}"
+												   HorizontalAlignment="Right"/>
+										<TextBlock Grid.Column="2"
+												   Text="{Binding SecurityText}"
+												   HorizontalAlignment="Right"/>
+									</Grid>
+								</DataTemplate>
+							</ListBox.ItemTemplate>
+						</ListBox>
+
+						<!--
+						An empty list has two very different causes: no wireless hardware, or
+						nothing in range. nmcli reports both as no output, so the view model
+						tells them apart from the device list and says which one this is.
+						-->
+						<TextBlock Text="{Binding WifiPlaceholder}"
+								   IsVisible="{Binding WifiEmpty}"
+								   HorizontalAlignment="Center"
+								   VerticalAlignment="Center"
+								   TextWrapping="Wrap"/>
+					</Panel>
+
+					<StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center"
+								Spacing="{console:OnPlatform Default='8',Console='1'}">
+						<Button Content="CONNECT" Click="OnJoin" IsEnabled="{Binding !Busy}"/>
+						<Button Content="RESCAN" Click="OnRescan" IsEnabled="{Binding !Busy}"/>
+					</StackPanel>
+				</Grid>
+			</TabItem>
+
+			<TabItem Header="Connections">
+				<Grid RowDefinitions="*,Auto">
+					<Panel Grid.Row="0">
+						<ListBox x:Name="ConnectionsBox"
+								 ItemsSource="{Binding Connections}"
+								 SelectedItem="{Binding SelectedConnection}"
+								 DoubleTapped="OnActivate"
+								 KeyDown="OnConnectionKeyDown">
+							<ListBox.ItemTemplate>
+								<DataTemplate x:DataType="services:SavedConnection">
+									<Grid ColumnDefinitions="*,24">
+										<TextBlock Grid.Column="0"
+												   Text="{Binding DisplayName}"
+												   TextTrimming="CharacterEllipsis"/>
+										<TextBlock Grid.Column="1"
+												   Text="{Binding Detail}"
+												   HorizontalAlignment="Right"
+												   TextTrimming="CharacterEllipsis"/>
+									</Grid>
+								</DataTemplate>
+							</ListBox.ItemTemplate>
+						</ListBox>
+
+						<TextBlock Text="No saved connections."
+								   IsVisible="{Binding ConnectionsEmpty}"
+								   HorizontalAlignment="Center"
+								   VerticalAlignment="Center"/>
+					</Panel>
+
+					<StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center"
+								Spacing="{console:OnPlatform Default='8',Console='1'}">
+						<Button Content="CONNECT" Click="OnActivate" IsEnabled="{Binding !Busy}"/>
+						<Button Content="DISCONNECT" Click="OnDeactivate" IsEnabled="{Binding !Busy}"/>
+					</StackPanel>
+				</Grid>
+			</TabItem>
+
+			<!-- Informational: what the machine has, and what each one is doing. -->
+			<TabItem Header="Devices">
+				<ListBox x:Name="DevicesBox" ItemsSource="{Binding Devices}">
+					<ListBox.ItemTemplate>
+						<DataTemplate x:DataType="services:NetworkDevice">
+							<Grid ColumnDefinitions="16,12,*">
+								<TextBlock Grid.Column="0" Text="{Binding Name}"
+										   TextTrimming="CharacterEllipsis"/>
+								<TextBlock Grid.Column="1" Text="{Binding Type}"/>
+								<TextBlock Grid.Column="2" Text="{Binding Detail}"
+										   TextTrimming="CharacterEllipsis"/>
+							</Grid>
+						</DataTemplate>
+					</ListBox.ItemTemplate>
+				</ListBox>
+			</TabItem>
+		</TabControl>
+
+		<!--
+		One line for both outcomes. nmcli explains its own failures in a sentence written for a
+		person, and this is where that sentence goes.
+		-->
+		<TextBlock Grid.Row="1"
+				   Text="{Binding Status}"
+				   TextWrapping="Wrap"
+				   Margin="0 1 0 0"/>
+
+		<StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center"
+					Spacing="{console:OnPlatform Default='8',Console='1'}">
+			<Button Content="CLOSE" Click="OnClose" IsCancel="True"/>
+		</StackPanel>
+	</Grid>
+</wm:ManagedWindow>

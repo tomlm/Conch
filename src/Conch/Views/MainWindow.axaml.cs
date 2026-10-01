@@ -128,6 +128,14 @@ namespace Conch.Views
                 "builtin.files", "Files",
                 path => new FilesDialog(path, OpenInEditor).Show(Windows)));
 
+            // Unavailable where NetworkManager is not, which is everywhere but Linux. The role
+            // then falls back to whatever the catalog offers, exactly as it did before there was
+            // a built-in for it.
+            registry.RegisterBuiltIn(ShellRoles.NetworkConfig, new BuiltInRoleProvider(
+                "builtin.network", "Network",
+                _ => new NetworkDialog().Show(Windows),
+                () => Nmcli.IsPresent));
+
             return registry;
         }
 
@@ -166,6 +174,9 @@ namespace Conch.Views
         private void OnNetworkClicked(object? sender, RoutedEventArgs e)
             => OpenRole(ShellRoles.NetworkConfig);
 
+        private void OnShowNetwork(object? sender, RoutedEventArgs e)
+            => OpenRole(ShellRoles.NetworkConfig);
+
         private void OnShowFiles(object? sender, RoutedEventArgs e)
             => OpenRole(ShellRoles.FileExplorer);
 
@@ -191,9 +202,10 @@ namespace Conch.Views
         /// Opens whatever serves <paramref name="role"/>, offering Settings when nothing does.
         /// </summary>
         /// <remarks>
-        /// Nothing available is an ordinary state, not an error -- network configuration has no
-        /// candidate at all on a machine with no network tool installed, which today includes
-        /// Conchix. Saying so and offering the place to fix it beats a click that does nothing.
+        /// Nothing available is an ordinary state, not an error -- audio configuration has no
+        /// candidate at all until something is installed for it, and on Conchix there is not yet
+        /// an audio stack for anything to configure. Saying so and offering the place to fix it
+        /// beats a click that does nothing.
         /// </remarks>
         private async void OpenRole(string role, string? argument = null)
         {

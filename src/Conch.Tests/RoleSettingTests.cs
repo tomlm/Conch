@@ -113,4 +113,43 @@ public class RoleSettingTests
         // Otherwise the dropdown opens on a blank row for anyone who has never chosen.
         Assert.Contains(AppViewModel.DefaultTheme, SettingsViewModel.ThemeNames);
     }
+
+    [Fact]
+    public void WithNothingStoredTheShownChoiceIsOneThatCouldActuallyRun()
+    {
+        // A built-in can be unavailable: the Network window needs NetworkManager, which Windows
+        // and macOS do not have. Showing it as the current setting would name something that
+        // cannot run while something else quietly did the job -- so Settings agrees with
+        // RoleRegistry.Resolve and shows the first available candidate instead.
+        var unavailableBuiltIn = new FakeProvider(
+            "builtin.network", "Network", IsBuiltIn: true, IsAvailable: false);
+
+        var setting = new RoleSettingViewModel(
+            ShellRoles.NetworkConfig,
+            new IRoleProvider[] { unavailableBuiltIn, App("nmtui") },
+            chosenId: null,
+            (_, _) => { });
+
+        Assert.Equal("nmtui", setting.Selected?.Id);
+
+        // Still listed, and still saying why it is not the one.
+        Assert.Contains(setting.Choices, c => c.Label == "Network (not available here)");
+    }
+
+    [Fact]
+    public void AnUnavailableBuiltInIsStillShownWhenItIsTheOnlyCandidate()
+    {
+        // Falling back to nothing selected would leave the dropdown blank, which says less than
+        // naming the thing and why it cannot run.
+        var setting = new RoleSettingViewModel(
+            ShellRoles.NetworkConfig,
+            new IRoleProvider[]
+            {
+                new FakeProvider("builtin.network", "Network", IsBuiltIn: true, IsAvailable: false),
+            },
+            chosenId: null,
+            (_, _) => { });
+
+        Assert.Equal("builtin.network", setting.Selected?.Id);
+    }
 }

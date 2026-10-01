@@ -26,7 +26,16 @@ namespace Conch.ViewModel
                 candidates.Select(c => new RoleChoiceViewModel(c)));
 
             _loading = true;
-            Selected = Choices.FirstOrDefault(c => c.Id == chosenId) ?? Choices.FirstOrDefault();
+
+            // With nothing stored, the shown value is the one that would actually serve the
+            // role, which is the first AVAILABLE candidate -- the same rule RoleRegistry.Resolve
+            // follows. Showing the first candidate regardless would put "Network (not available
+            // here)" in front of a Windows user as though it were the current setting, while
+            // something else was quietly doing the job.
+            Selected = Choices.FirstOrDefault(c => c.Id == chosenId)
+                ?? Choices.FirstOrDefault(c => c.IsAvailable)
+                ?? Choices.FirstOrDefault();
+
             _loading = false;
         }
 
@@ -62,11 +71,15 @@ namespace Conch.ViewModel
         public RoleChoiceViewModel(IRoleProvider provider)
         {
             Id = provider.Id;
+            IsAvailable = provider.IsAvailable;
 
             // The suffix says why something is listed but will not run, which is the question
             // a greyed-out entry raises and does not answer.
             var note = provider switch
             {
+                // A built-in that cannot run here is not missing an install -- there is nothing
+                // to install -- so it says the other true thing instead.
+                { IsBuiltIn: true, IsAvailable: false } => " (not available here)",
                 { IsBuiltIn: true } => " (built in)",
                 { IsAvailable: false } => " (not installed)",
                 _ => string.Empty,
@@ -78,6 +91,9 @@ namespace Conch.ViewModel
         public string Id { get; }
 
         public string Label { get; }
+
+        /// <summary>Whether this could serve the role right now.</summary>
+        public bool IsAvailable { get; }
 
         public override string ToString() => Label;
     }

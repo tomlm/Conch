@@ -1,0 +1,5 @@
+*:Cafe\: Free:72:WPA2
+:Neighbour 2.4GHz:57:WPA1 WPA2
+:Bob's Hotspot:41:WPA2 WPA3
+::30:WPA2
+:Open Guest:22:

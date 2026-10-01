@@ -1,0 +1,3 @@
+dummy0:dummy:unmanaged:
+eth0:ethernet:unmanaged:
+lo:loopback:unmanaged:

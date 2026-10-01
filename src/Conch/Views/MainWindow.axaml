@@ -27,6 +27,12 @@
 			</MenuItem>
 			<MenuItem Header="_Tools">
 				<MenuItem Header="_Manage" Click="OnManageApps"/>
+				<!--
+				Also reachable by clicking the network indicator, which is where you look when
+				the network is the problem. Here as well because a menu is where you look when
+				you simply want to change networks.
+				-->
+				<MenuItem Header="_Network" Click="OnShowNetwork"/>
 				<MenuItem Header="_Settings" Click="OnShowSettings"/>
 				<Separator/>
 				<MenuItem Header="_Log" Click="OnShowLog"/>
