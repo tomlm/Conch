@@ -76,7 +76,10 @@ namespace Conch.ViewModel
             var selected = SelectedTool;
 
             FilteredTools.Clear();
-            foreach (var tool in tools)
+
+            // Only what this machine can have: an app for another OS, or a Linux app on Windows
+            // with no WSL to run it in, could only ever fail to install.
+            foreach (var tool in tools.Where(t => t.IsAvailableHere))
             {
                 FilteredTools.Add(tool);
             }

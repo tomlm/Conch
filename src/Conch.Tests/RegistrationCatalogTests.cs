@@ -145,6 +145,53 @@ public class RegistrationCatalogTests
 
     [Theory]
     [MemberData(nameof(RegistrationFiles))]
+    public void WingetEntriesNameTheExactPackage(string fileName)
+    {
+        // Without -e, winget matches by substring and may pick, or ask about, a different
+        // package. With it, the id is matched case-sensitively: "Vim.Vim" finds nothing,
+        // because the package is "vim.vim" -- which is how Vim's install used to fail.
+        var tool = Load(fileName);
+        var windows = tool.Platforms?.Windows;
+        if (windows == null)
+        {
+            return;
+        }
+
+        foreach (var line in new[] { windows.Install, windows.Uninstall })
+        {
+            if (line.Contains("winget", StringComparison.OrdinalIgnoreCase))
+            {
+                Assert.Matches(@"\s-e(\s|$)", line);
+                Assert.Contains("--id", line);
+            }
+        }
+    }
+
+    [Fact]
+    public void MicrosoftEditIsOnlyOfferedOnWindows()
+    {
+        // Edit is Windows-only here. On Debian, `edit` is run-mailcap's alias, so a Linux entry
+        // would also be "detected" as installed on any machine with mime-support.
+        var edit = Load("Edit.yml");
+
+        Assert.True(edit.IsAvailableOn(HostOs.Windows, wslAvailable: false));
+        Assert.False(edit.IsAvailableOn(HostOs.Linux, wslAvailable: false));
+        // It once carried Edit.NET's links; this is Microsoft's editor.
+        Assert.Equal("https://github.com/microsoft/edit", edit.Source);
+    }
+
+    [Fact]
+    public void NanoIsOfferedOnWindowsEvenWithoutWsl()
+    {
+        var nano = Load("Nano.yml");
+
+        Assert.True(nano.IsAvailableOn(HostOs.Windows, wslAvailable: false));
+        Assert.False(nano.RunsUnderWslOn(HostOs.Windows));
+        Assert.True(nano.IsAvailableOn(HostOs.Linux, wslAvailable: false));
+    }
+
+    [Theory]
+    [MemberData(nameof(RegistrationFiles))]
     public void RegistrationAsksForAGridEveryTuiWillStartIn(string fileName)
     {
         // 80x24 is the floor several full-screen TUIs enforce rather than adapt to: btop

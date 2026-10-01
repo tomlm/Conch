@@ -1,23 +1,22 @@
 id: edit.exe
 name: Edit
 version: 1.0.0
-author: Tom Laird-McConnell & Evgeny Gorbovoy
-description: Full text editor with TextMate themes
+author: Microsoft
+description: Simple text editor for the terminal, in the spirit of MS-DOS Edit, with mouse support
 license: MIT
 platforms:
   windows:
-    install: winget install Microsoft.Edit
-    uninstall: winget uninstall Microsoft.Edit
-command: Edit
-args: "%1? %2? %3? %4? %5?"
-source: https://github.com/consolonia/Edit
-website: https://github.com/consolonia/Edit
-documentation: https://github.com/consolonia/Edit/wiki
+    install: winget install -e --id Microsoft.Edit
+    uninstall: winget uninstall -e --id Microsoft.Edit
+command: edit
+args: "%1?"
+source: https://github.com/microsoft/edit
+website: https://github.com/microsoft/edit
+documentation: https://github.com/microsoft/edit
 keywords:
   - text editor
-  - code editor
-  - textmate themes
-  - syntax highlighting
+  - terminal
+  - mouse
 
 roles:
   - text-editor

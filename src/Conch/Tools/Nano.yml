@@ -6,8 +6,8 @@ description: Simple, easy-to-use text editor for the terminal
 license: GPL-3.0
 platforms:
   linux:
-    install: sudo apt-get install nano
-    uninstall: sudo apt-get remove nano
+    install: sudo apt-get update && sudo apt-get install -y nano
+    uninstall: sudo apt-get remove -y nano
   windows:
     install: winget install -e --id GNU.Nano
     uninstall: winget uninstall -e --id GNU.Nano

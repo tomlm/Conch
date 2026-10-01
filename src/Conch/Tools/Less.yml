@@ -5,9 +5,12 @@ author: Mark Nudelman et al.
 description: Terminal pager program for viewing text one screen at a time
 license: GPL-3.0
 platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y less
+    uninstall: sudo apt-get remove -y less
   windows:
-    install: winget install -e --id Git.Git
-    uninstall: winget uninstall -e --id Git.Git
+    install: winget install -e --id jftuga.less
+    uninstall: winget uninstall -e --id jftuga.less
 command: less
 args: "%1?"
 source: https://www.greenwoodsoftware.com/less/

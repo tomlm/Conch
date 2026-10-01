@@ -69,6 +69,13 @@ namespace Conch.Services
         {
             try
             {
+                // Nothing to look for, and on Windows without WSL a probe would only start
+                // wsl.exe to be told there is no distribution.
+                if (!tool.IsAvailableHere)
+                {
+                    return false;
+                }
+
                 // An explicit detect command wins: it is the only way to find an app that is not
                 // simply a binary sitting on PATH.
                 if (!string.IsNullOrWhiteSpace(tool.Detect))

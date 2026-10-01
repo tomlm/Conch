@@ -8,9 +8,6 @@ platforms:
   linux:
     install: sudo apt-get update && sudo apt-get install -y weechat
     uninstall: sudo apt-get remove -y weechat
-  windows:
-    install: winget install -e --id Weechat.Weechat
-    uninstall: winget uninstall -e --id Weechat.Weechat
 command: weechat
 args: ""
 source: https://github.com/weechat/weechat

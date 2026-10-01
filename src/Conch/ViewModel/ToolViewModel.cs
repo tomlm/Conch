@@ -164,6 +164,25 @@ namespace Conch.ViewModel
         public bool RunsUnderWslOn(HostOs os) => os == HostOs.Windows && ResolvePlatformFor(os) == ToolPlatform.Linux;
 
         /// <summary>
+        /// Whether this app can exist on this machine at all: there is an entry for it here, and
+        /// if that entry is a Linux one on Windows, there is a WSL distribution to run it in.
+        /// </summary>
+        /// <remarks>
+        /// Not whether it is installed -- that is <see cref="IsInstalled"/>. This is what decides
+        /// whether it is offered at all: Microsoft's Edit has no business in the app list on
+        /// Debian, and nano belongs in it on Windows only when WSL can run it or winget can
+        /// install it natively.
+        /// </remarks>
+        public bool IsAvailableHere => IsAvailableOn(Host.Current, Wsl.IsAvailable);
+
+        /// <summary>
+        /// Whether this app can exist on <paramref name="os"/>, given whether WSL is usable there.
+        /// </summary>
+        public bool IsAvailableOn(HostOs os, bool wslAvailable)
+            => ResolvePlatformFor(os) != ToolPlatform.None
+               && (!RunsUnderWslOn(os) || wslAvailable);
+
+        /// <summary>
         /// Whether the app was found on this machine. Maintained by the detector, not the file.
         /// </summary>
         [ObservableProperty]

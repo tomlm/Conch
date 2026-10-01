@@ -111,8 +111,10 @@ namespace Conch.Views
         private RoleRegistry BuildRoles()
         {
             var registry = new RoleRegistry(
+                // Same rule as the app manager: Settings should not offer, for the text editor,
+                // an app that cannot exist on this machine.
                 role => App.Tools
-                    .Where(t => t.Roles.Contains(role, StringComparer.OrdinalIgnoreCase))
+                    .Where(t => t.IsAvailableHere && t.Roles.Contains(role, StringComparer.OrdinalIgnoreCase))
                     .Select(t => new ToolRoleProvider(t, (tool, values) => Apps.LaunchTool(tool, values))),
                 role => App.Settings.GetRoleChoice(role));
 

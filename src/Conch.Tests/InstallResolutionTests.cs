@@ -117,6 +117,78 @@ public class InstallResolutionTests
         Assert.Null(tool.GetInstallDefinitionFor(HostOs.MacOS));
     }
 
+    // ----------------------------------------------------------- availability ----
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void AWindowsOnlyAppIsAvailableOnWindowsWithOrWithoutWsl(bool wsl)
+    {
+        var tool = Tool(windows: Def("win"));
+
+        Assert.True(tool.IsAvailableOn(HostOs.Windows, wsl));
+    }
+
+    [Fact]
+    public void AWindowsOnlyAppIsNotAvailableOnLinux()
+    {
+        // Microsoft's Edit on Debian: there is nothing to install it with, so it is not offered.
+        var tool = Tool(windows: Def("win"));
+
+        Assert.False(tool.IsAvailableOn(HostOs.Linux, wslAvailable: false));
+    }
+
+    [Fact]
+    public void ALinuxOnlyAppIsAvailableOnWindowsOnlyWhenWslCanRunIt()
+    {
+        var tool = Tool(linux: Def("lin"));
+
+        Assert.True(tool.IsAvailableOn(HostOs.Windows, wslAvailable: true));
+        Assert.False(tool.IsAvailableOn(HostOs.Windows, wslAvailable: false));
+    }
+
+    [Fact]
+    public void AnAppWithANativeWindowsEntryDoesNotNeedWsl()
+    {
+        // nano has both: on Windows it is installed with winget, so WSL is beside the point.
+        var tool = Tool(windows: Def("win"), linux: Def("lin"));
+
+        Assert.True(tool.IsAvailableOn(HostOs.Windows, wslAvailable: false));
+    }
+
+    [Theory]
+    [InlineData(HostOs.Windows)]
+    [InlineData(HostOs.Linux)]
+    [InlineData(HostOs.MacOS)]
+    public void ADefaultEntryIsAvailableEverywhere(HostOs os)
+    {
+        var tool = Tool(dflt: Def("any"));
+
+        Assert.True(tool.IsAvailableOn(os, wslAvailable: false));
+    }
+
+    [Fact]
+    public void ALinuxOnlyAppIsNotAvailableOnMacOs()
+    {
+        var tool = Tool(linux: Def("lin"));
+
+        Assert.False(tool.IsAvailableOn(HostOs.MacOS, wslAvailable: true));
+    }
+
+    [Theory]
+    [InlineData("Ubuntu-24.04", true)]
+    [InlineData("Debian", true)]
+    [InlineData("docker-desktop", false)]
+    [InlineData("docker-desktop-data", false)]
+    [InlineData("", false)]
+    [InlineData(null, false)]
+    public void OnlyARealDistributionCountsAsWsl(string? name, bool usable)
+    {
+        // Docker Desktop registers its own distributions like any other; installing nano into
+        // one of them is not what anybody meant.
+        Assert.Equal(usable, Wsl.IsUsableDistribution(name));
+    }
+
     [Fact]
     public void NoPlatformEntriesMeansNothingToInstall()
     {

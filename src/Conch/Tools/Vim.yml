@@ -6,11 +6,11 @@ description: Highly configurable text editor built to enable efficient text edit
 license: Vim
 platforms:
   linux:
-    install: sudo apt-get install vim
-    uninstall: sudo apt-get remove vim
+    install: sudo apt-get update && sudo apt-get install -y vim
+    uninstall: sudo apt-get remove -y vim
   windows:
-    install: winget install -e --id Vim.Vim
-    uninstall: winget uninstall -e --id Vim.Vim
+    install: winget install -e --id vim.vim
+    uninstall: winget uninstall -e --id vim.vim
 command: vim
 args: "%1?"
 source: https://github.com/vim/vim
