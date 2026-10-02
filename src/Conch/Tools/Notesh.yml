@@ -1,0 +1,23 @@
+id: notesh
+name: NoteSH
+version: 1.0.0
+author: Cvaniak
+description: Sticky notes app for the terminal with layers and resizable notes
+license: MIT
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y pipx && sudo pipx install --global notesh
+    uninstall: sudo pipx uninstall --global notesh
+command: notesh
+args: ""
+source: https://github.com/Cvaniak/NoteSH
+website: https://github.com/Cvaniak/NoteSH
+documentation: https://github.com/Cvaniak/NoteSH#readme
+screenshot: https://raw.githubusercontent.com/Cvaniak/NoteSH/04bf418a1643ed3bae294bb84489b430ecd6aae3/documentation/NoteshApp.png
+keywords:
+  - notes
+  - sticky notes
+  - tui
+  - textual
+
+roles: []

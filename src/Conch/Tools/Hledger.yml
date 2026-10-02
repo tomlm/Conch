@@ -1,0 +1,27 @@
+id: hledger.ui
+name: hledger-ui
+version: 1.0.0
+author: Simon Michael
+description: Terminal interface for hledger, the plain text, multi-currency, double-entry accounting tool
+license: GPL-3.0
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y hledger-ui
+    uninstall: sudo apt-get remove -y hledger-ui
+  # The winget package installs hledger, hledger-ui and hledger-web.
+  windows:
+    install: winget install -e --id simonmichael.hledger
+    uninstall: winget uninstall -e --id simonmichael.hledger
+command: hledger-ui
+# Without a file, hledger-ui opens $LEDGER_FILE or ~/.hledger.journal.
+args: "--file=%1?"
+source: https://github.com/simonmichael/hledger
+website: https://hledger.org/
+documentation: https://hledger.org/hledger-ui.html
+screenshot: https://hledger.org/images/hledger-ui/Screen%20Shot%202020-03-24%20at%202.31.12%20PM.png
+keywords:
+  - tui
+  - accounting
+  - finance
+  - plain text
+  - ledger

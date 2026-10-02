@@ -1,0 +1,35 @@
+id: gitui
+name: GitUI
+version: 1.0.0
+author: Stephan Dilly
+description: Git client with the comfort of a git GUI in the terminal
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/gitui-org/gitui/releases/download/v0.28.1/gitui-linux-x86_64.tar.gz; s=f6149b9ae203397158b0c89c13cfde718e7121d3d3cd2ebc597f93d6628d9b5b ;;
+      aarch64) a=https://github.com/gitui-org/gitui/releases/download/v0.28.1/gitui-linux-aarch64.tar.gz; s=2a640da05b73e9152a7bf92bfd7c23acd9d60438f4f2cabb62357014a5fd7c28 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 gitui /usr/local/bin/gitui &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/gitui
+  windows:
+    install: winget install -e --id StephanDilly.gitui
+    uninstall: winget uninstall -e --id StephanDilly.gitui
+command: gitui
+args: ""
+source: https://github.com/gitui-org/gitui
+website: https://github.com/gitui-org/gitui
+documentation: https://github.com/gitui-org/gitui#readme
+screenshot: https://raw.githubusercontent.com/gitui-org/gitui/2fa693cb6ed431b21ebc300dd02e83c2476699ce/demo.gif
+keywords:
+  - git
+  - version control
+  - tui
+
+roles: []

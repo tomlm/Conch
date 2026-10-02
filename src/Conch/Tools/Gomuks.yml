@@ -1,0 +1,25 @@
+id: gomuks
+name: gomuks
+version: 1.0.0
+author: Tulir Asokan
+description: Terminal client for the Matrix chat network
+license: AGPL-3.0
+platforms:
+  # Debian ships legacy gomuks 0.3.1, the terminal client. Upstream's current releases are a
+  # web-first rewrite whose terminal frontend is experimental and needs a separate backend.
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y gomuks
+    uninstall: sudo apt-get remove -y gomuks
+command: gomuks
+args: ""
+source: https://github.com/gomuks/gomuks
+website: https://github.com/gomuks/gomuks
+documentation: https://docs.mau.fi/gomuks/
+screenshot: https://www.linuxlinks.com/wp-content/uploads/2023/04/gomuks.png
+keywords:
+  - matrix
+  - chat
+  - messaging
+  - tui
+
+roles: []

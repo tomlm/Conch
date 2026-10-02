@@ -1,0 +1,33 @@
+id: nb
+name: nb
+version: 1.0.0
+author: William Melody
+description: Note-taking, bookmarking, archiving and knowledge base application with Markdown notes, encryption and git sync
+license: AGPL-3.0
+platforms:
+  # Not in Debian 13. nb is a single Bash script; the install fetches it from the 7.25.5
+  # tag's commit, checks its hash, and puts it on PATH. git is a hard requirement of nb.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget git &&
+      t=$(mktemp -d) && cd "$t" &&
+      wget -q -O nb https://raw.githubusercontent.com/xwmx/nb/a1e007dc191b7d821b14773978e720b67b6034d2/nb &&
+      echo "7dc2e0c2a6130e3317c675bb171e8205f93f73c4e4972958b31bc774b959cc55  nb" | sha256sum -c --quiet &&
+      sudo install -m 755 nb /usr/local/bin/nb &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/nb
+command: nb
+# Plain "nb" prints the note list and exits; "nb shell" is its interactive mode.
+args: "shell"
+source: https://github.com/xwmx/nb
+website: https://xwmx.github.io/nb/
+documentation: https://xwmx.github.io/nb/
+screenshot: https://xwmx.github.io/misc/nb/images/nb-theme-nb-home.png
+keywords:
+  - tui
+  - notes
+  - bookmarks
+  - markdown
+  - knowledge base
+
+roles: []

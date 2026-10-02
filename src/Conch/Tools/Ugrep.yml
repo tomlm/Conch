@@ -1,0 +1,26 @@
+id: ugrep
+name: ugrep
+version: 1.0.0
+author: Robert van Engelen
+description: Fast grep replacement with an interactive query interface for searching files as you type
+license: BSD-3-Clause
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y ugrep
+    uninstall: sudo apt-get remove -y ugrep
+  windows:
+    install: winget install -e --id Genivia.ugrep
+    uninstall: winget uninstall -e --id Genivia.ugrep
+command: ug
+args: "-Q %1?"
+source: https://github.com/Genivia/ugrep
+website: https://ugrep.com/
+documentation: https://ugrep.com/
+screenshot: https://www.genivia.com/images/scranim.gif
+keywords:
+  - grep
+  - search
+  - tui
+  - terminal
+
+roles: []

@@ -1,0 +1,24 @@
+id: wego
+name: wego
+version: 1.0.0
+author: Markus Teich
+description: Weather client that draws the forecast for the coming days in the terminal
+license: ISC
+platforms:
+  # Debian ships 2.3, whose backends (OpenWeatherMap, WorldWeatherOnline, SMHI, Caiyun) mostly
+  # need an API key; the first run writes ~/.config/wego/wegorc to fill in.
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y wego
+    uninstall: sudo apt-get remove -y wego
+command: wego
+args: ""
+source: https://github.com/schachmat/wego
+website: https://github.com/schachmat/wego
+documentation: https://github.com/schachmat/wego#setup
+screenshot: https://schachmat.github.io/wego/wego.gif
+keywords:
+  - weather
+  - forecast
+  - terminal
+
+roles: []

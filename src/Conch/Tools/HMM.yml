@@ -1,0 +1,34 @@
+id: h.m.m
+name: h-m-m
+version: 1.0.0
+author: Nader K. Rad
+description: Keyboard-centric mind-mapping tool for the terminal
+license: GPL-3.0
+platforms:
+  # h-m-m is a single PHP script with no Debian package or release asset, so the install
+  # fetches it at a pinned commit, checks its hash, and gets PHP from apt (php-cli and
+  # php-mbstring stay on uninstall). Copying to the system clipboard needs xclip or similar;
+  # without one, start it with --clipboard=internal.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y php-cli php-mbstring wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      wget -q -O h-m-m https://raw.githubusercontent.com/nadrad/h-m-m/bf5448d880ec89e68644441ca59517601a4890c3/h-m-m &&
+      echo '26170790cf85df5ee251097cbe325c1592844fc4647dd1b6a89f1f5e6a212318  h-m-m' | sha256sum -c --quiet &&
+      sudo install -m 755 h-m-m /usr/local/bin/h-m-m &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/h-m-m
+    detect: command -v h-m-m >/dev/null && command -v php >/dev/null
+command: h-m-m
+args: "%1?"
+source: https://github.com/nadrad/h-m-m
+website: https://github.com/nadrad/h-m-m
+documentation: https://github.com/nadrad/h-m-m#readme
+screenshot: https://raw.githubusercontent.com/nadrad/h-m-m/bf5448d880ec89e68644441ca59517601a4890c3/screenshot.png
+keywords:
+  - mind map
+  - planning
+  - outline
+  - tui
+
+roles: []

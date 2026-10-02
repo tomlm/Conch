@@ -1,0 +1,37 @@
+id: browsh
+name: Browsh
+version: 1.0.0
+author: Thomas Buckley-Houston
+description: Text-based web browser that renders modern pages through a headless Firefox
+license: LGPL-2.1
+platforms:
+  # Browsh drives Firefox in headless mode, so firefox-esr comes from apt; it needs no
+  # display server. v1.8.3 shipped only the extension, so 1.8.2 is the newest binary.
+  # firefox-esr stays on uninstall: apt owns it and other programs may use it.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget firefox-esr &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/browsh-org/browsh/releases/download/v1.8.2/browsh_1.8.2_linux_amd64; s=a20aeaad841e41634d5a4ca43845e9bf81a4fd3e8123efcc870668e2091ccb1f ;;
+      aarch64) a=https://github.com/browsh-org/browsh/releases/download/v1.8.2/browsh_1.8.2_linux_arm64; s=c805136292ba03c5520752819c532909c70411c811a15cd7bc4c0d3d92f9d8e1 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      sudo install -m 755 pkg /usr/local/bin/browsh &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/browsh
+    detect: command -v browsh >/dev/null && command -v firefox-esr >/dev/null
+command: browsh
+args: ""
+source: https://github.com/browsh-org/browsh
+website: https://www.brow.sh/
+documentation: https://www.brow.sh/docs/introduction/
+screenshot: https://media.giphy.com/media/bbsmVkYjPdOKHhMXOO/giphy.gif
+keywords:
+  - web
+  - browser
+  - firefox
+  - tui
+
+roles: []

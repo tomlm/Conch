@@ -1,0 +1,37 @@
+id: dua.cli
+name: dua-cli
+version: 1.0.0
+author: Sebastian Thiel
+description: Parallel disk usage analyzer that shows what uses the space in a directory and can delete it
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/Byron/dua-cli/releases/download/v2.45.1/dua-v2.45.1-x86_64-unknown-linux-musl.tar.gz; s=e9279f02bbbf22611c1602c4d5b526c9b99962d3d828016d48a0ee5b27252805 ;;
+      aarch64) a=https://github.com/Byron/dua-cli/releases/download/v2.45.1/dua-v2.45.1-aarch64-unknown-linux-musl.tar.gz; s=8549719a92187491c1a6956aefddbd815ee5b3217491f2a3d98f2cc388bcb5ef ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 "dua-v2.45.1-$(uname -m)-unknown-linux-musl/dua" /usr/local/bin/dua &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/dua
+  windows:
+    install: winget install -e --id Byron.dua-cli
+    uninstall: winget uninstall -e --id Byron.dua-cli
+command: dua
+# Plain "dua" prints a summary and exits; "dua i" is the interactive interface.
+args: "i %1?"
+source: https://github.com/Byron/dua-cli
+website: https://github.com/Byron/dua-cli
+documentation: https://github.com/Byron/dua-cli#readme
+screenshot: https://asciinema.org/a/kDnXUOeqBxZVMoWuFNqzfpeey.png
+keywords:
+  - disk usage
+  - disk space
+  - du
+  - tui
+
+roles: []

@@ -1,0 +1,33 @@
+id: ctop
+name: ctop
+version: 1.0.0
+author: Bradley Cicenas
+description: Top-like overview of real-time metrics for multiple Docker and runC containers
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/bcicen/ctop/releases/download/v0.7.7/ctop-0.7.7-linux-amd64; s=b78374734ebe3d14b6edee3d5512c911c250d7fa7f3f964cb00acd3bc5a02a09 ;;
+      aarch64) a=https://github.com/bcicen/ctop/releases/download/v0.7.7/ctop-0.7.7-linux-arm64; s=d8d91e0fea53a8c78fa81192f078272e5a92f0ea6c4f0e38ec7c944d76e6f02f ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O ctop "$a" && echo "$s  ctop" | sha256sum -c --quiet &&
+      sudo install -m 755 ctop /usr/local/bin/ctop &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/ctop
+command: ctop
+args: ""
+source: https://github.com/bcicen/ctop
+website: https://ctop.sh/
+documentation: https://github.com/bcicen/ctop#readme
+screenshot: https://raw.githubusercontent.com/bcicen/ctop/59f00dd6aaebf48f3bc501e174f75f815c2619f0/_docs/img/grid.gif
+keywords:
+  - tui
+  - docker
+  - containers
+  - monitor
+
+roles: []

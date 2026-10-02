@@ -1,0 +1,33 @@
+id: hwatch
+name: hwatch
+version: 1.0.0
+author: blacknon
+description: Alternative to the watch command that records each run and shows its history and diffs
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/blacknon/hwatch/releases/download/0.4.2/hwatch-0.4.2.x86_64-unknown-linux-musl.tar.gz; s=9d1c6a61b1f04f9e1aa84fe18634a6296aa22061c62d39416a3fa23fba066803 ;;
+      aarch64) a=https://github.com/blacknon/hwatch/releases/download/0.4.2/hwatch-0.4.2.aarch64-unknown-linux-musl.tar.gz; s=bdb592e933274aa6437a3d9b45aa93d2be62292eab978f7e8612c12ed42b4a49 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 bin/hwatch /usr/local/bin/hwatch &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/hwatch
+command: hwatch
+args: "%1"
+source: https://github.com/blacknon/hwatch
+website: https://github.com/blacknon/hwatch
+documentation: https://github.com/blacknon/hwatch#readme
+screenshot: https://raw.githubusercontent.com/blacknon/hwatch/aeed51e5e5d138880e2a473af86effa42bfe3ce6/img/hwatch.gif
+keywords:
+  - watch
+  - diff
+  - monitor
+  - tui
+
+roles: []

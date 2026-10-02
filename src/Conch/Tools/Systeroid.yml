@@ -1,0 +1,35 @@
+id: systeroid
+name: systeroid
+version: 1.0.0
+author: Orhun Parmaksız
+description: Improved sysctl with a terminal interface for browsing, searching and changing kernel parameters
+license: MIT OR Apache-2.0
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/orhun/systeroid/releases/download/v0.4.6/systeroid-0.4.6-x86_64-unknown-linux-musl.tar.gz; s=3f65d48500eec1a3b3cc0e757c1fe919931ea8b5276f7244b0ec5a261f96f983 ;;
+      aarch64) a=https://github.com/orhun/systeroid/releases/download/v0.4.6/systeroid-0.4.6-aarch64-unknown-linux-musl.tar.gz; s=ebed6ce9b8eb460381925dc93996553e46820b62bdd745976c8a26d6ec86a35a ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg &&
+      sudo install -m 755 systeroid-0.4.6/systeroid /usr/local/bin/systeroid &&
+      sudo install -m 755 systeroid-0.4.6/systeroid-tui /usr/local/bin/systeroid-tui &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/systeroid /usr/local/bin/systeroid-tui
+command: systeroid-tui
+args: ""
+source: https://github.com/orhun/systeroid
+website: https://systeroid.cli.rs/
+documentation: https://github.com/orhun/systeroid#readme
+screenshot: https://raw.githubusercontent.com/orhun/systeroid/ecc9365429ff1564c485a37c2e477723865634e1/assets/systeroid-demo.gif
+keywords:
+  - sysctl
+  - kernel
+  - system administration
+  - tui
+
+roles: []

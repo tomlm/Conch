@@ -1,0 +1,21 @@
+id: tmux
+name: tmux
+version: 1.0.0
+author: Nicholas Marriott
+description: Terminal multiplexer that creates, accesses and controls several terminals from a single screen
+license: ISC
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y tmux
+    uninstall: sudo apt-get remove -y tmux
+command: tmux
+args: ""
+source: https://github.com/tmux/tmux
+website: https://github.com/tmux/tmux/wiki
+documentation: https://github.com/tmux/tmux/wiki/Getting-Started
+screenshot: https://www.linuxlinks.com/wp-content/uploads/2018/01/Screenshot-tmux.jpg
+keywords:
+  - tui
+  - terminal multiplexer
+  - sessions
+  - terminal

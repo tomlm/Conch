@@ -1,0 +1,34 @@
+id: up
+name: up
+version: 1.0.0
+author: Mateusz Czapliński
+description: Ultimate Plumber, a tool for writing Linux pipes interactively with an instant live preview of their output
+license: Apache-2.0
+platforms:
+  # Not in Debian. Pinned upstream release, checked by hash. Upstream publishes a single
+  # static Linux binary, for x86_64 only.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/akavel/up/releases/download/v0.4/up; s=7ad3008da8047ef3df6f1fe0c02f5a56ac438ec632aae57cdbbe7494851d5be6 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      sudo install -m 755 pkg /usr/local/bin/up &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/up
+command: up
+# up refuses to start when nothing is piped into it; --noinput starts it with an empty buffer
+# so the pipeline can be typed from scratch.
+args: "--noinput"
+source: https://github.com/akavel/up
+website: https://github.com/akavel/up
+documentation: https://github.com/akavel/up#readme
+screenshot: https://raw.githubusercontent.com/akavel/up/840f23c21d3e692661d6ee574490880d7524f761/up.gif
+keywords:
+  - tui
+  - pipes
+  - shell
+  - text processing

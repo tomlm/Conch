@@ -1,0 +1,22 @@
+id: dockly
+name: dockly
+version: 1.0.0
+author: Liran Tal
+description: Terminal interface for managing Docker containers, services and images
+license: MIT
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y npm && sudo npm install -g dockly
+    uninstall: sudo npm uninstall -g dockly
+command: dockly
+args: ""
+source: https://github.com/lirantal/dockly
+website: https://lirantal.github.io/dockly/
+documentation: https://github.com/lirantal/dockly#readme
+screenshot: https://cloud.githubusercontent.com/assets/316371/25682867/c5212216-3027-11e7-8f36-72d38516d2af.gif
+keywords:
+  - docker
+  - containers
+  - tui
+
+roles: []

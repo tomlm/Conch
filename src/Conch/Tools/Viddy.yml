@@ -1,0 +1,33 @@
+id: viddy
+name: viddy
+version: 1.0.0
+author: Takumasa Sakao
+description: Modern watch command that runs a program periodically and shows its output
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/sachaos/viddy/releases/download/v1.3.1/viddy-v1.3.1-linux-x86_64.tar.gz; s=c0406da6c19bbfbf0381a1a54cf7098a97372c15e5d64bed38e4b8be53e8455e ;;
+      aarch64) a=https://github.com/sachaos/viddy/releases/download/v1.3.1/viddy-v1.3.1-linux-arm64.tar.gz; s=4bf88aa5443b09a49e8af55c1e92ff6148486856703b8f886e1984b0e541af4d ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 viddy /usr/local/bin/viddy &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/viddy
+command: viddy
+args: "%1"
+source: https://github.com/sachaos/viddy
+website: https://github.com/sachaos/viddy
+documentation: https://github.com/sachaos/viddy#readme
+screenshot: https://raw.githubusercontent.com/sachaos/viddy/b56efe0876f255ade025d6b77fb9f3f30099675b/images/demo.gif
+keywords:
+  - watch
+  - monitor
+  - command
+  - tui
+
+roles: []

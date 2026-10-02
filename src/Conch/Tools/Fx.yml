@@ -1,0 +1,33 @@
+id: fx
+name: fx
+version: 1.0.0
+author: Anton Medvedev
+description: Interactive JSON viewer with streaming and mouse support
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/antonmedv/fx/releases/download/39.2.0/fx_linux_amd64; s=17ea6549c7cf0b8be5ec109d04da7fbf1d5de9f7b99d957a6215081933528afe ;;
+      aarch64) a=https://github.com/antonmedv/fx/releases/download/39.2.0/fx_linux_arm64; s=85ea8435b0a80b6d31ffa9f61ac9b67d9bb8f0ffffabdfe5e7e587b07a0a0684 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O fx "$a" && echo "$s  fx" | sha256sum -c --quiet &&
+      sudo install -m 755 fx /usr/local/bin/fx &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/fx
+command: fx
+args: "%1"
+source: https://github.com/antonmedv/fx
+website: https://fx.wtf/
+documentation: https://fx.wtf/
+screenshot: https://raw.githubusercontent.com/antonmedv/fx/9b6e927285e25ab570d59fe8338ff8210105a36f/.github/images/preview.gif
+keywords:
+  - tui
+  - json
+  - viewer
+  - terminal
+
+roles: []

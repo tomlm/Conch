@@ -1,8 +1,8 @@
 id: ncdu
 name: ncdu
 version: 1.0.0
-author: ncdu contributors
-description: NCurses Disk Usage
+author: Yorhel
+description: Disk usage analyzer with an ncurses interface
 license: MIT
 platforms:
   linux:
@@ -13,6 +13,7 @@ args: "%1?"
 source: https://dev.yorhel.nl/ncdu
 website: https://dev.yorhel.nl/ncdu
 documentation: https://dev.yorhel.nl/ncdu
+screenshot: https://dev.yorhel.nl/img/ncduinfo-2.png
 keywords:
   - tui
   - disk

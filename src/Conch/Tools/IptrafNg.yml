@@ -1,0 +1,26 @@
+id: iptraf.ng
+name: IPTraf-ng
+version: 1.0.0
+author: IPTraf-ng developers
+description: Console-based network monitor that shows information about IP traffic
+license: GPL-2.0
+platforms:
+  # iptraf-ng lives in /usr/sbin and needs root to capture packets, so it is launched
+  # through sudo and detected by its path rather than by the user's PATH.
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y iptraf-ng
+    uninstall: sudo apt-get remove -y iptraf-ng
+    detect: test -x /usr/sbin/iptraf-ng
+command: sudo
+args: "iptraf-ng"
+source: https://github.com/iptraf-ng/iptraf-ng
+website: https://github.com/iptraf-ng/iptraf-ng
+documentation: https://github.com/iptraf-ng/iptraf-ng#readme
+screenshot: https://www.linuxlinks.com/wp-content/uploads/2020/09/IPTraf-ng.png
+keywords:
+  - network
+  - traffic
+  - monitor
+  - tui
+
+roles: []

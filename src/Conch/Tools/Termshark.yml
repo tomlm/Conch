@@ -1,0 +1,22 @@
+id: termshark
+name: termshark
+version: 1.0.0
+author: Graham Clark
+description: Terminal user interface for tshark, inspired by Wireshark, that reads pcap files or sniffs live interfaces
+license: MIT
+platforms:
+  linux:
+    install: sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y termshark
+    uninstall: sudo apt-get remove -y termshark
+command: termshark
+args: "%1?"
+source: https://github.com/gcla/termshark
+website: https://termshark.io/
+documentation: https://github.com/gcla/termshark/blob/master/docs/UserGuide.md
+screenshot: https://raw.githubusercontent.com/gcla/termshark/ef2bd8fb1cd83621138c958d655bf2e1a86f98f0/images/demo4.gif
+keywords:
+  - tui
+  - network
+  - packet capture
+  - wireshark
+  - pcap

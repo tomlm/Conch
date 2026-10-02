@@ -1,0 +1,23 @@
+id: neomutt
+name: NeoMutt
+version: 1.0.0
+author: NeoMutt contributors
+description: Text-based email client with support for color terminals, MIME, OpenPGP and threaded sorting
+license: GPL-2.0
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y neomutt
+    uninstall: sudo apt-get remove -y neomutt
+command: neomutt
+args: ""
+source: https://github.com/neomutt/neomutt
+website: https://neomutt.org/
+documentation: https://neomutt.org/guide/
+screenshot: https://www.linuxlinks.com/wp-content/uploads/2020/09/NeoMutt.png
+keywords:
+  - tui
+  - email
+  - mail client
+  - terminal
+
+roles: []

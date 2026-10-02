@@ -1,0 +1,24 @@
+id: pspg
+name: pspg
+version: 1.0.0
+author: Pavel Stehule
+description: Pager for tabular data from PostgreSQL, MySQL and CSV, with searching and row, column and block selection
+license: BSD-2-Clause
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y pspg
+    uninstall: sudo apt-get remove -y pspg
+command: pspg
+args: "%1"
+source: https://github.com/okbob/pspg
+website: https://github.com/okbob/pspg
+documentation: https://github.com/okbob/pspg#readme
+screenshot: https://raw.githubusercontent.com/okbob/pspg/6726d96db0ea644c9838d3afdab9bdb4cfcdb4c3/screenshots/pspg-4.3.0-mc-111x34.png
+keywords:
+  - tui
+  - pager
+  - postgresql
+  - csv
+  - tables
+
+roles: []

@@ -1,0 +1,24 @@
+id: calcurse
+name: calcurse
+version: 1.0.0
+author: calcurse developers
+description: Text-based calendar and scheduling application for events, appointments and tasks
+license: BSD-2-Clause
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y calcurse
+    uninstall: sudo apt-get remove -y calcurse
+command: calcurse
+args: ""
+source: https://github.com/lfos/calcurse
+website: https://calcurse.org/
+documentation: https://calcurse.org/files/manual.html
+screenshot: https://calcurse.org/images/demo.gif
+keywords:
+  - calendar
+  - scheduling
+  - todo
+  - appointments
+  - tui
+
+roles: []

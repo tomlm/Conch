@@ -1,0 +1,33 @@
+id: tickrs
+name: tickrs
+version: 1.0.0
+author: Cory Forsstrom
+description: Real-time stock ticker with charts for the terminal
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/tarkah/tickrs/releases/download/v0.15.0/tickrs-v0.15.0-x86_64-unknown-linux-gnu.tar.gz; s=99456e9e2ab6054737d2d087d873e424aae3c632d034d1e1c1c3b987791c27cc ;;
+      aarch64) a=https://github.com/tarkah/tickrs/releases/download/v0.15.0/tickrs-v0.15.0-aarch64-unknown-linux-gnu.tar.gz; s=8fd7ff37acfd204853ecd4fe3670687dcadcb2f3e8c99c24feac5f7f964d83ea ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 tickrs /usr/local/bin/tickrs &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/tickrs
+command: tickrs
+args: ""
+source: https://github.com/tarkah/tickrs
+website: https://github.com/tarkah/tickrs
+documentation: https://github.com/tarkah/tickrs#readme
+screenshot: https://raw.githubusercontent.com/tarkah/tickrs/dbeaa747c2a7265bf09f9ab32c8655d1f118fc3a/assets/demo.gif
+keywords:
+  - stocks
+  - finance
+  - charts
+  - tui
+
+roles: []

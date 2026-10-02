@@ -1,0 +1,23 @@
+id: dhex
+name: DHEX
+version: 1.0.0
+author: Thomas Dettbarn
+description: Hex editor with a diff mode for comparing two files side by side
+license: GPL-2.0-or-later
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y dhex
+    uninstall: sudo apt-get remove -y dhex
+command: dhex
+args: "%1 %2?"
+source: http://www.dettus.net/dhex/
+website: http://www.dettus.net/dhex/
+documentation: http://www.dettus.net/dhex/
+screenshot: https://www.linuxlinks.com/wp-content/uploads/2020/08/DHEX.png
+keywords:
+  - hex editor
+  - diff
+  - binary
+  - terminal
+
+roles: []

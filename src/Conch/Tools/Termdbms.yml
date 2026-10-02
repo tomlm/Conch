@@ -1,0 +1,33 @@
+id: termdbms
+name: termdbms
+version: 1.0.0
+author: mathaou
+description: Viewer and editor for SQLite databases and CSV files in the terminal
+license: MIT
+platforms:
+  # The last release (v0.9-alpha) has a static Linux build for x86_64 only.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget unzip &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/mathaou/termdbms/releases/download/v0.9-alpha/termdbms_linux_x64.zip; s=71ade034dbbe8682fbfe8ab6afb984c6a9170a46e35dd73b2ba580cf05df7e36 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      unzip -q pkg && sudo install -m 755 build/termdbms_linux_x64/termdbms /usr/local/bin/termdbms &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/termdbms
+command: termdbms
+args: "-p %1"
+source: https://github.com/mathaou/termdbms
+website: https://github.com/mathaou/termdbms
+documentation: https://github.com/mathaou/termdbms#readme
+screenshot: https://i.imgur.com/vmK0DVn.gif
+keywords:
+  - database
+  - sqlite
+  - csv
+  - tui
+
+roles: []

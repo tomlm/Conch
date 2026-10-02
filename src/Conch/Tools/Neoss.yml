@@ -1,0 +1,24 @@
+id: neoss
+name: neoss
+version: 1.0.0
+author: Pablo Lecolinet
+description: Socket statistics viewer that lists in-use TCP and UDP sockets in a sortable terminal interface, as a replacement for ss
+license: BSD-3-Clause
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y npm && sudo npm install -g neoss
+    uninstall: sudo npm uninstall -g neoss
+command: neoss
+args: ""
+source: https://github.com/PabloLec/neoss
+website: https://github.com/PabloLec/neoss
+documentation: https://github.com/PabloLec/neoss#readme
+screenshot: https://raw.githubusercontent.com/PabloLec/neoss/94e5b84d1a169541abd9d40e6ca29cf18dbfa425/docs/assets/demo.gif
+keywords:
+  - network
+  - sockets
+  - tcp
+  - udp
+  - tui
+
+roles: []

@@ -1,0 +1,24 @@
+id: newsboat
+name: Newsboat
+version: 1.0.0
+author: Newsboat contributors
+description: RSS and Atom feed reader for the terminal, continuing the Newsbeuter project
+license: MIT
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y newsboat
+    uninstall: sudo apt-get remove -y newsboat
+command: newsboat
+args: ""
+source: https://github.com/newsboat/newsboat
+website: https://newsboat.org/
+documentation: https://newsboat.org/releases/2.36/docs/newsboat.html
+screenshot: https://newsboat.org/images/2.25-screenshot_2x-33f26153.png
+keywords:
+  - tui
+  - rss
+  - feed reader
+  - news
+  - terminal
+
+roles: []

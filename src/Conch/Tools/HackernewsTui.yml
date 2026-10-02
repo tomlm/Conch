@@ -1,0 +1,34 @@
+id: hackernews.tui
+name: hackernews-TUI
+version: 1.0.0
+author: aome510
+description: Fast, customizable reader for browsing Hacker News in the terminal
+license: MIT
+platforms:
+  # Upstream ships glibc builds only (no musl); they need glibc 2.34, which Debian 13 exceeds.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/aome510/hackernews-TUI/releases/download/v0.13.5/hackernews_tui-x86_64-unknown-linux-gnu.tar.gz; s=390e4fe218f1c8f8204a481fe83b391c1b9b15714a44bbde5814de90f284a540 ;;
+      aarch64) a=https://github.com/aome510/hackernews-TUI/releases/download/v0.13.5/hackernews_tui-aarch64-unknown-linux-gnu.tar.gz; s=2def17affe03d711529ecca15c6233177a9bf95786ed2bf179593b09066df7ea ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 hackernews_tui /usr/local/bin/hackernews_tui &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/hackernews_tui
+command: hackernews_tui
+args: ""
+source: https://github.com/aome510/hackernews-TUI
+website: https://github.com/aome510/hackernews-TUI
+documentation: https://github.com/aome510/hackernews-TUI#readme
+screenshot: https://user-images.githubusercontent.com/40011582/147393397-71991e48-cba6-4f89-9d28-cafbc0143c42.png
+keywords:
+  - hacker news
+  - news
+  - reader
+  - tui
+
+roles: []

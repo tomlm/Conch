@@ -1,0 +1,21 @@
+id: ncmpcpp
+name: ncmpcpp
+version: 1.0.0
+author: Andrzej Rybczak
+description: Console client for the Music Player Daemon (MPD)
+license: GPL-2.0
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y ncmpcpp
+    uninstall: sudo apt-get remove -y ncmpcpp
+command: ncmpcpp
+args: ""
+source: https://github.com/ncmpcpp/ncmpcpp
+website: https://rybczak.net/ncmpcpp/
+documentation: https://github.com/ncmpcpp/ncmpcpp#readme
+screenshot: https://rybczak.net/ncmpcpp/screens/screen01.png
+keywords:
+  - tui
+  - music
+  - mpd
+  - audio player

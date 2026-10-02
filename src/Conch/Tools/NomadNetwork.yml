@@ -1,0 +1,24 @@
+id: nomadnet
+name: Nomad Network
+version: 1.0.0
+author: Mark Qvist
+description: Encrypted, off-grid messaging and information sharing over Reticulum, across packet radio, LoRa, WiFi and more
+license: GPL-3.0
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y pipx && sudo pipx install --global nomadnet
+    uninstall: sudo pipx uninstall --global nomadnet
+command: nomadnet
+args: ""
+source: https://github.com/markqvist/NomadNet
+website: https://github.com/markqvist/NomadNet
+documentation: https://github.com/markqvist/NomadNet#readme
+screenshot: https://raw.githubusercontent.com/markqvist/NomadNet/b2f852c9e0efc68d89d9185939f42ec0c2fee125/docs/screenshots/1a.png
+keywords:
+  - messaging
+  - mesh
+  - lora
+  - reticulum
+  - encrypted
+
+roles: []

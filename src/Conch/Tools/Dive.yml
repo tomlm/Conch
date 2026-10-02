@@ -1,0 +1,37 @@
+id: dive
+name: dive
+version: 1.0.0
+author: Alex Goodman
+description: Tool for exploring a Docker/OCI image layer by layer and finding ways to shrink its size
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/wagoodman/dive/releases/download/v0.13.1/dive_0.13.1_linux_amd64.tar.gz; s=0970549eb4a306f8825a84145a2534153badb4d7dcf3febd1967c706367c3d0e ;;
+      aarch64) a=https://github.com/wagoodman/dive/releases/download/v0.13.1/dive_0.13.1_linux_arm64.tar.gz; s=2fcd2cf20f634ccdb41efac44048b204bfc867c115641f37a7420693ed480a18 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 dive /usr/local/bin/dive &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/dive
+  windows:
+    install: winget install -e --id wagoodman.dive
+    uninstall: winget uninstall -e --id wagoodman.dive
+command: dive
+args: "%1"
+source: https://github.com/wagoodman/dive
+website: https://github.com/wagoodman/dive
+documentation: https://github.com/wagoodman/dive#readme
+screenshot: https://raw.githubusercontent.com/wagoodman/dive/d6c691947f8fda635c952a17ee3b7555379d58f0/.data/demo.gif
+keywords:
+  - docker
+  - container
+  - image
+  - oci
+  - tui
+
+roles: []

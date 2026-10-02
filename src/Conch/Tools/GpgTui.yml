@@ -1,0 +1,33 @@
+id: gpg.tui
+name: gpg-tui
+version: 1.0.0
+author: Orhun Parmaksız
+description: Terminal user interface for GnuPG key management, such as listing, exporting and signing keys
+license: MIT
+platforms:
+  # Not in Debian. Pinned upstream release (x86_64 only), checked by hash. The binary links
+  # against GPGME, so its library and GnuPG come from apt.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget gnupg libgpgme11t64 &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/orhun/gpg-tui/releases/download/v0.11.2/gpg-tui-0.11.2-x86_64-unknown-linux-gnu.tar.gz; s=08ef50325bc7035915861f642023d045543dfacb1cb69838ac4cf694aa4436ba ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 gpg-tui-0.11.2/gpg-tui /usr/local/bin/gpg-tui &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/gpg-tui
+command: gpg-tui
+args: ""
+source: https://github.com/orhun/gpg-tui
+website: https://github.com/orhun/gpg-tui
+documentation: https://github.com/orhun/gpg-tui#readme
+screenshot: https://raw.githubusercontent.com/orhun/gpg-tui/9fb341e0a1ee00a0d903e4810083bed777108448/demo/gpg-tui-showcase.gif
+keywords:
+  - tui
+  - gpg
+  - gnupg
+  - encryption
+  - keys

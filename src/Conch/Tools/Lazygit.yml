@@ -1,0 +1,26 @@
+id: lazygit
+name: lazygit
+version: 1.0.0
+author: Jesse Duffield
+description: Simple terminal UI for git commands
+license: MIT
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y lazygit
+    uninstall: sudo apt-get remove -y lazygit
+  windows:
+    install: winget install -e --id JesseDuffield.lazygit
+    uninstall: winget uninstall -e --id JesseDuffield.lazygit
+command: lazygit
+args: ""
+source: https://github.com/jesseduffield/lazygit
+website: https://github.com/jesseduffield/lazygit
+documentation: https://github.com/jesseduffield/lazygit#readme
+screenshot: https://raw.githubusercontent.com/jesseduffield/lazygit/96f0df95381a118a11097806cb116b5b46502e5d/demo/commit_and_push-compressed.gif
+keywords:
+  - tui
+  - git
+  - version control
+  - terminal
+
+roles: []

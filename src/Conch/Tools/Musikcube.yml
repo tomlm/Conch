@@ -1,0 +1,41 @@
+id: musikcube
+name: musikcube
+version: 1.0.0
+author: Casey Langen
+description: Terminal music player, library and streaming audio server with gapless playback
+license: BSD-3-Clause
+platforms:
+  # Not in Debian 13. The release's standalone tarball carries its own codecs and finds
+  # them through $ORIGIN, so it goes to /opt/musikcube with a symlink on PATH. The apt line
+  # brings the system libraries it and its output plugins link against. Upstream builds
+  # this tarball for x86_64 only; its "rpi_armv8" build is 32-bit ARM, not aarch64.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget bzip2 libatomic1 zlib1g
+      libasound2t64 libpulse0 libpipewire-0.3-0t64 libportaudio2 libsndio7.0 libsystemd0 &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/clangen/musikcube/releases/download/3.0.5/musikcube_3.0.5_linux_x86_64.tar.bz2; s=86ce5dfdae55099b7d1cad94c1bff13df7a656684ada1ee13174ca70bdb0966c ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      sudo rm -rf /opt/musikcube && sudo mkdir -p /opt/musikcube &&
+      sudo tar -xjf pkg -C /opt/musikcube --strip-components=1 &&
+      sudo ln -sf /opt/musikcube/musikcube /usr/local/bin/musikcube &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -rf /usr/local/bin/musikcube /opt/musikcube
+    detect: test -x /opt/musikcube/musikcube
+command: musikcube
+args: ""
+source: https://github.com/clangen/musikcube
+website: https://github.com/clangen/musikcube
+documentation: https://github.com/clangen/musikcube/wiki
+screenshot: https://raw.githubusercontent.com/clangen/clangen-projects-static/828ddf4bdf42fa13da92fc884936815cdc843dc6/musikcube/screenshots/linux.png
+keywords:
+  - tui
+  - music
+  - audio player
+  - streaming
+  - terminal
+
+roles: []

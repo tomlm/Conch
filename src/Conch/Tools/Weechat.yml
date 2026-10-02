@@ -1,10 +1,11 @@
 id: weechat
 name: WeeChat
 version: 1.0.0
-author: WeeChat contributors
-description: Fast, light and extensible chat client
+author: Sébastien Helleu
+description: Fast, light and extensible chat client for IRC and other protocols, driven entirely from the keyboard
 license: GPL-3.0
 platforms:
+  # Linux only: WeeChat has no native Windows build, so on Windows it runs in WSL.
   linux:
     install: sudo apt-get update && sudo apt-get install -y weechat
     uninstall: sudo apt-get remove -y weechat
@@ -13,6 +14,7 @@ args: ""
 source: https://github.com/weechat/weechat
 website: https://weechat.org/
 documentation: https://weechat.org/doc/
+screenshot: https://weechat.org/media/images/screenshots/weechat/medium/weechat_2013-04-27_phlux_shadow.png
 keywords:
   - tui
   - chat

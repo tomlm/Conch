@@ -1,0 +1,24 @@
+id: kmon
+name: kmon
+version: 1.0.0
+author: Orhun Parmaksız
+description: Linux kernel manager and activity monitor for loading, unloading and blacklisting kernel modules
+license: GPL-3.0
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y kmon
+    uninstall: sudo apt-get remove -y kmon
+command: kmon
+args: ""
+source: https://github.com/orhun/kmon
+website: https://kmon.cli.rs/
+documentation: https://github.com/orhun/kmon#readme
+screenshot: https://user-images.githubusercontent.com/24392180/77252333-35997400-6c64-11ea-9627-bb56ee14ae22.gif
+keywords:
+  - tui
+  - kernel
+  - modules
+  - linux
+  - monitor
+
+roles: []

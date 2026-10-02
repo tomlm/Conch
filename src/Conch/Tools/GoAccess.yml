@@ -1,0 +1,25 @@
+id: goaccess
+name: GoAccess
+version: 1.0.0
+author: Gerardo Orellana
+description: Real-time web log analyzer and interactive viewer with HTTP statistics
+license: MIT
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y goaccess
+    uninstall: sudo apt-get remove -y goaccess
+command: goaccess
+args: "%1"
+source: https://github.com/allinurl/goaccess
+website: https://goaccess.io/
+documentation: https://goaccess.io/man
+screenshot: https://goaccess.io/images/goaccess-real-time-term-gh-2026-1.png
+keywords:
+  - web
+  - log
+  - analyzer
+  - http
+  - statistics
+  - tui
+
+roles: []

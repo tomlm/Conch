@@ -1,0 +1,36 @@
+id: lazydocker
+name: lazydocker
+version: 1.0.0
+author: Jesse Duffield
+description: Terminal UI for docker and docker-compose that keeps containers, images and logs one keypress away
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/jesseduffield/lazydocker/releases/download/v0.25.2/lazydocker_0.25.2_Linux_x86_64.tar.gz; s=0d9dbfc26068b218e7ed84b104748cadc6e3cf733c0afd35465306fb39b9523c ;;
+      aarch64) a=https://github.com/jesseduffield/lazydocker/releases/download/v0.25.2/lazydocker_0.25.2_Linux_arm64.tar.gz; s=005c38b685aaa557e7d646d83a3dadb5024340eeed8c6a2e1949eee6f530de23 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 lazydocker /usr/local/bin/lazydocker &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/lazydocker
+  windows:
+    install: winget install -e --id JesseDuffield.Lazydocker
+    uninstall: winget uninstall -e --id JesseDuffield.Lazydocker
+command: lazydocker
+args: ""
+source: https://github.com/jesseduffield/lazydocker
+website: https://github.com/jesseduffield/lazydocker
+documentation: https://github.com/jesseduffield/lazydocker#readme
+screenshot: https://raw.githubusercontent.com/jesseduffield/lazydocker/7e7aadc2071d58031bf2daafca1fbd4093efc23f/docs/resources/demo3.gif
+keywords:
+  - tui
+  - docker
+  - containers
+  - docker-compose
+
+roles: []

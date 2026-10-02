@@ -1,0 +1,36 @@
+id: k9s
+name: K9s
+version: 1.0.0
+author: Fernand Galiana
+description: Terminal UI for navigating, observing and managing Kubernetes clusters
+license: Apache-2.0
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/derailed/k9s/releases/download/v0.51.0/k9s_Linux_amd64.tar.gz; s=c3752ad51a5a4015a113819c4eeb6e55a4d0e4b8e652494797532f6fc8161dd7 ;;
+      aarch64) a=https://github.com/derailed/k9s/releases/download/v0.51.0/k9s_Linux_arm64.tar.gz; s=3ee05c82e5f9198928a4e86133608ba6a2c10a2244d6a7789e820f78319d640c ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 k9s /usr/local/bin/k9s &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/k9s
+  windows:
+    install: winget install -e --id Derailed.k9s
+    uninstall: winget uninstall -e --id Derailed.k9s
+command: k9s
+args: ""
+source: https://github.com/derailed/k9s
+website: https://k9scli.io/
+documentation: https://k9scli.io/topics/commands/
+screenshot: https://raw.githubusercontent.com/derailed/k9s/7064f96f1e852e71efcb848a483a5b6d4b986f35/assets/screen_po.png
+keywords:
+  - tui
+  - kubernetes
+  - k8s
+  - cluster
+
+roles: []

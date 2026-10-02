@@ -1,0 +1,33 @@
+id: ali
+name: ali
+version: 1.0.0
+author: Ryo Nakao
+description: Load testing tool that plots latency and other metrics in real time in the terminal
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/nakabonne/ali/releases/download/v0.8.0/ali_0.8.0_linux_amd64.tar.gz; s=6bd43212f032528dd0a6c6db00035432051d1566d7af8ef0ef1b91a0b041705c ;;
+      aarch64) a=https://github.com/nakabonne/ali/releases/download/v0.8.0/ali_0.8.0_linux_arm64.tar.gz; s=a71bb89dcf1ceb7431327bb7f162c7ad30c675d0e5b4cae183e83fac276212f4 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 ali /usr/local/bin/ali &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/ali
+command: ali
+args: "%1"
+source: https://github.com/nakabonne/ali
+website: https://github.com/nakabonne/ali
+documentation: https://github.com/nakabonne/ali#readme
+screenshot: https://raw.githubusercontent.com/nakabonne/ali/200c15970c4d314fa2cd85b4827c9a25461a26da/images/demo.gif
+keywords:
+  - load testing
+  - http
+  - benchmark
+  - tui
+
+roles: []

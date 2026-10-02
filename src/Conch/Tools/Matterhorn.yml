@@ -1,0 +1,34 @@
+id: matterhorn
+name: Matterhorn
+version: 1.0.0
+author: Jonathan Daugherty
+description: Terminal client for the Mattermost chat system
+license: BSD-3-Clause
+platforms:
+  # Not in Debian. Pinned upstream release (Ubuntu 22.04 build, x86_64 only), checked by hash.
+  # Matterhorn finds its bundled emoji data next to the real executable, so the whole release
+  # directory goes to /opt/matterhorn and only a symlink goes on PATH.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget bzip2 libgmp10 libtinfo6 zlib1g &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/matterhorn-chat/matterhorn/releases/download/90000.1.1/matterhorn-90000.1.1-ubuntu-22.04-jammy-x86_64.tar.bz2; s=34a91a3f2ab0471302483e60843cd20d818c0f80a067d33dd31b4ebf86adbd7d ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      sudo rm -rf /opt/matterhorn && sudo mkdir -p /opt/matterhorn &&
+      sudo tar -xjf pkg -C /opt/matterhorn --strip-components=1 --no-same-owner &&
+      sudo ln -sf /opt/matterhorn/matterhorn /usr/local/bin/matterhorn &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -rf /usr/local/bin/matterhorn /opt/matterhorn
+command: matterhorn
+args: ""
+source: https://github.com/matterhorn-chat/matterhorn
+website: https://github.com/matterhorn-chat/matterhorn
+documentation: https://github.com/matterhorn-chat/matterhorn/tree/master/docs
+screenshot: https://raw.githubusercontent.com/matterhorn-chat/matterhorn/5e015ce2b89a5597a12526cf59e5c1946af28880/screenshots/screenshot-00.png
+keywords:
+  - tui
+  - chat
+  - mattermost

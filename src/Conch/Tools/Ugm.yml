@@ -1,0 +1,33 @@
+id: ugm
+name: ugm
+version: 1.0.0
+author: ariasmn
+description: Terminal browser for UNIX users and groups
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/ariasmn/ugm/releases/download/v1.9.0/ugm_1.9.0_linux_amd64; s=1a8edb601161e55e7ccb0121de938219ba0b2684bfcb08555a9d2853c8536b9e ;;
+      aarch64) a=https://github.com/ariasmn/ugm/releases/download/v1.9.0/ugm_1.9.0_linux_arm64; s=1587d24e5321b6d2a54783059526336c5ae502467ec727919842ddc9e0de4e51 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      sudo install -m 755 pkg /usr/local/bin/ugm &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/ugm
+command: ugm
+args: ""
+source: https://github.com/ariasmn/ugm
+website: https://github.com/ariasmn/ugm
+documentation: https://github.com/ariasmn/ugm#readme
+screenshot: https://user-images.githubusercontent.com/33121576/180660203-9c9f3801-5298-4ebc-b23a-e25e35582974.gif
+keywords:
+  - users
+  - groups
+  - system administration
+  - tui
+
+roles: []

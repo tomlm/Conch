@@ -1,0 +1,24 @@
+id: profanity
+name: Profanity
+version: 1.0.0
+author: Profanity contributors
+description: Console XMPP chat client inspired by Irssi
+license: GPL-3.0
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y profanity
+    uninstall: sudo apt-get remove -y profanity
+command: profanity
+args: ""
+source: https://github.com/profanity-im/profanity
+website: https://profanity-im.github.io/
+documentation: https://profanity-im.github.io/userguide.html
+screenshot: https://profanity-im.github.io/images/prof-2.png
+keywords:
+  - xmpp
+  - jabber
+  - chat
+  - messaging
+  - tui
+
+roles: []

@@ -1,0 +1,35 @@
+id: gobang
+name: gobang
+version: 1.0.0
+author: Takayuki Maeda
+description: Cross-platform terminal database management tool for MySQL, PostgreSQL and SQLite
+license: MIT
+platforms:
+  # Not in Debian. Pinned upstream release (static musl build, x86_64 only), checked by hash.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/TaKO8Ki/gobang/releases/download/v0.1.0-alpha.5/gobang-0.1.0-alpha.5-x86_64-unknown-linux-musl.tar.gz; s=29b8f517937cf19691c6e594a0789fe80a528fff05c346883af0e2950b9b90ef ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 gobang-0.1.0-alpha.5-x86_64-unknown-linux-musl/gobang /usr/local/bin/gobang &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/gobang
+  windows:
+    install: winget install -e --id TaKO8Ki.gobang
+    uninstall: winget uninstall -e --id TaKO8Ki.gobang
+command: gobang
+args: ""
+source: https://github.com/TaKO8Ki/gobang
+website: https://github.com/TaKO8Ki/gobang
+documentation: https://github.com/TaKO8Ki/gobang#readme
+screenshot: https://raw.githubusercontent.com/TaKO8Ki/gobang/7b1b5f7eba3ea98a5d254a12ea31f383ee7737d1/resources/gobang.gif
+keywords:
+  - tui
+  - database
+  - sql
+  - mysql
+  - postgresql

@@ -1,0 +1,23 @@
+id: euporie
+name: euporie
+version: 1.0.0
+author: Josiah Outram Halstead
+description: Terminal environment for Jupyter that runs notebooks and interacts with Jupyter kernels
+license: MIT
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y pipx && sudo pipx install --global euporie
+    uninstall: sudo pipx uninstall --global euporie
+command: euporie
+args: ""
+source: https://github.com/joouha/euporie
+website: https://github.com/joouha/euporie
+documentation: https://euporie.readthedocs.io/
+screenshot: https://github.com/joouha/euporie/assets/12154190/c8ea6e23-11bb-4ffc-a9e5-111f788c51ae
+keywords:
+  - jupyter
+  - notebook
+  - python
+  - tui
+
+roles: []

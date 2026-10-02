@@ -1,0 +1,22 @@
+id: gnu.chess
+name: GNU Chess
+version: 1.0.0
+author: GNU Chess contributors
+description: Chess-playing program for the terminal that also serves as an engine for graphical frontends
+license: GPL-3.0
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y gnuchess
+    uninstall: sudo apt-get remove -y gnuchess
+command: gnuchess
+args: ""
+source: https://savannah.gnu.org/projects/chess
+website: https://www.gnu.org/software/chess/
+documentation: https://www.gnu.org/software/chess/manual/
+screenshot: https://www.linuxlinks.com/wp-content/uploads/2023/04/gnuchess.png
+keywords:
+  - chess
+  - game
+  - terminal
+
+roles: []

@@ -1,0 +1,23 @@
+id: epr
+name: epr
+version: 1.0.0
+author: Benawi Adha
+description: EPUB reader for the terminal
+license: MIT
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y pipx && sudo pipx install --global epr-reader
+    uninstall: sudo pipx uninstall --global epr-reader
+command: epr
+args: "%1?"
+source: https://github.com/wustho/epr
+website: https://github.com/wustho/epr
+documentation: https://github.com/wustho/epr#readme
+screenshot: https://raw.githubusercontent.com/wustho/epr/723c77d34d7f149a2c1bcadd99d288d26f66531d/screenshot.png
+keywords:
+  - epub
+  - ebook
+  - reader
+  - tui
+
+roles: []

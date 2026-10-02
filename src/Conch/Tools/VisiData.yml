@@ -1,0 +1,22 @@
+id: visidata
+name: VisiData
+version: 1.0.0
+author: Saul Pwanson
+description: Interactive multitool for exploring tabular data such as tsv, csv, sqlite, json and xlsx files
+license: GPL-3.0
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y visidata
+    uninstall: sudo apt-get remove -y visidata
+command: vd
+args: "%1?"
+source: https://github.com/saulpw/visidata
+website: https://www.visidata.org/
+documentation: https://www.visidata.org/docs/
+screenshot: https://www.visidata.org/videos/freq-move-row.gif
+keywords:
+  - tui
+  - data
+  - csv
+  - spreadsheet
+  - json

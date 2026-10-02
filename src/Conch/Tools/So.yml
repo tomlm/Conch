@@ -1,0 +1,34 @@
+id: so
+name: so
+version: 1.0.0
+author: Sam Tay
+description: Terminal interface for searching and reading StackOverflow and other StackExchange sites
+license: MIT
+platforms:
+  # Not in Debian. Pinned upstream release, checked by hash (musl build on x86_64; upstream
+  # ships only a glibc build for aarch64).
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/samtay/so/releases/download/v0.4.10/so-x86_64-unknown-linux-musl.tar.gz; s=57dc2fd6b1bf203c0a79a50a068623f45a8fd5f70ff59d4f930e237d950e1d4f ;;
+      aarch64) a=https://github.com/samtay/so/releases/download/v0.4.10/so-aarch64-unknown-linux-gnu.tar.gz; s=49445ad17735533570e449033a75db1e5b44d3588091d433698f76f2fdb5d979 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 so /usr/local/bin/so &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/so
+command: so
+# so requires a search query; the words of the query become its arguments.
+args: "%1"
+source: https://github.com/samtay/so
+website: https://github.com/samtay/so
+documentation: https://github.com/samtay/so#readme
+screenshot: https://raw.githubusercontent.com/samtay/so/4969956b4aab1bb3aa8705627f71a1ad269ffe31/assets/demo.gif
+keywords:
+  - tui
+  - stackoverflow
+  - search
+  - programming

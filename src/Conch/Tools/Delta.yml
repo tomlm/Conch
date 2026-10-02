@@ -1,0 +1,28 @@
+id: delta
+name: delta
+version: 1.0.0
+author: Dan Davison
+description: Syntax-highlighting pager for git, diff and grep output
+license: MIT
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y git-delta
+    uninstall: sudo apt-get remove -y git-delta
+  windows:
+    install: winget install -e --id dandavison.delta
+    uninstall: winget uninstall -e --id dandavison.delta
+command: delta
+# Run on its own, delta shows the diff between two files.
+args: "%1 %2"
+source: https://github.com/dandavison/delta
+website: https://dandavison.github.io/delta/
+documentation: https://dandavison.github.io/delta/introduction.html
+screenshot: https://www.linuxlinks.com/wp-content/uploads/2023/04/delta.png
+keywords:
+  - tui
+  - diff
+  - git
+  - pager
+  - syntax highlighting
+
+roles: []

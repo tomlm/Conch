@@ -1,0 +1,25 @@
+id: pulsemixer
+name: pulsemixer
+version: 1.0.0
+author: George Filipkin
+description: Volume mixer for PulseAudio-compatible sound servers
+license: MIT
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y pulsemixer
+    uninstall: sudo apt-get remove -y pulsemixer
+command: pulsemixer
+args: ""
+source: https://github.com/GeorgeFilipkin/pulsemixer
+website: https://github.com/GeorgeFilipkin/pulsemixer
+documentation: https://github.com/GeorgeFilipkin/pulsemixer#readme
+screenshot: https://raw.githubusercontent.com/GeorgeFilipkin/pulsemixer/30b2d9033ab0de3e4e7263dc92d01a210ec28103/1.png
+keywords:
+  - audio
+  - mixer
+  - volume
+  - pulseaudio
+  - tui
+
+roles:
+  - audio-config

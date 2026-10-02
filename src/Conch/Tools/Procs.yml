@@ -1,0 +1,25 @@
+id: procs
+name: procs
+version: 1.0.0
+author: Naoya Hatta
+description: Replacement for ps with colored, human-readable output and multi-column keyword search
+license: MIT
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y procs
+    uninstall: sudo apt-get remove -y procs
+  windows:
+    install: winget install -e --id dalance.procs
+    uninstall: winget uninstall -e --id dalance.procs
+command: procs
+# Plain procs prints the process list and exits; --watch keeps it updating like top.
+args: "--watch"
+source: https://github.com/dalance/procs
+website: https://github.com/dalance/procs
+documentation: https://github.com/dalance/procs#readme
+screenshot: https://user-images.githubusercontent.com/4331004/55446625-5e5fce00-55fb-11e9-8914-69e8640d89d7.png
+keywords:
+  - processes
+  - ps
+  - monitor
+  - terminal

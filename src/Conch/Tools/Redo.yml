@@ -1,0 +1,34 @@
+id: redo
+name: redo
+version: 1.0.0
+author: barthr
+description: Tool for building reusable shell functions interactively from commands in the shell history
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/barthr/redo/releases/download/v0.8.4/redo_0.8.4_Linux_x86_64.tar.gz; s=2fdaec5df77548f60d5adf265ba0acd8f22b339ae472374095bb25cccee02759 ;;
+      aarch64) a=https://github.com/barthr/redo/releases/download/v0.8.4/redo_0.8.4_Linux_arm64.tar.gz; s=ebca442c3a0fcb6dea21d24e5fd571bde425138794e519fda17a70bc6795d897 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 redo /usr/local/bin/redo &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/redo
+command: redo
+args: ""
+source: https://github.com/barthr/redo
+website: https://github.com/barthr/redo
+documentation: https://github.com/barthr/redo#readme
+screenshot: https://raw.githubusercontent.com/barthr/redo/83ee846d5a9f2dfeed6e416e7b76c065080256e7/docs/demo.gif
+keywords:
+  - shell
+  - history
+  - functions
+  - aliases
+  - tui
+
+roles: []

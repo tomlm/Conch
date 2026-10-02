@@ -1,0 +1,34 @@
+id: httm
+name: httm
+version: 1.0.0
+author: Robert Swinford
+description: Interactive, file-level Time Machine-like tool for browsing and restoring ZFS, BTRFS and NILFS2 snapshot versions
+license: MPL-2.0
+platforms:
+  # The project publishes no static binary, only a Debian package for amd64 on each release,
+  # which its README points Debian users to. It is pinned and hash-checked before apt sees it.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/kimono-koans/httm/releases/download/0.51.0/httm_0.51.0-1_amd64.deb; s=2cf811bc3848a9b21e296e1f42e080a8271217025fecb86f080e09eea6277760 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O httm.deb "$a" && echo "$s  httm.deb" | sha256sum -c --quiet &&
+      sudo apt-get install -y ./httm.deb &&
+      cd / && rm -rf "$t"
+    uninstall: sudo apt-get remove -y httm
+command: httm
+args: "-b %1?"
+source: https://github.com/kimono-koans/httm
+website: https://github.com/kimono-koans/httm
+documentation: https://github.com/kimono-koans/httm#readme
+keywords:
+  - snapshots
+  - zfs
+  - btrfs
+  - backup
+  - restore
+
+roles: []

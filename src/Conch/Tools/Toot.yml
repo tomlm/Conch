@@ -1,0 +1,23 @@
+id: toot
+name: toot
+version: 1.0.0
+author: Ivan Habunek
+description: Mastodon client with a command-line interface and a terminal user interface
+license: GPL-3.0
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y toot
+    uninstall: sudo apt-get remove -y toot
+command: toot
+args: "tui"
+source: https://github.com/ihabunek/toot
+website: https://toot.bezdomni.net/
+documentation: https://toot.bezdomni.net/
+screenshot: https://www.linuxlinks.com/wp-content/uploads/2021/05/Toot.png
+keywords:
+  - mastodon
+  - fediverse
+  - social
+  - tui
+
+roles: []

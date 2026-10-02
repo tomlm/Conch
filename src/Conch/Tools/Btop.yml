@@ -2,7 +2,7 @@ id: btop
 name: btop
 version: 1.0.0
 author: aristocratos
-description: Resource monitor in the terminal
+description: Resource monitor that shows usage and stats for processor, memory, disks, network and processes
 license: Apache-2.0
 platforms:
   linux:
@@ -13,6 +13,7 @@ args: ""
 source: https://github.com/aristocratos/btop
 website: https://github.com/aristocratos/btop
 documentation: https://github.com/aristocratos/btop#readme
+screenshot: https://raw.githubusercontent.com/aristocratos/btop/d3389d74e88644c50907e84314c3c7c973ba5be9/Img/normal.png
 keywords:
   - tui
   - monitor

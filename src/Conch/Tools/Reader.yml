@@ -1,0 +1,33 @@
+id: reader
+name: reader
+version: 1.0.0
+author: mrusme
+description: Readability-style viewer that shows web pages and EML files as clean text in the terminal
+license: GPL-3.0
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/mrusme/reader/releases/download/v0.6.0/reader_0.6.0_linux_amd64.tar.gz; s=dd1af76325b237c28241344a89585acddc4e0dd4446b71c1d669354074c57258 ;;
+      aarch64) a=https://github.com/mrusme/reader/releases/download/v0.6.0/reader_0.6.0_linux_arm64.tar.gz; s=dc02ccc91ab1580c0d3760ceaef839f370099076eb76c51f4148987dacb11f57 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 reader /usr/local/bin/reader &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/reader
+command: reader
+args: "%1"
+source: https://github.com/mrusme/reader
+website: https://github.com/mrusme/reader
+documentation: https://github.com/mrusme/reader#readme
+screenshot: https://raw.githubusercontent.com/mrusme/reader/08ba85d1df554d1c43106c0a75a7a07af5386824/sixel.png
+keywords:
+  - web
+  - readability
+  - reader
+  - terminal
+
+roles: []

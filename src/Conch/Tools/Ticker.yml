@@ -1,0 +1,38 @@
+id: ticker
+name: ticker
+version: 1.0.0
+author: Ani Channarasappa
+description: Terminal stock ticker that tracks stocks, currencies, cryptocurrencies, commodities and indexes
+license: GPL-3.0
+platforms:
+  # Debian's "ticker" package is an unrelated text scroller, so this installs the upstream release.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/achannarasappa/ticker/releases/download/v5.3.0/ticker-5.3.0-linux-amd64.tar.gz; s=fa4991f1c963559d0a27dec6ddc35cff411954a6f62ae3c2c3dc24d9ffedc12a ;;
+      aarch64) a=https://github.com/achannarasappa/ticker/releases/download/v5.3.0/ticker-5.3.0-linux-arm64.tar.gz; s=98f1316362cd48a2a235bb2088fc8b7514e58aaeb6b3a3992e0b70facfde94ca ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 ticker /usr/local/bin/ticker &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/ticker
+  windows:
+    install: winget install -e --id achannarasappa.ticker
+    uninstall: winget uninstall -e --id achannarasappa.ticker
+command: ticker
+args: ""
+source: https://github.com/achannarasappa/ticker
+website: https://github.com/achannarasappa/ticker
+documentation: https://github.com/achannarasappa/ticker#readme
+screenshot: https://raw.githubusercontent.com/achannarasappa/ticker/3e659aad55959e56123a83144295917a2f4dadc5/docs/ticker.gif
+keywords:
+  - stocks
+  - finance
+  - portfolio
+  - crypto
+  - tui
+
+roles: []

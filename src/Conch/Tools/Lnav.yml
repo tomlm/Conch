@@ -1,0 +1,24 @@
+id: lnav
+name: lnav
+version: 1.0.0
+author: Tim Stack
+description: Log file viewer that merges, highlights and queries log files
+license: BSD-2-Clause
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y lnav
+    uninstall: sudo apt-get remove -y lnav
+  windows:
+    install: winget install -e --id tstack.lnav
+    uninstall: winget uninstall -e --id tstack.lnav
+command: lnav
+args: "%1?"
+source: https://github.com/tstack/lnav
+website: https://lnav.org/
+documentation: https://docs.lnav.org/
+screenshot: https://raw.githubusercontent.com/tstack/lnav/ec4b334aaf1e52749cb506b5e6c5a03884a606b2/docs/assets/images/lnav-front-page.png
+keywords:
+  - tui
+  - logs
+  - viewer
+  - sql

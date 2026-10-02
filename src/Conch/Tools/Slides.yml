@@ -1,0 +1,32 @@
+id: slides
+name: slides
+version: 1.0.0
+author: Maas Lalani
+description: Terminal-based presentation tool that shows slides written in Markdown
+license: MIT
+platforms:
+  # Not in Debian. Pinned upstream release, checked by hash.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/maaslalani/slides/releases/download/v0.9.0/slides_0.9.0_linux_amd64.tar.gz; s=3ceccd36310d6f9e0db4983acff5248c7a03d168c6ff7d90dee89448d9083235 ;;
+      aarch64) a=https://github.com/maaslalani/slides/releases/download/v0.9.0/slides_0.9.0_linux_arm64.tar.gz; s=00a84b2ccd12554bd27983ba46dbdab3542d4af6e4858e1929c7f93785880768 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 slides /usr/local/bin/slides &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/slides
+command: slides
+args: "%1"
+source: https://github.com/maaslalani/slides
+website: https://github.com/maaslalani/slides
+documentation: https://github.com/maaslalani/slides#readme
+screenshot: https://raw.githubusercontent.com/maaslalani/slides/92af1ef1f33a75bd51db9842a760bd228f3b1a61/assets/slides-1.gif
+keywords:
+  - tui
+  - presentation
+  - markdown
+  - slides

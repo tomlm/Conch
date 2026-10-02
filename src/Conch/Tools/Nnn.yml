@@ -1,8 +1,8 @@
 id: nnn
 name: nnn
 version: 1.0.0
-author: nnn contributors
-description: Tiny, fast terminal file manager
+author: Arun Prakash Jana
+description: Tiny, fast, nearly zero-config terminal file manager with disk usage analysis, batch rename and plugins
 license: BSD-2-Clause
 platforms:
   linux:
@@ -13,6 +13,7 @@ args: "%1?"
 source: https://github.com/jarun/nnn
 website: https://github.com/jarun/nnn
 documentation: https://github.com/jarun/nnn#readme
+screenshot: https://github.com/user-attachments/assets/a8ee4689-1552-4fb1-997e-b16fe8ef5086
 keywords:
   - tui
   - file manager

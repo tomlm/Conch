@@ -1,0 +1,37 @@
+id: pyradio
+name: PyRadio
+version: 1.0.0
+author: Ben Dowling & Spiros Georgaras
+description: Internet radio player for the terminal with Radio Browser station search
+license: MIT
+platforms:
+  # Not in Debian 13, and the "pyradio" release on PyPI is from 2013. So pipx installs the
+  # 0.9.3.11.31 source tarball from GitHub, checked by hash. Its pyproject lists only part
+  # of what it imports; the rest comes from Debian's Python packages, which the venv sees
+  # through --system-site-packages (the way PyRadio's own installer sets up pipx). mpv
+  # is the player it drives.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget pipx mpv
+      python3-rich python3-requests python3-dnspython python3-psutil python3-netifaces
+      python3-dateutil python3-charset-normalizer python3-rapidfuzz &&
+      t=$(mktemp -d) && cd "$t" &&
+      wget -q -O pyradio-0.9.3.11.31.tar.gz https://github.com/coderholic/pyradio/archive/refs/tags/0.9.3.11.31.tar.gz &&
+      echo "e4aca283ac05295020f6d187f90e902199a6897afe1fcaf6aa9304e098c3266d  pyradio-0.9.3.11.31.tar.gz" | sha256sum -c --quiet &&
+      sudo pipx install --global --system-site-packages ./pyradio-0.9.3.11.31.tar.gz &&
+      cd / && rm -rf "$t"
+    uninstall: sudo pipx uninstall --global pyradio
+command: pyradio
+args: ""
+source: https://github.com/coderholic/pyradio
+website: https://github.com/coderholic/pyradio
+documentation: https://github.com/coderholic/pyradio#readme
+screenshot: https://members.hellug.gr/sng/pyradio/pyradio.png
+keywords:
+  - tui
+  - radio
+  - music
+  - streaming
+  - audio
+
+roles: []

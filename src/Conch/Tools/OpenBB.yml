@@ -1,0 +1,33 @@
+id: openbb
+name: OpenBB
+version: 1.0.0
+author: OpenBB Inc.
+description: Investment research environment that pulls financial data from many providers into an interactive command line
+license: Apache-2.0
+platforms:
+  # openbb-cli is the command line; the "openbb" package brings the data providers it
+  # runs in-process. On first import openbb builds its static package files in its own
+  # site-packages, which a user cannot write in a global venv, so the install runs that
+  # first import as root.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y pipx &&
+      sudo pipx install --global openbb-cli &&
+      sudo pipx inject --global openbb-cli openbb &&
+      sudo /opt/pipx/venvs/openbb-cli/bin/python -c "from openbb import obb"
+    uninstall: sudo pipx uninstall --global openbb-cli
+command: openbb
+# Without -i the CLI runs one command and prints JSON; -i is the interactive REPL.
+args: "-i"
+source: https://github.com/OpenBB-finance/OpenBB
+website: https://openbb.co/
+documentation: https://docs.openbb.co/odp/cli
+screenshot: https://www.linuxlinks.com/wp-content/uploads/2022/01/Gamestonk-Terminal-economy-currencies.png
+keywords:
+  - tui
+  - finance
+  - investing
+  - stocks
+  - research
+
+roles: []

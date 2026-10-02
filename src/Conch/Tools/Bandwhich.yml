@@ -1,0 +1,36 @@
+id: bandwhich
+name: bandwhich
+version: 1.0.0
+author: Aram Drevekenin
+description: Network utilization monitor that shows bandwidth by process, connection and remote host
+license: MIT
+platforms:
+  # bandwhich sniffs packets, so the install grants the binary the capabilities its README
+  # lists (setcap) instead of making every launch go through sudo.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget libcap2-bin &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/imsnif/bandwhich/releases/download/v0.23.1/bandwhich-v0.23.1-x86_64-unknown-linux-musl.tar.gz; s=fec93e01c393cd3ef8aa168a675dffb8fa4841d5fd93390b5d14f238ae29e59c ;;
+      aarch64) a=https://github.com/imsnif/bandwhich/releases/download/v0.23.1/bandwhich-v0.23.1-aarch64-unknown-linux-musl.tar.gz; s=6bbf084e5280a1a10833b8f466728ff428a7d637282c0487d6fcda0c4781357a ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 bandwhich /usr/local/bin/bandwhich &&
+      sudo setcap cap_sys_ptrace,cap_dac_read_search,cap_net_raw,cap_net_admin+ep /usr/local/bin/bandwhich &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/bandwhich
+command: bandwhich
+args: ""
+source: https://github.com/imsnif/bandwhich
+website: https://github.com/imsnif/bandwhich
+documentation: https://github.com/imsnif/bandwhich#readme
+screenshot: https://raw.githubusercontent.com/imsnif/bandwhich/1899870cea8bb377948f05cfea64733ec6ea2cd6/res/demo.gif
+keywords:
+  - network
+  - bandwidth
+  - monitor
+  - tui
+
+roles: []

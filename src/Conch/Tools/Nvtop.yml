@@ -1,0 +1,22 @@
+id: nvtop
+name: NVTOP
+version: 1.0.0
+author: Maxime Schmitt
+description: Htop-like task monitor for AMD, Intel and NVIDIA GPUs that can show several GPUs at once
+license: GPL-3.0
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y nvtop
+    uninstall: sudo apt-get remove -y nvtop
+command: nvtop
+args: ""
+source: https://github.com/Syllo/nvtop
+website: https://github.com/Syllo/nvtop
+documentation: https://github.com/Syllo/nvtop#readme
+screenshot: https://raw.githubusercontent.com/Syllo/nvtop/ed4a572ea7a2eeb8ab16e7ef94ff87dbf3785969/screenshot/NVTOP_ex1.png
+keywords:
+  - tui
+  - gpu
+  - monitor
+  - nvidia
+  - amd

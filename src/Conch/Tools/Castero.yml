@@ -1,0 +1,23 @@
+id: castero
+name: castero
+version: 1.0.0
+author: xgi
+description: Podcast client for the terminal that imports and exports OPML subscription lists
+license: MIT
+platforms:
+  # Not in Debian; installed from PyPI with pipx. libmpv2 is the playback backend that
+  # castero's python-mpv binding loads.
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y pipx libmpv2 && sudo pipx install --global castero
+    uninstall: sudo pipx uninstall --global castero
+command: castero
+args: ""
+source: https://github.com/xgi/castero
+website: https://github.com/xgi/castero
+documentation: https://github.com/xgi/castero#readme
+screenshot: https://raw.githubusercontent.com/xgi/castero/d229ebe1748c839f80cee86e6dd383fa4f4df370/res/client_example.png
+keywords:
+  - tui
+  - podcast
+  - audio
+  - rss

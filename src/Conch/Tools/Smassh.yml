@@ -1,0 +1,23 @@
+id: smassh
+name: smassh
+version: 1.0.0
+author: kraanzu
+description: Typing test for the terminal, formerly called Termtyper
+license: GPL-3.0
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y pipx && sudo pipx install --global smassh
+    uninstall: sudo pipx uninstall --global smassh
+command: smassh
+args: ""
+source: https://github.com/kraanzu/smassh
+website: https://github.com/kraanzu/smassh
+documentation: https://github.com/kraanzu/smassh#readme
+screenshot: https://raw.githubusercontent.com/kraanzu/smassh/8aa6b2319730f7171404473d05445d4e1f4c87dc/imgs/preview.png
+keywords:
+  - typing
+  - typing test
+  - tui
+  - textual
+
+roles: []

@@ -1,0 +1,34 @@
+id: cointop
+name: cointop
+version: 1.0.0
+author: Miguel Mota
+description: Real-time cryptocurrency price and portfolio tracker
+license: Apache-2.0
+platforms:
+  # The project is archived; 1.6.10 is its last release and ships for x86_64 only.
+  # Prices come from the public CoinGecko API, which still answers.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/cointop-sh/cointop/releases/download/v1.6.10/cointop_1.6.10_linux_amd64.tar.gz; s=7b0ae618e3d0719f0246d6578a901d6536fa6699c10f7530bedd1586d74939ab ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 cointop /usr/local/bin/cointop &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/cointop
+command: cointop
+args: ""
+source: https://github.com/cointop-sh/cointop
+website: https://github.com/cointop-sh/cointop
+documentation: https://github.com/cointop-sh/cointop#readme
+screenshot: https://user-images.githubusercontent.com/168240/39569578-7ce9f3b6-4e7a-11e8-82a9-8a18b91b1bd5.png
+keywords:
+  - tui
+  - cryptocurrency
+  - finance
+  - portfolio
+
+roles: []

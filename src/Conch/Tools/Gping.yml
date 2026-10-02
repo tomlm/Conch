@@ -1,0 +1,27 @@
+id: gping
+name: gping
+version: 1.0.0
+author: Tom Forbes
+description: Ping that graphs the response time of one or more hosts
+license: MIT
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y gping
+    uninstall: sudo apt-get remove -y gping
+  windows:
+    install: winget install -e --id orf.gping
+    uninstall: winget uninstall -e --id orf.gping
+command: gping
+args: "%1"
+source: https://github.com/orf/gping
+website: https://github.com/orf/gping
+documentation: https://github.com/orf/gping#readme
+screenshot: https://raw.githubusercontent.com/orf/gping/fad1ee3c02fdc45751271778814cec452a45f2ab/images/readme-example.gif
+keywords:
+  - tui
+  - ping
+  - network
+  - graph
+  - terminal
+
+roles: []

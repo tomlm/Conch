@@ -1,0 +1,23 @@
+id: pudb
+name: PuDB
+version: 1.0.0
+author: Andreas Klöckner
+description: Full-screen console debugger for Python with source, stack, breakpoints and variables in view
+license: MIT
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y python3-pudb
+    uninstall: sudo apt-get remove -y python3-pudb
+command: pudb
+args: "%1"
+source: https://github.com/inducer/pudb
+website: https://documen.tician.de/pudb/
+documentation: https://documen.tician.de/pudb/
+screenshot: https://raw.githubusercontent.com/inducer/pudb/1526341ee3309c337d75db496402455342782f0a/doc/images/pudb-screenshot-light.png
+keywords:
+  - python
+  - debugger
+  - development
+  - tui
+
+roles: []

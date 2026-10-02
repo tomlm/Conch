@@ -1,0 +1,21 @@
+id: patat
+name: patat
+version: 1.0.0
+author: Jasper Van der Jeugt
+description: Presentations Atop The ANSI Terminal, a tool that shows Markdown presentations in a plain ANSI terminal
+license: GPL-2.0
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y patat
+    uninstall: sudo apt-get remove -y patat
+command: patat
+args: "%1"
+source: https://github.com/jaspervdj/patat
+website: https://github.com/jaspervdj/patat
+documentation: https://github.com/jaspervdj/patat#readme
+screenshot: https://raw.githubusercontent.com/jaspervdj/patat/867b2ac535d4402acb3b5fb48f9b061fb76b4c5c/extra/demo.gif
+keywords:
+  - tui
+  - presentation
+  - markdown
+  - slides

@@ -1,0 +1,45 @@
+id: helix
+name: Helix
+version: 1.0.0
+author: Helix contributors
+description: Modal text editor with multiple selections and built-in language server support
+license: MPL-2.0
+platforms:
+  # Debian 13 has no Helix package (its "hx" package is an unrelated hex editor). The
+  # release tarball holds hx next to the runtime folder it loads grammars and themes from,
+  # so the whole folder goes to /opt/helix and only a symlink lands on PATH; hx finds the
+  # runtime through its real path.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget xz-utils &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/helix-editor/helix/releases/download/25.07.1/helix-25.07.1-x86_64-linux.tar.xz; s=3f08e63ecd388fff657ad39722f88bb03dcf326f1f2da2700d99e1dc40ab2e8b ;;
+      aarch64) a=https://github.com/helix-editor/helix/releases/download/25.07.1/helix-25.07.1-aarch64-linux.tar.xz; s=ce23fa8d395e633e3e54c052012f11965d91d8d5c2bfa659685f50430b4f8175 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      sudo rm -rf /opt/helix && sudo mkdir -p /opt/helix &&
+      sudo tar -xJf pkg -C /opt/helix --strip-components=1 &&
+      sudo ln -sf /opt/helix/hx /usr/local/bin/hx &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -rf /usr/local/bin/hx /opt/helix
+    detect: test -x /opt/helix/hx && test -d /opt/helix/runtime
+  windows:
+    install: winget install -e --id Helix.Helix
+    uninstall: winget uninstall -e --id Helix.Helix
+command: hx
+args: "%1?"
+source: https://github.com/helix-editor/helix
+website: https://helix-editor.com/
+documentation: https://docs.helix-editor.com/
+screenshot: https://raw.githubusercontent.com/helix-editor/helix/ba40e547426b0f9896c8bdc699a4ab11f2b37dbc/screenshot.png
+keywords:
+  - text editor
+  - code editor
+  - modal
+  - lsp
+  - terminal
+
+roles:
+  - text-editor

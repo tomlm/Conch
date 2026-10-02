@@ -1,0 +1,32 @@
+id: wtf
+name: WTF
+version: 1.0.0
+author: Chris Cummer
+description: Personal information dashboard for the terminal, giving quick access to infrequently needed stats and data
+license: MPL-2.0
+platforms:
+  # Not in Debian. Pinned upstream release, checked by hash. The package's binary is wtfutil.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/wtfutil/wtf/releases/download/v0.51.0/wtf_0.51.0_linux_amd64.tar.gz; s=5b1670e8a6a2bfcddf699bccbaae6b53263d75b87ef099d8e2a837c1d5ffc81b ;;
+      aarch64) a=https://github.com/wtfutil/wtf/releases/download/v0.51.0/wtf_0.51.0_linux_arm64.tar.gz; s=125ffb623e610dfc8076034b57cf0c13e8422b52924177ce752c541c6e356203 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 wtfutil /usr/local/bin/wtfutil &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/wtfutil
+command: wtfutil
+args: ""
+source: https://github.com/wtfutil/wtf
+website: https://wtfutil.com/
+documentation: https://wtfutil.com/quick_start/
+screenshot: https://raw.githubusercontent.com/wtfutil/wtf/26919197d49d5f3c3025575602aaffee12675606/images/screenshot.jpg
+keywords:
+  - tui
+  - dashboard
+  - terminal
+  - productivity

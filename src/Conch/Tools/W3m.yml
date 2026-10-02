@@ -1,0 +1,22 @@
+id: w3m
+name: w3m
+version: 1.0.0
+author: Akinori Ito
+description: Text-based web browser that also works as a pager
+license: w3m
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y w3m
+    uninstall: sudo apt-get remove -y w3m
+command: w3m
+args: "%1"
+source: https://github.com/tats/w3m
+website: https://w3m.sourceforge.net/
+documentation: https://w3m.sourceforge.net/MANUAL
+screenshot: https://www.linuxlinks.com/wp-content/uploads/2020/10/w3m.png
+keywords:
+  - web browser
+  - pager
+  - terminal
+
+roles: []

@@ -1,0 +1,22 @@
+id: mapscii
+name: MapSCII
+version: 1.0.0
+author: Michael Straßburger
+description: World map renderer for the terminal that draws OpenStreetMap vector tiles in Braille and ASCII
+license: MIT
+platforms:
+  # Not in Debian; published on npm. Map tiles are fetched from mapscii.me at run time.
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y npm && sudo npm install -g mapscii
+    uninstall: sudo npm uninstall -g mapscii
+command: mapscii
+args: ""
+source: https://github.com/rastapasta/mapscii
+website: https://github.com/rastapasta/mapscii
+documentation: https://github.com/rastapasta/mapscii#readme
+screenshot: https://cloud.githubusercontent.com/assets/1259904/25480718/497a64e2-2b4a-11e7-9cf0-ed52ee0b89c0.png
+keywords:
+  - tui
+  - map
+  - openstreetmap
+  - ascii

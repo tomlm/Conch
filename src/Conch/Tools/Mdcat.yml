@@ -1,0 +1,34 @@
+id: mdcat
+name: mdcat
+version: 1.0.0
+author: Sebastian Wiesner
+description: Markdown renderer for the terminal that formats CommonMark and highlights code blocks
+license: MPL-2.0
+platforms:
+  # Not in Debian. Pinned upstream release (the project is archived; 2.7.1 is its last),
+  # checked by hash. Upstream ships a Linux build for x86_64 only, linked against OpenSSL 3.
+  # less is the pager --paginate uses.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget libssl3t64 less &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/swsnr/mdcat/releases/download/mdcat-2.7.1/mdcat-2.7.1-x86_64-unknown-linux-gnu.tar.gz; s=a5610f76a8f3ca1da84326ee42f4e7b00c7daa349ad831168e71c3fbb054dae2 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 mdcat-2.7.1-x86_64-unknown-linux-gnu/mdcat /usr/local/bin/mdcat &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/mdcat
+command: mdcat
+# mdcat prints and exits on its own; --paginate keeps the rendered document open in a pager.
+args: "--paginate %1"
+source: https://github.com/swsnr/mdcat
+website: https://github.com/swsnr/mdcat
+documentation: https://github.com/swsnr/mdcat#readme
+screenshot: https://raw.githubusercontent.com/swsnr/mdcat/5012892b6f998545381413d60b30271004b4ad28/screenshots/side-by-side.png
+keywords:
+  - markdown
+  - viewer
+  - pager
+  - terminal
