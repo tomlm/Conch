@@ -13,7 +13,7 @@ namespace Conch.Services
     public sealed class AppLauncher
     {
         private const string LogCategory = "Launch";
-        private const string DefaultFontFamily = "Cascadia Mono";
+        internal const string DefaultFontFamily = "Cascadia Mono";
 
         private readonly WindowsPanel _windows;
 
@@ -114,6 +114,29 @@ namespace Conch.Services
                 onExit?.Invoke(code);
             };
 
+            return window;
+        }
+
+        /// <summary>
+        /// Opens a window around a session that is already running, such as an install whose
+        /// panel is closing.
+        /// </summary>
+        public ManagedTerminalWindow Adopt(Porta.Pty.IPtyConnection connection, string title)
+        {
+            // An empty Process is what stops the window starting a shell of its own on load.
+            var window = new ManagedTerminalWindow(100, 30)
+            {
+                Process = string.Empty,
+                FontFamily = DefaultFontFamily,
+                CloseOnProcessExit = false,
+                Title = title,
+            };
+
+            window.Show(_windows);
+            window.AttachConnection(connection);
+            Dispatcher.UIThread.Post(window.Activate, DispatcherPriority.Background);
+
+            Log.Info(LogCategory, $"{title}: moved into its own window.");
             return window;
         }
 

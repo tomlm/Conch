@@ -5,12 +5,13 @@
 				  xmlns:console="https://github.com/consolonia"
 				  xmlns:wm="using:Iciclecreek.Avalonia.WindowManager"
 				  xmlns:vm="clr-namespace:Conch.ViewModel"
+				  xmlns:controls="clr-namespace:Conch.Controls"
 				  mc:Ignorable="d" d:DesignWidth="120" d:DesignHeight="40"
 				  x:Class="Conch.Views.AppManagerDialog"
 				  Title="Manage Apps"
 				  Width="110" Height="34"
 				  x:DataType="vm:AppManagerViewModel">
-	<Grid Margin="{console:OnPlatform Default='16', Console='1'}" RowDefinitions="Auto,*,Auto,Auto">
+	<Grid Margin="{console:OnPlatform Default='16', Console='1'}" RowDefinitions="Auto,*,Auto,Auto,Auto">
 		<TextBox Grid.Row="0" x:Name="SearchBox" PlaceholderText="Search apps..." Text="{Binding SearchText}"/>
 		<Grid Grid.Row="1"
 			  ColumnDefinitions="1*,1*" >
@@ -95,13 +96,27 @@
 				</ScrollViewer>
 			</Border>
 		</Grid>
-		<TextBlock Grid.Row="2" Text="{Binding CheckStatus}" Foreground="Gray" HorizontalAlignment="Center"/>
-		<StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center"
+		<!--
+		Installs and uninstalls run here rather than in a window of their own: they are part of
+		what this window is doing, and a separate window can end up behind it. A real terminal,
+		because sudo, apt and nmcli all ask things. Hidden until a task starts; folds away after
+		one succeeds, and stays open after one fails, which is when the output is worth reading.
+		-->
+		<Border Grid.Row="2"
+				IsVisible="{Binding IsTaskPanelOpen}"
+				BorderBrush="Gray" BorderThickness="1"
+				Margin="{console:OnPlatform Default='0 8 0 0', Console='0 1 0 0'}">
+			<controls:TaskTerminalPanel x:Name="TaskPanel"
+										Height="{console:OnPlatform Default='220', Console='10'}"/>
+		</Border>
+		<TextBlock Grid.Row="3" Text="{Binding CheckStatus}" Foreground="Gray" HorizontalAlignment="Center"/>
+		<StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center"
 					Spacing="{console:OnPlatform Default='8',Console='1'}">
 			<Button Content="RUN" Click="OnRun" IsEnabled="{Binding CanRun}"/>
 			<Button Content="INSTALL" Click="OnInstall" IsEnabled="{Binding CanInstall}"/>
 			<Button Content="UNINSTALL" Click="OnUninstall" IsEnabled="{Binding CanUninstall}"/>
 			<Button Content="RECHECK" Click="OnRecheck" IsEnabled="{Binding CanRecheck}"/>
+			<Button Content="{Binding LogButtonText}" Click="OnToggleLog" IsVisible="{Binding HasTaskOutput}"/>
 			<Button Content="CLOSE" Click="OnClose"/>
 		</StackPanel>
 	</Grid>

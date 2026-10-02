@@ -79,6 +79,64 @@ public class AppManagerViewModelTests
     }
 
     [Fact]
+    public void OnlyOneTaskRunsAtATime()
+    {
+        var manager = Manager();
+        manager.SelectedTool = Tool(installed: false);
+
+        manager.BeginTask("Installing t");
+
+        Assert.False(manager.CanInstall);
+        Assert.False(manager.CanRecheck);
+        Assert.True(manager.IsTaskPanelOpen);
+        Assert.Equal("Installing t...", manager.CheckStatus);
+    }
+
+    [Fact]
+    public void ASuccessfulTaskFoldsThePanelAway()
+    {
+        var manager = Manager();
+        manager.BeginTask("Installing t");
+
+        var token = manager.EndTask("t installed.");
+        manager.CollapseAfterSuccess(token);
+
+        Assert.False(manager.IsTaskPanelOpen);
+        Assert.True(manager.HasTaskOutput);
+        Assert.Equal("SHOW LOG", manager.LogButtonText);
+        Assert.Equal("t installed.", manager.CheckStatus);
+    }
+
+    [Fact]
+    public void ALaterTaskKeepsThePanelOpen()
+    {
+        // The first task's collapse timer fires while the second is running.
+        var manager = Manager();
+        manager.BeginTask("Installing a");
+        var first = manager.EndTask("a installed.");
+        manager.BeginTask("Installing b");
+
+        manager.CollapseAfterSuccess(first);
+
+        Assert.True(manager.IsTaskPanelOpen);
+    }
+
+    [Fact]
+    public void AFailedTaskLeavesThePanelOpenAndTheButtonsBack()
+    {
+        // There is no collapse after a failure: the output is what explains it.
+        var manager = Manager();
+        manager.SelectedTool = Tool(installed: false);
+        manager.BeginTask("Installing t");
+
+        manager.EndTask("Installing t failed (exit code 100).");
+
+        Assert.True(manager.IsTaskPanelOpen);
+        Assert.True(manager.CanInstall);
+        Assert.Equal("HIDE LOG", manager.LogButtonText);
+    }
+
+    [Fact]
     public async Task AFailedRecheckSaysSoAndCanBeTriedAgain()
     {
         var manager = Manager();

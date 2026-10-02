@@ -393,6 +393,24 @@ namespace Conch.Controls
         }
 
         /// <summary>
+        /// Takes over a session that is already running somewhere else.
+        /// </summary>
+        /// <remarks>
+        /// For a window shown with an empty <see cref="Process"/>, which is what stops it launching
+        /// one of its own when it loads. The terminal control exists only once the window has been
+        /// shown, since it is built in OnInitialized -- so this is called after Show.
+        /// </remarks>
+        public void AttachConnection(Porta.Pty.IPtyConnection connection)
+        {
+            if (_terminalControl == null)
+            {
+                throw new InvalidOperationException("Show the window before attaching a session to it.");
+            }
+
+            _terminalControl.AttachConnection(connection);
+        }
+
+        /// <summary>
         /// Raised when the hosted process exits, before <see cref="CloseOnProcessExit"/> is honoured.
         /// </summary>
         public event EventHandler<ProcessExitedEventArgs>? ProcessExited;

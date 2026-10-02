@@ -35,7 +35,7 @@ namespace Conch.ViewModel
         [NotifyPropertyChangedFor(nameof(CanRecheck))]
         private bool _isChecking;
 
-        public bool CanRecheck => !IsChecking;
+        public bool CanRecheck => !IsChecking && !IsTaskRunning;
 
         /// <summary>What the last detection sweep found, or that one is running.</summary>
         [ObservableProperty]
@@ -82,9 +82,77 @@ namespace Conch.ViewModel
             }
         }
 
-        public bool CanInstall => SelectedTool is { HasInstall: true, IsInstalled: false };
+        public bool CanInstall => !IsTaskRunning && SelectedTool is { HasInstall: true, IsInstalled: false };
 
-        public bool CanUninstall => SelectedTool is { HasUninstall: true, IsInstalled: true };
+        public bool CanUninstall => !IsTaskRunning && SelectedTool is { HasUninstall: true, IsInstalled: true };
+
+        /// <summary>
+        /// True while an install or uninstall is running in the panel.
+        /// </summary>
+        /// <remarks>
+        /// One at a time: the panel is a single terminal, and two package managers at once would
+        /// only queue on apt's lock anyway -- with one of them sitting there looking stuck.
+        /// </remarks>
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(CanInstall))]
+        [NotifyPropertyChangedFor(nameof(CanUninstall))]
+        [NotifyPropertyChangedFor(nameof(CanRecheck))]
+        private bool _isTaskRunning;
+
+        /// <summary>Whether the task terminal is showing.</summary>
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(LogButtonText))]
+        private bool _isTaskPanelOpen;
+
+        /// <summary>True once a task has run, so its output can be shown again.</summary>
+        [ObservableProperty]
+        private bool _hasTaskOutput;
+
+        /// <summary>What is running, or how the last task ended.</summary>
+        [ObservableProperty]
+        private string _taskTitle = string.Empty;
+
+        public string LogButtonText => IsTaskPanelOpen ? "HIDE LOG" : "SHOW LOG";
+
+        private int _taskVersion;
+
+        /// <summary>Opens the panel for a task and stops the buttons starting another.</summary>
+        public void BeginTask(string title)
+        {
+            _taskVersion++;
+            TaskTitle = title;
+            IsTaskRunning = true;
+            HasTaskOutput = true;
+            IsTaskPanelOpen = true;
+            CheckStatus = title + "...";
+        }
+
+        /// <summary>
+        /// Records how a task ended, and returns a token for <see cref="CollapseAfterSuccess"/>.
+        /// </summary>
+        public int EndTask(string outcome)
+        {
+            IsTaskRunning = false;
+            TaskTitle = outcome;
+            CheckStatus = outcome;
+            return _taskVersion;
+        }
+
+        /// <summary>
+        /// Folds the panel away after a task that succeeded -- unless another task has started
+        /// since, or someone has already closed it.
+        /// </summary>
+        /// <remarks>
+        /// Only after success. A failure leaves it open, because that is exactly when the output
+        /// is worth reading; the status line says what happened either way.
+        /// </remarks>
+        public void CollapseAfterSuccess(int token)
+        {
+            if (token == _taskVersion && !IsTaskRunning)
+            {
+                IsTaskPanelOpen = false;
+            }
+        }
 
         /// <summary>The selected app's screenshot, once fetched and decoded.</summary>
         [ObservableProperty]

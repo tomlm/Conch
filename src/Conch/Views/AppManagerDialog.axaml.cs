@@ -27,6 +27,7 @@ public partial class AppManagerDialog : ManagedWindow
         DataContext = _viewModel;
 
         Opened += OnOpened;
+        Closing += OnClosing;
     }
 
     /// <summary>
@@ -109,46 +110,16 @@ public partial class AppManagerDialog : ManagedWindow
             }
         }
 
-        RunPlan(plan.Steps, 0);
+        var steps = plan.Steps
+            .Select((step, i) => new TaskStep(
+                i == plan.Steps.Count - 1 ? $"Installing {step.Name}" : $"Installing {step.Name} (needed first)",
+                step, step.Install))
+            .ToList();
+
+        await RunTaskAsync(steps, $"{tool.Name} installed.");
     }
 
-    /// <summary>
-    /// Runs an install plan a step at a time, stopping at the first failure.
-    /// </summary>
-    /// <remarks>
-    /// Sequential rather than one combined script, so each step gets its own window with its
-    /// own output and exit code. Installing the SDK and then the tool are different operations
-    /// and failing halfway should say which half.
-    ///
-    /// Stopping on failure matters more than it looks: without the toolchain, the app's own
-    /// install would fail too, and the second error would bury the first one that explained it.
-    /// </remarks>
-    private void RunPlan(IReadOnlyList<ToolViewModel> steps, int index)
-    {
-        if (index >= steps.Count)
-        {
-            return;
-        }
-
-        var step = steps[index];
-        var label = index == steps.Count - 1 ? $"Install {step.Name}" : $"Install {step.Name} (needed first)";
-
-        Apps.RunScript(label, step.Install, step.RunsUnderWsl, exitCode =>
-        {
-            _ = ReprobeAsync(step);
-
-            if (exitCode == 0)
-            {
-                RunPlan(steps, index + 1);
-            }
-            else
-            {
-                Log.Warning("Install", $"{step.Id} failed with {exitCode}; stopping before {steps.Count - index - 1} remaining step(s).");
-            }
-        });
-    }
-
-    private void OnUninstall(object? sender, RoutedEventArgs e)
+    private async void OnUninstall(object? sender, RoutedEventArgs e)
     {
         var tool = _viewModel.SelectedTool;
         if (tool == null || !tool.HasUninstall)
@@ -156,8 +127,104 @@ public partial class AppManagerDialog : ManagedWindow
             return;
         }
 
-        Apps.RunScript($"Uninstall {tool.Name}", tool.Uninstall, tool.RunsUnderWsl, exitCode => { _ = ReprobeAsync(tool); });
+        await RunTaskAsync([new TaskStep($"Removing {tool.Name}", tool, tool.Uninstall)], $"{tool.Name} removed.");
     }
+
+    private sealed record TaskStep(string Title, ToolViewModel Tool, string Script);
+
+    /// <summary>How long a successful task's output stays open before the panel folds away.</summary>
+    private static readonly TimeSpan CollapseDelay = TimeSpan.FromSeconds(2);
+
+    /// <summary>
+    /// Runs the steps of an install or uninstall in the panel, one at a time, stopping at the
+    /// first failure.
+    /// </summary>
+    /// <remarks>
+    /// Sequential rather than one combined script, so each step has its own exit code. Installing
+    /// the SDK and then the tool are different operations, and failing halfway should say which
+    /// half. Stopping matters more than it looks: without the toolchain the app's own install
+    /// fails too, and its error would bury the one that explained it.
+    ///
+    /// Every step is followed by a fresh probe, so the buttons follow what actually happened
+    /// rather than what the package manager's exit code claimed.
+    /// </remarks>
+    private async Task RunTaskAsync(IReadOnlyList<TaskStep> steps, string succeeded)
+    {
+        if (_viewModel.IsTaskRunning || steps.Count == 0)
+        {
+            return;
+        }
+
+        // Resolved now, while the dialog is still in its panel: a step may finish after it has
+        // closed, and the rest of the plan then runs in windows of its own.
+        var apps = Apps;
+
+        foreach (var step in steps)
+        {
+            _viewModel.BeginTask(step.Title);
+            Log.Info(LogCategory, $"{step.Title}: {step.Script}");
+
+            var exitCode = await RunStepAsync(apps, step).ConfigureAwait(true);
+            await ReprobeAsync(step.Tool).ConfigureAwait(true);
+
+            if (exitCode != 0)
+            {
+                var outcome = exitCode is int code
+                    ? $"{step.Title} failed (exit code {code})."
+                    : $"{step.Title} ended, but how is unknown.";
+                Log.Warning(LogCategory, outcome);
+                _viewModel.EndTask(outcome);
+                return;
+            }
+        }
+
+        var token = _viewModel.EndTask(succeeded);
+        Log.Info(LogCategory, succeeded);
+
+        await Task.Delay(CollapseDelay).ConfigureAwait(true);
+        _viewModel.CollapseAfterSuccess(token);
+    }
+
+    private Task<int?> RunStepAsync(AppLauncher apps, TaskStep step)
+    {
+        if (!_closed)
+        {
+            return TaskPanel.RunAsync(ShellCommand.ForScript(step.Script, step.Tool.RunsUnderWsl));
+        }
+
+        // The dialog closed partway through a plan: the remaining steps carry on in windows.
+        var exit = new TaskCompletionSource<int?>(TaskCreationOptions.RunContinuationsAsynchronously);
+        apps.RunScript(step.Title, step.Script, step.Tool.RunsUnderWsl, code => exit.TrySetResult(code));
+        return exit.Task;
+    }
+
+    private bool _closed;
+
+    /// <summary>
+    /// Moves a running task into a window of its own as the dialog closes.
+    /// </summary>
+    /// <remarks>
+    /// Killing an install halfway can leave a package manager mid-transaction, and refusing to
+    /// close is worse than letting the work carry on somewhere else. This has to happen in
+    /// Closing, not Closed: the session must leave the panel's terminal before that terminal
+    /// leaves the visual tree, which is when it would kill the process.
+    /// </remarks>
+    private void OnClosing(object? sender, Avalonia.Controls.WindowClosingEventArgs e)
+    {
+        if (e.Cancel)
+        {
+            return;
+        }
+
+        _closed = true;
+
+        var title = _viewModel.TaskTitle;
+        var apps = Apps;
+        TaskPanel.HandOver(connection => apps.Adopt(connection, title));
+    }
+
+    private void OnToggleLog(object? sender, RoutedEventArgs e)
+        => _viewModel.IsTaskPanelOpen = !_viewModel.IsTaskPanelOpen;
 
     /// <summary>
     /// Re-probes one tool after a package command, so the buttons reflect what actually happened
