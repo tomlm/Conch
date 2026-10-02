@@ -1,0 +1,33 @@
+id: dtop
+name: dtop
+version: 1.0.0
+author: Amir Raminfar
+description: Docker container monitor with live processor and memory usage for local and remote hosts
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/amir20/dtop/releases/download/v0.9.4/dtop-x86_64-unknown-linux-gnu.tar.gz; s=a96f8d2d4528045ddf47e49f66aa6908b85836d54ad4c2a84bd2b88c18e10165 ;;
+      aarch64) a=https://github.com/amir20/dtop/releases/download/v0.9.4/dtop-aarch64-unknown-linux-gnu.tar.gz; s=82ecb51fd74a3d4c720ac2ab43a4901e58e773ca094521646e523d602ef583dc ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 */dtop /usr/local/bin/dtop &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/dtop
+command: dtop
+args: ""
+source: https://github.com/amir20/dtop
+website: https://dtop.dev/
+documentation: https://dtop.dev/
+screenshot: https://raw.githubusercontent.com/amir20/dtop/b8247d0d4baf3e1c30b5c4f94e8157c9e67390c6/demo.gif
+keywords:
+  - docker
+  - containers
+  - monitor
+  - tui
+
+roles: []

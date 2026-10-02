@@ -1,0 +1,27 @@
+id: nethogs
+name: NetHogs
+version: 1.0.0
+author: Arnout Engelen
+description: Network monitor that groups bandwidth by process instead of by protocol or subnet
+license: GPL-2.0
+platforms:
+  # nethogs lives in /usr/sbin and needs root to capture packets, so it is launched
+  # through sudo and detected by its path rather than by the user's PATH.
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y nethogs
+    uninstall: sudo apt-get remove -y nethogs
+    detect: test -x /usr/sbin/nethogs
+command: sudo
+args: "nethogs"
+source: https://github.com/raboof/nethogs
+website: https://github.com/raboof/nethogs
+documentation: https://github.com/raboof/nethogs#readme
+screenshot: https://raw.githubusercontent.com/raboof/nethogs/459a786ca4c7c3d2011b7a4c84bf6b41586dcf8b/doc/screenshot.png
+keywords:
+  - network
+  - bandwidth
+  - monitor
+  - top
+  - tui
+
+roles: []

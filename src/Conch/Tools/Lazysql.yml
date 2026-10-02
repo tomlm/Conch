@@ -1,0 +1,35 @@
+id: lazysql
+name: lazysql
+version: 1.0.0
+author: Jorge Rojas
+description: Database management TUI for PostgreSQL, MySQL, SQLite and SQL Server
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/jorgerojas26/lazysql/releases/download/v0.5.9/lazysql_Linux_x86_64.tar.gz; s=d392ee8fe4225e5d3d746f2610c1416709615cb37e6b0f44f35ff7c9bd56abaa ;;
+      aarch64) a=https://github.com/jorgerojas26/lazysql/releases/download/v0.5.9/lazysql_Linux_arm64.tar.gz; s=24950c7bb1dc304df73415a3fd6fcf71b88d0ed88907a3403f67a40f5c2f6059 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 lazysql /usr/local/bin/lazysql &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/lazysql
+command: lazysql
+# Without a connection URL it opens the connection picker.
+args: ""
+source: https://github.com/jorgerojas26/lazysql
+website: https://github.com/jorgerojas26/lazysql
+documentation: https://github.com/jorgerojas26/lazysql#readme
+screenshot: https://raw.githubusercontent.com/jorgerojas26/lazysql/v0.5.9/images/lazysql.png
+keywords:
+  - sql
+  - database
+  - postgresql
+  - mysql
+  - tui
+
+roles: []

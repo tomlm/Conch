@@ -1,0 +1,24 @@
+id: wavemon
+name: wavemon
+version: 1.0.0
+author: Jan Morgenstern
+description: Wireless device monitor that shows signal and noise levels, packet statistics, device configuration and network parameters
+license: GPL-3.0
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y wavemon
+    uninstall: sudo apt-get remove -y wavemon
+command: wavemon
+args: ""
+source: https://github.com/uoaerg/wavemon
+website: https://github.com/uoaerg/wavemon
+documentation: https://github.com/uoaerg/wavemon#readme
+screenshot: https://cloud.githubusercontent.com/assets/5132989/8640926/1f8436a0-28c6-11e5-9336-a79fd002c324.png
+keywords:
+  - tui
+  - wifi
+  - wireless
+  - network
+  - monitor
+
+roles: []

@@ -1,0 +1,40 @@
+id: sttr
+name: sttr
+version: 1.0.0
+author: Abhimanyu Sharma
+description: Text transformation tool with an interactive menu of more than 30 operations such as encoding, hashing and case conversion
+license: MIT
+platforms:
+  # Not in Debian. Pinned upstream release, checked by hash; static Go binary. Run without
+  # arguments, sttr reads the input text and then opens its operation menu.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/abhimanyu003/sttr/releases/download/v0.2.30/sttr_Linux_x86_64.tar.gz; s=f4cb5b240853b53f67d7b789c9cf5969e794675c5c38aad2ed5ff2c065be4c19 ;;
+      aarch64) a=https://github.com/abhimanyu003/sttr/releases/download/v0.2.30/sttr_Linux_arm64.tar.gz; s=3653d0b1ebebae7cc93e96260d03a872698e3bc689f3162de31c758f25331311 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 sttr /usr/local/bin/sttr &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/sttr
+  # Portable zip; winget adds the sttr alias to PATH.
+  windows:
+    install: winget install -e --id abhimanyu003.sttr
+    uninstall: winget uninstall -e --id abhimanyu003.sttr
+command: sttr
+args: ""
+source: https://github.com/abhimanyu003/sttr
+website: https://github.com/abhimanyu003/sttr
+documentation: https://github.com/abhimanyu003/sttr#readme
+screenshot: https://raw.githubusercontent.com/abhimanyu003/sttr/a024bff2c27b88a267ff7cbc7d72800ef07846fe/media/demo.gif
+keywords:
+  - tui
+  - text
+  - encoding
+  - hashing
+  - converter
+
+roles: []

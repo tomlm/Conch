@@ -1,0 +1,22 @@
+id: rtorrent
+name: rTorrent
+version: 1.0.0
+author: Jari Sundell
+description: Text-based BitTorrent client
+license: GPL-2.0
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y rtorrent
+    uninstall: sudo apt-get remove -y rtorrent
+command: rtorrent
+args: ""
+source: https://github.com/rakshasa/rtorrent
+website: https://rakshasa.github.io/rtorrent/
+documentation: https://github.com/rakshasa/rtorrent/wiki
+keywords:
+  - bittorrent
+  - torrent
+  - download
+  - tui
+
+roles: []

@@ -1,0 +1,23 @@
+id: flameshow
+name: Flameshow
+version: 1.0.0
+author: laixintao
+description: Flame graph viewer for the terminal that opens Go pprof, collapsed-stack, Austin and Speedscope profiles
+license: MIT
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y pipx && sudo pipx install --global flameshow
+    uninstall: sudo pipx uninstall --global flameshow
+command: flameshow
+args: "%1"
+source: https://github.com/laixintao/flameshow
+website: https://github.com/laixintao/flameshow
+documentation: https://github.com/laixintao/flameshow#readme
+screenshot: https://raw.githubusercontent.com/laixintao/flameshow/ed06067c09aedf5d5ef839f61d1db279d162b32e/docs/flameshow.gif
+keywords:
+  - flamegraph
+  - profiling
+  - pprof
+  - textual
+
+roles: []

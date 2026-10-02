@@ -1,0 +1,33 @@
+id: simutil
+name: SimUtil
+version: 1.0.0
+author: Dzung Nguyen Minh
+description: Launcher for Android emulators and iOS simulators that also works with connected physical devices
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/dungngminh/simutil/releases/download/v0.9.0/simutil-linux-x64.tar.gz; s=fd8ba0a4beb1bd4159522c5ceb37ec179ed8b1ead75da030f4ebf228ffe15053 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 simutil-linux-x64 /usr/local/bin/simutil &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/simutil
+command: simutil
+args: ""
+source: https://github.com/dungngminh/simutil
+website: https://github.com/dungngminh/simutil
+documentation: https://github.com/dungngminh/simutil#readme
+screenshot: https://raw.githubusercontent.com/dungngminh/simutil/c6bb513313a5d000bca449bc5ecc288f8d4412f7/art/showcase.png
+keywords:
+  - android
+  - emulator
+  - adb
+  - mobile
+  - tui
+
+roles: []

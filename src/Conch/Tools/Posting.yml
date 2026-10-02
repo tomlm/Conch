@@ -1,0 +1,24 @@
+id: posting
+name: Posting
+version: 1.0.0
+author: Darren Burns
+description: HTTP client for the terminal that builds, sends and saves API requests
+license: Apache-2.0
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y pipx && sudo pipx install --global posting
+    uninstall: sudo pipx uninstall --global posting
+command: posting
+args: ""
+source: https://github.com/darrenburns/posting
+website: https://posting.sh/
+documentation: https://posting.sh/guide/
+screenshot: https://github.com/user-attachments/assets/78359ab0-5e0c-4c0b-a60b-dce06b11bbf5
+keywords:
+  - http
+  - api
+  - rest
+  - tui
+  - textual
+
+roles: []

@@ -1,0 +1,35 @@
+id: atac
+name: ATAC
+version: 1.0.0
+author: Julien-cpsn
+description: API client for the terminal, like Postman, with collections, environments and offline storage
+license: MIT
+platforms:
+  # Debian's "atac" package is an unrelated genome tool, so the release binary is used.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/Julien-cpsn/ATAC/releases/download/v0.23.1/atac-v0.23.1-x86_64-unknown-linux-musl.tar.gz; s=dcd61727c3871e3643439dd32d3182995bb5337feeba5bdbbcd3d6432cf00618 ;;
+      aarch64) a=https://github.com/Julien-cpsn/ATAC/releases/download/v0.23.1/atac-v0.23.1-aarch64-unknown-linux-musl.tar.gz; s=fea0eb4adb7d3df156b94e95d74c59c7489da6d8c6ad5c0be0ca1e3b910952e4 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 atac /usr/local/bin/atac &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/atac
+command: atac
+args: ""
+source: https://github.com/Julien-cpsn/ATAC
+website: https://github.com/Julien-cpsn/ATAC
+documentation: https://github.com/Julien-cpsn/ATAC#readme
+screenshot: https://cdn.terminaltrove.com/m/43b2059a-0e96-4a06-a60a-414c6ccf1c1c.png
+keywords:
+  - api
+  - http
+  - rest
+  - postman
+  - tui
+
+roles: []

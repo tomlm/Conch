@@ -1,0 +1,24 @@
+id: cronboard
+name: Cronboard
+version: 1.0.0
+author: Antonio Rodriguez
+description: Cron job manager for the terminal that creates, edits and checks cron jobs locally and on remote servers
+license: Apache-2.0
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y pipx cron && sudo pipx install --global cronboard
+    uninstall: sudo pipx uninstall --global cronboard
+command: cronboard
+args: ""
+source: https://github.com/antoniorodr/cronboard
+website: https://cronboard.dev/
+documentation: https://cronboard.dev/
+screenshot: https://raw.githubusercontent.com/antoniorodr/cronboard/df9441732748f3e44e4e18bc246c2db7f68ce014/assets/cronboard.gif
+keywords:
+  - cron
+  - scheduler
+  - system administration
+  - tui
+  - textual
+
+roles: []

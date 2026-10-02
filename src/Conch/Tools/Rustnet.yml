@@ -1,0 +1,37 @@
+id: rustnet
+name: RustNet
+version: 1.0.0
+author: Marco Cadetg
+description: Network monitor that shows live TCP, UDP and QUIC connections and the processes that own them
+license: Apache-2.0
+platforms:
+  # RustNet captures packets, so the install grants the binary the capabilities its install
+  # guide lists for the static build (setcap) instead of making every launch go through sudo.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget libcap2-bin &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/domcyrus/rustnet/releases/download/v1.6.0/rustnet-v1.6.0-x86_64-unknown-linux-musl.tar.gz; s=647195dfdae1c7de49720b5e493f47877272e293ecfff1d839c36a95bb32273c ;;
+      aarch64) a=https://github.com/domcyrus/rustnet/releases/download/v1.6.0/rustnet-v1.6.0-aarch64-unknown-linux-musl.tar.gz; s=ac32c38f19dda4c5f8fc0315bf80b2734aeb3c6fad3472976d0bdce620891f41 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 "rustnet-v1.6.0-$(uname -m)-unknown-linux-musl/rustnet" /usr/local/bin/rustnet &&
+      sudo setcap cap_net_raw,cap_bpf,cap_perfmon+eip /usr/local/bin/rustnet &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/rustnet
+command: rustnet
+args: ""
+source: https://github.com/domcyrus/rustnet
+website: https://github.com/domcyrus/rustnet
+documentation: https://github.com/domcyrus/rustnet/blob/v1.6.0/USAGE.md
+screenshot: https://raw.githubusercontent.com/domcyrus/rustnet/v1.6.0/assets/rustnet.gif
+keywords:
+  - network
+  - connections
+  - monitor
+  - packet capture
+  - tui
+
+roles: []

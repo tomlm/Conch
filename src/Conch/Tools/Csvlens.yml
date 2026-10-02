@@ -1,0 +1,36 @@
+id: csvlens
+name: csvlens
+version: 1.0.0
+author: YS-L
+description: CSV file viewer for the terminal, like less but made for CSV, with column filtering and search
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget xz-utils &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/YS-L/csvlens/releases/download/v0.15.1/csvlens-x86_64-unknown-linux-musl.tar.xz; s=ab086b420e453618fd1544eb4e09cc98279e8570b739725592feb241cd1bef4b ;;
+      aarch64) a=https://github.com/YS-L/csvlens/releases/download/v0.15.1/csvlens-aarch64-unknown-linux-gnu.tar.xz; s=7671466036ebc22b1b9b958890a638fd21a06452137fb9ca1321448e5afea7ad ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xJf pkg --strip-components=1 && sudo install -m 755 csvlens /usr/local/bin/csvlens &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/csvlens
+  windows:
+    install: winget install -e --id YS-L.csvlens
+    uninstall: winget uninstall -e --id YS-L.csvlens
+command: csvlens
+args: "%1"
+source: https://github.com/YS-L/csvlens
+website: https://github.com/YS-L/csvlens
+documentation: https://github.com/YS-L/csvlens#readme
+screenshot: https://raw.githubusercontent.com/YS-L/csvlens/6acf0606df0ff4d58f3bf5d87795dc4cb4a64a5d/.github/demo.gif
+keywords:
+  - csv
+  - viewer
+  - data
+  - tui
+
+roles: []

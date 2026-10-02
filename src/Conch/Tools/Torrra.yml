@@ -1,0 +1,29 @@
+id: torrra
+name: Torrra
+version: 1.0.0
+author: stabldev
+description: Torrent search and download client that queries Jackett or Prowlarr indexers and downloads with pause and resume
+license: MIT
+platforms:
+  # Not in Debian; Python app from PyPI. Searching needs a Jackett or Prowlarr server, set up
+  # separately and configured as the default indexer so a plain "torrra" can start.
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y pipx && sudo pipx install --global torrra
+    uninstall: sudo pipx uninstall --global torrra
+  # Standalone portable exe; winget adds the torrra alias to PATH.
+  windows:
+    install: winget install -e --id stabldev.torrra
+    uninstall: winget uninstall -e --id stabldev.torrra
+command: torrra
+args: ""
+source: https://github.com/stabldev/torrra
+website: https://torrra.readthedocs.io
+documentation: https://torrra.readthedocs.io
+screenshot: https://cdn.terminaltrove.com/m/84315c48-ce70-492e-9efd-40bdf994c1a2.png
+keywords:
+  - tui
+  - torrent
+  - download
+  - textual
+
+roles: []

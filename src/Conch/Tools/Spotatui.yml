@@ -1,0 +1,41 @@
+id: spotatui
+name: spotatui
+version: 1.0.0
+author: LargeModGames
+description: Music player for Spotify, local files, Subsonic servers, internet radio and YouTube
+license: MIT
+platforms:
+  # Not in Debian. Pinned upstream release, checked by hash. The Linux builds are linked
+  # against PipeWire, ALSA and OpenSSL, so those libraries come from apt alongside it.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget libpipewire-0.3-0t64 libasound2t64 libssl3t64 &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/LargeModGames/spotatui/releases/download/v0.43.0/spotatui-linux-x86_64.tar.gz; s=907d9dd3969f89eecc3313452ee8b18408920b1babed412d7df82a4a5a3287a1 ;;
+      aarch64) a=https://github.com/LargeModGames/spotatui/releases/download/v0.43.0/spotatui-linux-aarch64.tar.gz; s=0dd5d9e285ee5243486a1065502d130110028bb2f195463bd5b2d2cb042ed72b ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 spotatui /usr/local/bin/spotatui &&
+      cd / && rm -rf "$t"
+    # The libraries stay: other programs use them, and apt owns them.
+    uninstall: sudo rm -f /usr/local/bin/spotatui
+  # Portable zip; winget adds the spotatui alias to PATH.
+  windows:
+    install: winget install -e --id LargeModGames.spotatui
+    uninstall: winget uninstall -e --id LargeModGames.spotatui
+command: spotatui
+args: ""
+source: https://github.com/LargeModGames/spotatui
+website: https://spotatui.com
+documentation: https://github.com/LargeModGames/spotatui#readme
+screenshot: https://cdn.terminaltrove.com/m/4567f25d-5eb3-4328-95ac-54216956de1d.png
+keywords:
+  - tui
+  - music
+  - spotify
+  - player
+  - ratatui
+
+roles: []

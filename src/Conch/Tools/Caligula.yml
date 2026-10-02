@@ -1,0 +1,36 @@
+id: caligula
+name: Caligula
+version: 1.0.0
+author: Astrid Yu
+description: Disk imaging tool that burns an image to a disk with hash checks, decompression, write-speed graphs and verification
+license: GPL-3.0
+platforms:
+  # Plain static binaries. Caligula asks to escalate through sudo itself when the target disk
+  # needs root, so it is launched as the user.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/ifd3f/caligula/releases/download/v0.5.0/caligula-x86_64-linux; s=470da9381d2ac44bbd54485ac8c8afcc23fd2aecbce98cd1aba815d1ef5ed3ed ;;
+      aarch64) a=https://github.com/ifd3f/caligula/releases/download/v0.5.0/caligula-aarch64-linux; s=9dd0cea2080bfa51e5b9a50c8048632e9767c1b269784e6902663566f53dbf75 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      sudo install -m 755 pkg /usr/local/bin/caligula &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/caligula
+command: caligula
+args: "burn %1"
+source: https://github.com/ifd3f/caligula
+website: https://github.com/ifd3f/caligula
+documentation: https://github.com/ifd3f/caligula#readme
+screenshot: https://raw.githubusercontent.com/ifd3f/caligula/ba1ace3d6a954272e1de6c1a2a24fa7deee02bf7/images/caligula.png
+keywords:
+  - disk
+  - imaging
+  - iso
+  - usb
+  - tui
+
+roles: []

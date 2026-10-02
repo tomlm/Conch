@@ -1,0 +1,40 @@
+id: scooter
+name: scooter
+version: 1.0.0
+author: Tom Perry-Schafer
+description: Interactive find and replace across the files in a directory, with a preview of each match before it is replaced
+license: MIT
+platforms:
+  # Not in Debian. Pinned upstream release (static musl builds), checked by hash.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/thomasschafer/scooter/releases/download/v0.9.1/scooter-v0.9.1-x86_64-unknown-linux-musl.tar.gz; s=ea619a20844b8833c220d50fc1cd5ccd8700dd1069685629fa0c5a6439d41045 ;;
+      aarch64) a=https://github.com/thomasschafer/scooter/releases/download/v0.9.1/scooter-v0.9.1-aarch64-unknown-linux-musl.tar.gz; s=196c9ac34ab7d4135bb595b495f2bb3f40534328bf6b411120549e66984f05c0 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 scooter /usr/local/bin/scooter &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/scooter
+  # Portable zip; winget adds the scooter alias to PATH.
+  windows:
+    install: winget install -e --id thomasschafer.scooter
+    uninstall: winget uninstall -e --id thomasschafer.scooter
+command: scooter
+# Optional directory to search; defaults to the current one.
+args: "%1?"
+source: https://github.com/thomasschafer/scooter
+website: https://github.com/thomasschafer/scooter
+documentation: https://github.com/thomasschafer/scooter#readme
+screenshot: https://raw.githubusercontent.com/thomasschafer/scooter/e2d53d1372c590701d79aac2625420257e49ec09/media/preview.gif
+keywords:
+  - tui
+  - search
+  - replace
+  - regex
+  - refactoring
+
+roles: []

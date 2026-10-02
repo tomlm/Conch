@@ -1,0 +1,35 @@
+id: herdr
+name: herdr
+version: 1.0.0
+author: herdrdev
+description: Agent-aware terminal multiplexer in the style of tmux for running coding agents side by side
+license: Apache-2.0
+platforms:
+  # Not in Debian. The release assets are bare static binaries, one per architecture.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/herdrdev/herdr/releases/download/v0.9.3/herdr-linux-x86_64; s=18a8dc65f1c2fa485884344356dea1cfd911c6f06cf46fa78e193f4087f4dba7 ;;
+      aarch64) a=https://github.com/herdrdev/herdr/releases/download/v0.9.3/herdr-linux-aarch64; s=4de7aa3e25678812e92960de64f7c2aaa1bca1f0f80a3c5e559837e231e1f5c0 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O herdr "$a" && echo "$s  herdr" | sha256sum -c --quiet &&
+      sudo install -m 755 herdr /usr/local/bin/herdr &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/herdr
+command: herdr
+args: ""
+source: https://github.com/herdrdev/herdr
+website: https://herdr.dev/
+documentation: https://herdr.dev/docs/quick-start/
+screenshot: https://cdn.terminaltrove.com/m/ac12314b-3161-4aa3-a0eb-7b4a39f926e3.png
+keywords:
+  - multiplexer
+  - ai
+  - coding agent
+  - tui
+  - terminal
+
+roles: []

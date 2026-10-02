@@ -1,0 +1,33 @@
+id: circumflex
+name: circumflex
+version: 1.0.0
+author: Ben Sadeh
+description: Hacker News reader for the terminal with comment threads and a reader mode for linked articles
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/bensadeh/circumflex/releases/download/5.0/circumflex_5.0_linux_amd64.tar.gz; s=830ea047491b7edfe6aa07b4801cc95d186ee15bfed66fc13529298992cfcd82 ;;
+      aarch64) a=https://github.com/bensadeh/circumflex/releases/download/5.0/circumflex_5.0_linux_arm64.tar.gz; s=451c31559dd0df8350b95ab4b5fe61f486a879e58fa9c9e78b0ccd22620c66d5 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 clx /usr/local/bin/clx &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/clx
+command: clx
+args: ""
+source: https://github.com/bensadeh/circumflex
+website: https://github.com/bensadeh/circumflex
+documentation: https://github.com/bensadeh/circumflex#readme
+screenshot: https://raw.githubusercontent.com/bensadeh/circumflex/ce26e6d5535452959bc87eb5f77d2046280fac0f/screenshots/main-view.png
+keywords:
+  - hacker news
+  - news
+  - reader
+  - tui
+
+roles: []

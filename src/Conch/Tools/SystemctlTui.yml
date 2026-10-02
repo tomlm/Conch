@@ -1,0 +1,34 @@
+id: systemctl.tui
+name: systemctl-tui
+version: 1.0.0
+author: Reilly Wood
+description: Terminal interface for browsing systemd services, starting and stopping them and reading their logs
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/rgwood/systemctl-tui/releases/download/v0.8.0/systemctl-tui-x86_64-unknown-linux-musl.tar.gz; s=69e1236a9a5f742fa905338e252e883c8139253ed863aad28dde47446d0bb909 ;;
+      aarch64) a=https://github.com/rgwood/systemctl-tui/releases/download/v0.8.0/systemctl-tui-aarch64-unknown-linux-musl.tar.gz; s=412a7a60b62b0811e9ee30f741f91130b103cf0adf22eb70003269b31d620b1a ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 systemctl-tui /usr/local/bin/systemctl-tui &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/systemctl-tui
+command: systemctl-tui
+args: ""
+source: https://github.com/rgwood/systemctl-tui
+website: https://github.com/rgwood/systemctl-tui
+documentation: https://github.com/rgwood/systemctl-tui#readme
+screenshot: https://github.com/user-attachments/assets/924d3cf2-cac6-474b-9127-756520fede6d
+keywords:
+  - systemd
+  - services
+  - logs
+  - journal
+  - tui
+
+roles: []

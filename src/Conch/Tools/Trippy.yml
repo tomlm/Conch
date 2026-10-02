@@ -1,0 +1,26 @@
+id: trippy
+name: Trippy
+version: 1.0.0
+author: FujiApple
+description: Network diagnostic tool that combines traceroute and ping in one live view of every hop
+license: Apache-2.0
+platforms:
+  # The Debian package grants /usr/bin/trip CAP_NET_RAW when it installs, so no sudo is
+  # needed to send probes. Windows is left out: there trip must run as Administrator.
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y trippy
+    uninstall: sudo apt-get remove -y trippy
+command: trip
+args: "%1"
+source: https://github.com/fujiapple852/trippy
+website: https://trippy.rs/
+documentation: https://trippy.rs/
+screenshot: https://raw.githubusercontent.com/fujiapple852/trippy/12aca1478bb2d9c4b8e25aaf47616d9d0b3949ef/assets/0.12.0/demo.gif
+keywords:
+  - network
+  - traceroute
+  - ping
+  - diagnostics
+  - tui
+
+roles: []

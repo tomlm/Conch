@@ -1,0 +1,34 @@
+id: resterm
+name: resterm
+version: 1.0.0
+author: david
+description: Terminal API client for HTTP, GraphQL, gRPC, WebSocket and SSE that runs plain .http request files
+license: Apache-2.0
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/unkn0wn-root/resterm/releases/download/v1.11.0/resterm_Linux_x86_64; s=071ea7fb192bb15fd3c17016d5a1c8d68449de61c8fcc00def05b8a1b5a17836 ;;
+      aarch64) a=https://github.com/unkn0wn-root/resterm/releases/download/v1.11.0/resterm_Linux_arm64; s=f522ade866954a11ff2aa5cce34d561c1aac78d0e367eb85414b9d20c94e3f01 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      sudo install -m 755 pkg /usr/local/bin/resterm &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/resterm
+command: resterm
+args: "%1?"
+source: https://github.com/unkn0wn-root/resterm
+website: https://resterm.app
+documentation: https://github.com/unkn0wn-root/resterm#readme
+screenshot: https://raw.githubusercontent.com/unkn0wn-root/resterm/81c6edb1f7f495d14381c27ebaa3b979cb323ada/_media/resterm_base.png
+keywords:
+  - http
+  - api
+  - rest
+  - graphql
+  - tui
+
+roles: []

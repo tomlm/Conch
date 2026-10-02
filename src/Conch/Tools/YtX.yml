@@ -1,0 +1,31 @@
+id: yt.x
+name: yt-x
+version: 1.0.0
+author: Benedict Xavier
+description: YouTube browser for the terminal that searches and previews videos with fzf and plays them through yt-dlp and mpv
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget curl fzf jq mpv pipx &&
+      sudo pipx install --global yt-dlp &&
+      t=$(mktemp -d) && cd "$t" &&
+      wget -q -O yt-x https://github.com/Benexl/yt-x/releases/download/v0.8.7/yt-x &&
+      echo "efba5ebb1007f6c5966624d91eaaa48b5879ac5dd21be15058ee5ebb7c7d7077  yt-x" | sha256sum -c --quiet &&
+      sudo install -m 755 yt-x /usr/local/bin/yt-x &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/yt-x
+command: yt-x
+args: ""
+source: https://github.com/Benexl/yt-x
+website: https://github.com/Benexl/yt-x
+documentation: https://github.com/Benexl/yt-x#readme
+screenshot: https://github.com/user-attachments/assets/c7eef0b5-9acb-4b2c-8dd0-76d0ae54913e
+keywords:
+  - youtube
+  - video
+  - music
+  - fzf
+  - tui
+
+roles: []

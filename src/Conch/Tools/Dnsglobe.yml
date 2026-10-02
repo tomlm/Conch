@@ -1,0 +1,33 @@
+id: dnsglobe
+name: dnsglobe
+version: 1.0.0
+author: Fiveonefour
+description: DNS propagation checker that shows a record's answers from public resolvers worldwide on a world map
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget xz-utils &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/514-labs/dnsglobe/releases/download/v0.5.0/dnsglobe-x86_64-unknown-linux-gnu.tar.xz; s=b2b293972463deee845ffd7c1c1217eff645bfd5f7ec549d99ba830dc4c0b598 ;;
+      aarch64) a=https://github.com/514-labs/dnsglobe/releases/download/v0.5.0/dnsglobe-aarch64-unknown-linux-gnu.tar.xz; s=95d3ad8e343fe8e4d34ab8b7a78dc42f2a9ff950ae141852f718314a6c3c717b ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xJf pkg && sudo install -m 755 */dnsglobe /usr/local/bin/dnsglobe &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/dnsglobe
+command: dnsglobe
+args: "%1?"
+source: https://github.com/514-labs/dnsglobe
+website: https://github.com/514-labs/dnsglobe
+documentation: https://github.com/514-labs/dnsglobe#readme
+screenshot: https://raw.githubusercontent.com/514-labs/dnsglobe/8f5c26b9804357537c3943910002c3b5dcd30a04/demo/demo.gif
+keywords:
+  - dns
+  - network
+  - tui
+  - ratatui
+
+roles: []

@@ -1,0 +1,35 @@
+id: binsider
+name: binsider
+version: 1.0.0
+author: Orhun Parmaksız
+description: ELF binary analyzer with static and dynamic analysis, strings, linked libraries and a hexdump
+license: Apache-2.0
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/orhun/binsider/releases/download/v0.3.2/binsider-0.3.2-x86_64-unknown-linux-musl.tar.gz; s=fd349c580824f2b52ff7cd6a302aaa774a3fe4beedd9378515bdfecec0d877a3 ;;
+      aarch64) a=https://github.com/orhun/binsider/releases/download/v0.3.2/binsider-0.3.2-aarch64-unknown-linux-musl.tar.gz; s=a5e745f1e31f1667ec14f6239bac3c31cc5043962624b12dae4182d31b5244e2 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 binsider-0.3.2/binsider /usr/local/bin/binsider &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/binsider
+command: binsider
+# With no file, binsider opens its own executable.
+args: "%1?"
+source: https://github.com/orhun/binsider
+website: https://binsider.dev/
+documentation: https://binsider.dev/getting-started/
+screenshot: https://raw.githubusercontent.com/orhun/binsider/v0.3.2/website/src/content/assets/quickstart.gif
+keywords:
+  - elf
+  - binary analysis
+  - reverse engineering
+  - hexdump
+  - tui
+
+roles: []

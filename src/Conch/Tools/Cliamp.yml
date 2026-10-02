@@ -1,0 +1,39 @@
+id: cliamp
+name: cliamp
+version: 1.0.0
+author: bjarneo
+description: Music player inspired by Winamp, for local files, streams, podcasts and radio
+license: MIT
+platforms:
+  # The Linux release binary links ALSA dynamically (libasound.so.2); the codecs are built in.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget libasound2t64 &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/bjarneo/cliamp/releases/download/v2.3.0/cliamp-linux-amd64; s=5c59b5380c5165b473c06148c108ee60a18a1f9961f8013e38b4a68ed5def641 ;;
+      aarch64) a=https://github.com/bjarneo/cliamp/releases/download/v2.3.0/cliamp-linux-arm64; s=827b4aa879feecab33ea621dc1460c60ffa765c210b5046d679ce5a4073d2b32 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      sudo install -m 755 pkg /usr/local/bin/cliamp &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/cliamp
+  windows:
+    install: winget install -e --id Bjarneo.Cliamp
+    uninstall: winget uninstall -e --id Bjarneo.Cliamp
+command: cliamp
+# An optional directory, file or stream URL to play.
+args: "%1?"
+source: https://github.com/bjarneo/cliamp
+website: https://cliamp.stream
+documentation: https://github.com/bjarneo/cliamp#readme
+screenshot: https://cdn.terminaltrove.com/m/44e5a610-6038-4d45-9131-7735022e35a7.png
+keywords:
+  - music
+  - audio player
+  - winamp
+  - radio
+  - tui
+
+roles: []

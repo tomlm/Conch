@@ -1,0 +1,22 @@
+id: kilo
+name: kilo
+version: 1.0.0
+author: Salvatore Sanfilippo
+description: Minimal text editor in about a thousand lines of C, with search and syntax highlighting
+license: BSD-2-Clause
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y kilo
+    uninstall: sudo apt-get remove -y kilo
+command: kilo
+# kilo exits with a usage message unless it is given a file to edit.
+args: "%1"
+source: https://github.com/antirez/kilo
+website: https://github.com/antirez/kilo
+documentation: https://github.com/antirez/kilo#readme
+keywords:
+  - text editor
+  - minimal
+  - terminal
+
+roles: []

@@ -1,0 +1,25 @@
+id: wordgrinder
+name: WordGrinder
+version: 1.0.0
+author: David Given
+description: Word processor for the terminal that concentrates on writing text rather than page layout
+license: MIT
+platforms:
+  # wordgrinder-ncurses is the terminal build (the wordgrinder package is a metapackage that
+  # depends on it; wordgrinder-x11 is the separate X11 build).
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y wordgrinder-ncurses
+    uninstall: sudo apt-get remove -y wordgrinder-ncurses
+command: wordgrinder
+args: "%1?"
+source: https://github.com/davidgiven/wordgrinder
+website: https://cowlark.com/wordgrinder/
+documentation: https://github.com/davidgiven/wordgrinder#readme
+screenshot: https://cdn.terminaltrove.com/m/bcfb2640-addb-4209-bb96-e1f47483cc46.png
+keywords:
+  - tui
+  - word processor
+  - writing
+  - documents
+
+roles: []

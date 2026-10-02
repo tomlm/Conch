@@ -1,0 +1,35 @@
+id: taskwarrior.tui
+name: taskwarrior-tui
+version: 1.0.0
+author: Dheepak Krishnamurthy
+description: Terminal user interface for browsing, adding and editing Taskwarrior tasks
+license: MIT
+platforms:
+  # Debian 13 ships Taskwarrior 2.6, and taskwarrior-tui 0.25.4 is the last release that
+  # supports Taskwarrior 2.x, so this pins 0.25.4. Upstream builds it for x86_64 only.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget taskwarrior &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/kdheepak/taskwarrior-tui/releases/download/v0.25.4/taskwarrior-tui-x86_64-unknown-linux-musl.tar.gz; s=91b0a86eacffa62e017174de04f712bb528e4a20b3fdc9b63e0379319b8ac6a4 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 taskwarrior-tui /usr/local/bin/taskwarrior-tui &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/taskwarrior-tui
+command: taskwarrior-tui
+args: ""
+source: https://github.com/kdheepak/taskwarrior-tui
+website: https://kdheepak.com/taskwarrior-tui
+documentation: https://kdheepak.com/taskwarrior-tui
+screenshot: https://cdn.terminaltrove.com/m/6984ea3f-a515-440f-84af-12b0952b31d9.gif
+keywords:
+  - tasks
+  - todo
+  - taskwarrior
+  - productivity
+  - tui
+
+roles: []

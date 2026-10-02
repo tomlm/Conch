@@ -1,0 +1,24 @@
+id: mc
+name: Midnight Commander
+version: 1.0.0
+author: The Midnight Commander Team
+description: Two-panel visual file manager with a built-in viewer, editor and subshell
+license: GPL-3.0
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y mc
+    uninstall: sudo apt-get remove -y mc
+command: mc
+args: "%1?"
+source: https://github.com/MidnightCommander/mc
+website: https://midnight-commander.org/
+documentation: https://midnight-commander.org/
+screenshot: https://midnight-commander.org/img/mc-screenshot-cropped.png
+keywords:
+  - tui
+  - file manager
+  - orthodox
+  - terminal
+
+roles:
+  - file-explorer

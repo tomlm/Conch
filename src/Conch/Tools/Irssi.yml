@@ -1,0 +1,23 @@
+id: irssi
+name: Irssi
+version: 1.0.0
+author: Irssi developers
+description: Terminal IRC client with a scripting interface and themes
+license: GPL-2.0-or-later
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y irssi
+    uninstall: sudo apt-get remove -y irssi
+command: irssi
+args: ""
+source: https://github.com/irssi/irssi
+website: https://irssi.org
+documentation: https://irssi.org/documentation/
+screenshot: https://user-images.githubusercontent.com/5665186/32180643-cf127f60-bd92-11e7-8aa2-882313ce1d8e.png
+keywords:
+  - irc
+  - chat
+  - messaging
+  - tui
+
+roles: []

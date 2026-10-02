@@ -1,0 +1,24 @@
+id: kakoune
+name: Kakoune
+version: 1.0.0
+author: Maxime Coste
+description: Modal text editor built around multiple selections, where you select text first and then act on it
+license: Unlicense
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y kakoune
+    uninstall: sudo apt-get remove -y kakoune
+command: kak
+args: "%1?"
+source: https://github.com/mawww/kakoune
+website: https://kakoune.org/
+documentation: https://github.com/mawww/kakoune/blob/master/README.asciidoc
+screenshot: https://cdn.terminaltrove.com/m/fc1771a5-6472-4f59-80e8-5c2a1c54b03b.png
+keywords:
+  - text editor
+  - code editor
+  - modal
+  - terminal
+
+roles:
+  - text-editor

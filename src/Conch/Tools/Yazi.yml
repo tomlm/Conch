@@ -1,0 +1,39 @@
+id: yazi
+name: Yazi
+version: 1.0.0
+author: sxyazi
+description: Fast terminal file manager built on asynchronous I/O, with previews for code, images and archives
+license: MIT
+platforms:
+  # Not in Debian. The release zip holds yazi and its companion ya (plugin and package
+  # manager) in a folder named after the target; both go on the PATH.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget unzip &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) d=yazi-x86_64-unknown-linux-musl; s=9b9c39decccf8cb0ff53a7d637d38f8a79d93bbd0099f4ea9c619ef6bb392f5d ;;
+      aarch64) d=yazi-aarch64-unknown-linux-musl; s=dd569daecaae914185f295634109295ccd25c1b42b02eb89a74f651970024f2e ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "https://github.com/sxyazi/yazi/releases/download/v26.9.1/$d.zip" && echo "$s  pkg" | sha256sum -c --quiet &&
+      unzip -q pkg && sudo install -m 755 "$d/yazi" "$d/ya" /usr/local/bin/ &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/yazi /usr/local/bin/ya
+  windows:
+    install: winget install -e --id sxyazi.yazi
+    uninstall: winget uninstall -e --id sxyazi.yazi
+command: yazi
+args: "%1?"
+source: https://github.com/sxyazi/yazi
+website: https://yazi-rs.github.io/
+documentation: https://yazi-rs.github.io/docs/installation
+screenshot: https://cdn.terminaltrove.com/m/66bd5626-d593-43f9-b2d7-719a8ca4a6d9.gif
+keywords:
+  - file manager
+  - files
+  - tui
+  - terminal
+
+roles:
+  - file-explorer

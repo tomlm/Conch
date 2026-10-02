@@ -1,0 +1,26 @@
+id: gdu
+name: gdu
+version: 1.0.0
+author: Daniel Milde
+description: Fast disk usage analyzer that scans a directory in parallel and lets you browse and delete what takes the space
+license: MIT
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y gdu
+    uninstall: sudo apt-get remove -y gdu
+  windows:
+    install: winget install -e --id dundee.gdu
+    uninstall: winget uninstall -e --id dundee.gdu
+command: gdu
+args: "%1?"
+source: https://github.com/dundee/gdu
+website: https://github.com/dundee/gdu
+documentation: https://github.com/dundee/gdu#readme
+screenshot: https://raw.githubusercontent.com/dundee/gdu/3b3db79d932e581e0d2b2b705ddf369edc3c6959/gdu.png
+keywords:
+  - disk usage
+  - disk space
+  - du
+  - tui
+
+roles: []

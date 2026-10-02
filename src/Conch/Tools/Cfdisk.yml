@@ -1,0 +1,32 @@
+id: cfdisk
+name: cfdisk
+version: 1.0.0
+author: util-linux developers
+description: Curses-based disk partition table editor from util-linux
+license: GPL-2.0
+platforms:
+  # cfdisk ships in Debian's fdisk package (installed on most systems already). It lives in
+  # /usr/sbin and needs root to read and write partition tables, so it is launched through
+  # sudo and detected by its path rather than by the user's PATH. With no device it opens
+  # the first disk; pass a device such as /dev/sdb to pick another.
+  #
+  # Not uninstallable from here: removing cfdisk means removing Debian's fdisk package, and
+  # with it fdisk and sfdisk, which the system's own tools rely on. Uninstall says so and
+  # exits non-zero, so the app manager reports it as not done rather than "removed".
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y fdisk
+    uninstall: echo "cfdisk is part of Debian's fdisk package (fdisk, sfdisk, cfdisk), which the system relies on, so Conch does not remove it." && exit 1
+    detect: test -x /usr/sbin/cfdisk
+command: sudo
+args: "cfdisk %1?"
+source: https://github.com/util-linux/util-linux
+website: https://github.com/util-linux/util-linux
+documentation: https://man7.org/linux/man-pages/man8/cfdisk.8.html
+keywords:
+  - disk
+  - partition
+  - storage
+  - system
+  - tui
+
+roles: []

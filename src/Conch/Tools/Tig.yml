@@ -1,0 +1,23 @@
+id: tig
+name: tig
+version: 1.0.0
+author: Jonas Fonseca
+description: Text-mode interface for Git that browses history, diffs, blame and the staging area
+license: GPL-2.0
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y tig
+    uninstall: sudo apt-get remove -y tig
+command: tig
+args: ""
+source: https://github.com/jonas/tig
+website: https://github.com/jonas/tig
+documentation: https://jonas.github.io/tig/doc/manual.html
+screenshot: https://cdn.terminaltrove.com/m/9d2a30f7-966a-4781-b255-0d88ef6040a7.png
+keywords:
+  - git
+  - version control
+  - tui
+  - terminal
+
+roles: []

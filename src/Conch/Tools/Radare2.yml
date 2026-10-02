@@ -1,0 +1,37 @@
+id: radare2
+name: radare2
+version: 1.0.0
+author: pancake and radare2 contributors
+description: Reverse engineering framework and toolset with an interactive visual mode for disassembling, debugging and patching binaries
+license: LGPL-3.0
+platforms:
+  # Debian 13 has no radare2 package. The project attaches its own .deb to each release; it
+  # depends only on libc6.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/radareorg/radare2/releases/download/6.2.2/radare2_6.2.2_amd64.deb; s=09234e4139bf8dfcbb7fc1fdb2519859ad516e63c19d3c27d92aaecdf463b1ad ;;
+      aarch64) a=https://github.com/radareorg/radare2/releases/download/6.2.2/radare2_6.2.2_arm64.deb; s=6e3ccf220e5b53adedc9dccc67825e908b545aabd4cf8723f0c43ebfd0c4f437 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O radare2.deb "$a" && echo "$s  radare2.deb" | sha256sum -c --quiet &&
+      sudo apt-get install -y ./radare2.deb &&
+      cd / && rm -rf "$t"
+    uninstall: sudo apt-get remove -y radare2
+# "-c V" opens the file straight in visual mode instead of the command prompt.
+command: r2
+args: "-c V %1"
+source: https://github.com/radareorg/radare2
+website: https://www.radare.org/
+documentation: https://book.rada.re/
+screenshot: https://raw.githubusercontent.com/radareorg/radare2/794af70c6b9277ff6e61f4f82743aeea63a15189/doc/images/shot.png
+keywords:
+  - reverse engineering
+  - disassembler
+  - debugger
+  - hex editor
+  - security
+
+roles: []

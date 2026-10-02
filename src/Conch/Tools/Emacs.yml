@@ -1,0 +1,27 @@
+id: emacs
+name: GNU Emacs
+version: 1.0.0
+author: Free Software Foundation
+description: Extensible, customizable text editor, in its terminal-only build
+license: GPL-3.0
+platforms:
+  # emacs-nox is the build without GUI support. The plain "emacs" package pulls in the GTK
+  # build, which opens a window instead of running in the terminal wherever DISPLAY is set
+  # (WSLg sets it), so the command is emacs-nox, not the "emacs" alternative.
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y emacs-nox
+    uninstall: sudo apt-get remove -y emacs-nox
+command: emacs-nox
+args: "%1?"
+source: https://git.savannah.gnu.org/cgit/emacs.git
+website: https://www.gnu.org/software/emacs/
+documentation: https://www.gnu.org/software/emacs/documentation.html
+screenshot: https://cdn.terminaltrove.com/m/6821b9d4-58a3-415d-8918-25718e22d606.png
+keywords:
+  - text editor
+  - emacs
+  - lisp
+  - terminal
+
+roles:
+  - text-editor

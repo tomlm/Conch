@@ -1,0 +1,36 @@
+id: lazyjournal
+name: lazyjournal
+version: 1.0.0
+author: Alex Kup
+description: Log viewer for journald, auditd, log files, Docker and Podman containers and Kubernetes pods, with highlighting and filtering
+license: MIT
+platforms:
+  # Not in Debian. Pinned upstream release, checked by hash; upstream ships plain static
+  # binaries (no archive) for x86_64 and arm64.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/Lifailon/lazyjournal/releases/download/0.8.6/lazyjournal-0.8.6-linux-amd64; s=c264bbcb6b30fa6418bbfce2087d0e1ecdc7ad17421772c0f002e4cbf8cf4bd7 ;;
+      aarch64) a=https://github.com/Lifailon/lazyjournal/releases/download/0.8.6/lazyjournal-0.8.6-linux-arm64; s=2718c73349ff1ef297f5a19d3e636ca116c6f8e85106ea5744c6d71bf8df6924 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      sudo install -m 755 pkg /usr/local/bin/lazyjournal &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/lazyjournal
+command: lazyjournal
+args: ""
+source: https://github.com/Lifailon/lazyjournal
+website: https://github.com/Lifailon/lazyjournal
+documentation: https://github.com/Lifailon/lazyjournal#readme
+screenshot: https://raw.githubusercontent.com/Lifailon/lazyjournal/3cef484429a55de826e0dcd6ac3fb42533f2466b/img/fuzzy.png
+keywords:
+  - tui
+  - logs
+  - journald
+  - docker
+  - kubernetes
+
+roles: []

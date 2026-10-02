@@ -1,0 +1,24 @@
+id: toolong
+name: Toolong
+version: 1.0.0
+author: Will McGugan
+description: Log file viewer that tails, merges and searches log files, including JSONL
+license: MIT
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y pipx && sudo pipx install --global toolong
+    uninstall: sudo pipx uninstall --global toolong
+command: tl
+args: "%1"
+source: https://github.com/Textualize/toolong
+website: https://github.com/Textualize/toolong
+documentation: https://github.com/Textualize/toolong#readme
+screenshot: https://github.com/Textualize/toolong/assets/554369/1595e8e0-f5bf-428b-9b84-f0b5c7f506a1
+keywords:
+  - logs
+  - viewer
+  - tail
+  - jsonl
+  - textual
+
+roles: []

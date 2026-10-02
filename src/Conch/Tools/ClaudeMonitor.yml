@@ -1,0 +1,24 @@
+id: claude.monitor
+name: Claude Code Usage Monitor
+version: 1.0.0
+author: Maciek-roboblog
+description: Live terminal monitor of Claude Code token usage, cost and limits, read from Claude Code's local session logs
+license: MIT
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y pipx && sudo pipx install --global claude-monitor
+    uninstall: sudo pipx uninstall --global claude-monitor
+command: claude-monitor
+args: ""
+source: https://github.com/Maciek-roboblog/Claude-Code-Usage-Monitor
+website: https://github.com/Maciek-roboblog/Claude-Code-Usage-Monitor
+documentation: https://github.com/Maciek-roboblog/Claude-Code-Usage-Monitor#readme
+screenshot: https://raw.githubusercontent.com/Maciek-roboblog/Claude-Code-Usage-Monitor/c59a83bf943f329f0e61f1a29c760353ee1860a5/doc/scnew.png
+keywords:
+  - claude
+  - ai
+  - tokens
+  - usage
+  - monitor
+
+roles: []

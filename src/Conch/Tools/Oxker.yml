@@ -1,0 +1,34 @@
+id: oxker
+name: oxker
+version: 1.0.0
+author: Jack Wills
+description: Terminal interface for viewing and controlling Docker containers, their logs and resource usage
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/mrjackwills/oxker/releases/download/v0.13.4/oxker_linux_x86_64.tar.gz; s=e077cbf2e978a7a6c9802d453491944ba3635482097e2549e58c7e81df389643 ;;
+      aarch64) a=https://github.com/mrjackwills/oxker/releases/download/v0.13.4/oxker_linux_aarch64.tar.gz; s=850bd6c772df85abb67ab08c2add1e46f663268b8788a4a7184d2ed28fce083b ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 oxker /usr/local/bin/oxker &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/oxker
+command: oxker
+args: ""
+source: https://github.com/mrjackwills/oxker
+website: https://github.com/mrjackwills/oxker
+documentation: https://github.com/mrjackwills/oxker#readme
+screenshot: https://raw.githubusercontent.com/mrjackwills/oxker/791342c041031d3da9c2cc1b42439372e0f54258/.github/screenshot_01.png
+keywords:
+  - docker
+  - containers
+  - logs
+  - devops
+  - tui
+
+roles: []

@@ -1,0 +1,25 @@
+id: khal
+name: khal
+version: 1.0.0
+author: pimutils
+description: Calendar that reads and writes local iCalendar files and syncs with CalDAV servers through vdirsyncer
+license: MIT
+platforms:
+  # The Debian package installs both the khal command line and ikhal, its interactive
+  # calendar; ikhal is what launches here. On first use it stops with "Cannot find a config
+  # file" until `khal configure` has been run once.
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y khal
+    uninstall: sudo apt-get remove -y khal
+command: ikhal
+args: ""
+source: https://github.com/pimutils/khal
+website: https://khal.readthedocs.io/
+documentation: https://khal.readthedocs.io/
+keywords:
+  - calendar
+  - caldav
+  - icalendar
+  - tui
+
+roles: []

@@ -1,0 +1,40 @@
+id: claude.code
+name: Claude Code
+version: 1.0.0
+author: Anthropic
+description: Agentic coding assistant from Anthropic that reads, edits and runs code from the terminal
+license: Proprietary
+platforms:
+  # Not in Debian, and the npm package needs Node 22 while Debian 13 ships Node 20, so the
+  # install takes the native binary Anthropic attaches to each GitHub release. Installed this
+  # way the built-in auto-updater cannot replace it; reinstall to move to a newer version.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/anthropics/claude-code/releases/download/v2.1.288/claude-linux-x64.tar.gz; s=5f3e0d5bfc21123a880ba6ffbd10f1b819c5e56204473591be1c1f65847c9368 ;;
+      aarch64) a=https://github.com/anthropics/claude-code/releases/download/v2.1.288/claude-linux-arm64.tar.gz; s=4d27054191394530666025db88114ea38c31cc5f5564766beb909b079a9652c4 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 claude /usr/local/bin/claude &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/claude
+  windows:
+    install: winget install -e --id Anthropic.ClaudeCode
+    uninstall: winget uninstall -e --id Anthropic.ClaudeCode
+command: claude
+args: ""
+source: https://github.com/anthropics/claude-code
+website: https://claude.com/product/claude-code
+documentation: https://code.claude.com/docs
+screenshot: https://cdn.terminaltrove.com/m/343ef369-16f5-4450-add6-944dfa69c161.png
+keywords:
+  - ai
+  - coding agent
+  - llm
+  - tui
+  - terminal
+
+roles: []

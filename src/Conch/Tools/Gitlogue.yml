@@ -1,0 +1,35 @@
+id: gitlogue
+name: gitlogue
+version: 1.0.0
+author: Yuji Ueki
+description: Git history replay that types out each commit with syntax highlighting, like a screensaver
+license: ISC
+platforms:
+  # Only glibc builds are published (they need glibc 2.34+ and zlib, both in Debian 13).
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/unhappychoice/gitlogue/releases/download/v0.11.0/gitlogue-v0.11.0-x86_64-unknown-linux-gnu.tar.gz; s=ff58adcdbbd5474d5bcabe8194313574aab967a60bfc1757070ba025ff9379c4 ;;
+      aarch64) a=https://github.com/unhappychoice/gitlogue/releases/download/v0.11.0/gitlogue-v0.11.0-aarch64-unknown-linux-gnu.tar.gz; s=7f3810486d771d7e61e185cee69e10af55e53538f25ab0ebd4b515809ef39a70 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 gitlogue /usr/local/bin/gitlogue &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/gitlogue
+command: gitlogue
+# Replays the Git repository in the current directory.
+args: ""
+source: https://github.com/unhappychoice/gitlogue
+website: https://github.com/unhappychoice/gitlogue
+documentation: https://github.com/unhappychoice/gitlogue/blob/main/docs/usage.md
+screenshot: https://cdn.terminaltrove.com/m/b0185bba-cc3e-45cc-b0b2-1946a1c4db24.png
+keywords:
+  - git
+  - screensaver
+  - animation
+  - tui
+
+roles: []

@@ -1,0 +1,42 @@
+id: csysdig
+name: csysdig
+version: 1.0.0
+author: Sysdig
+description: Ncurses interface for sysdig that explores processes, files, network connections and containers from live system calls
+license: Apache-2.0
+platforms:
+  # sysdig is not in Debian 13, and upstream's .deb depends on dkms to build a kernel module.
+  # The release tarball is used instead: csysdig runs with the modern BPF probe built into
+  # the binary (no module, no kernel headers). Its views are Lua chisels it loads from the
+  # compiled-in /usr/share/sysdig, so that folder is copied there; no Debian 13 package owns
+  # it. Capturing system calls needs root, so it is launched through sudo.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/draios/sysdig/releases/download/0.41.4/sysdig-0.41.4-x86_64.tar.gz; s=373dea5255e1f2f4cea52c7c74055020c9a6368bab5ad5c9311fb944015ce1be ;;
+      aarch64) a=https://github.com/draios/sysdig/releases/download/0.41.4/sysdig-0.41.4-aarch64.tar.gz; s=f9db1824446298284308a2a6bd5e371fff6b324c095dff73db86e81a34dea8cb ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && d="sysdig-0.41.4-$(uname -m)/usr" &&
+      sudo install -m 755 "$d/bin/sysdig" "$d/bin/csysdig" /usr/local/bin/ &&
+      sudo rm -rf /usr/share/sysdig && sudo mkdir -p /usr/share/sysdig &&
+      sudo cp -r "$d/share/sysdig/." /usr/share/sysdig/ &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -rf /usr/local/bin/sysdig /usr/local/bin/csysdig /usr/share/sysdig
+    detect: test -x /usr/local/bin/csysdig && test -d /usr/share/sysdig/chisels
+command: sudo
+args: "csysdig --modern-bpf"
+source: https://github.com/draios/sysdig
+website: https://github.com/draios/sysdig
+documentation: https://github.com/draios/sysdig/wiki/Csysdig-Overview
+keywords:
+  - tui
+  - system monitor
+  - troubleshooting
+  - containers
+  - syscalls
+
+roles: []

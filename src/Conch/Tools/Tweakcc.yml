@@ -1,0 +1,27 @@
+id: tweakcc
+name: tweakcc
+version: 1.0.0
+author: Piebald
+description: Customizer for Claude Code that changes its themes, thinking verbs, system prompts and other UI details
+license: MIT
+platforms:
+  # tweakcc patches the Claude Code install it finds, so it needs write access to it: a copy
+  # installed by the user (for example the native installer under ~/.local) works, while a
+  # root-owned /usr/local/bin/claude cannot be patched without sudo.
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y npm && sudo npm install -g tweakcc
+    uninstall: sudo npm uninstall -g tweakcc
+command: tweakcc
+args: ""
+source: https://github.com/Piebald-AI/tweakcc
+website: https://github.com/Piebald-AI/tweakcc
+documentation: https://github.com/Piebald-AI/tweakcc#readme
+screenshot: https://raw.githubusercontent.com/Piebald-AI/tweakcc/d839e046ff8036763ddaea42197e9dc88be65b33/assets/demo.gif
+keywords:
+  - claude code
+  - ai
+  - themes
+  - customization
+  - tui
+
+roles: []

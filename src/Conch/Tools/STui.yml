@@ -1,0 +1,24 @@
+id: s.tui
+name: s-tui
+version: 1.0.0
+author: Alex Manuskin
+description: CPU stress test and monitoring utility that graphs frequency, utilization, temperature and power
+license: GPL-2.0
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y s-tui
+    uninstall: sudo apt-get remove -y s-tui
+command: s-tui
+args: ""
+source: https://github.com/amanusk/s-tui
+website: https://amanusk.github.io/s-tui/
+documentation: https://github.com/amanusk/s-tui#readme
+screenshot: https://raw.githubusercontent.com/amanusk/s-tui/010729638386e0a453d088df8446e4f07e3f77c3/ScreenShots/s-tui-1.0.gif
+keywords:
+  - cpu
+  - monitor
+  - stress test
+  - temperature
+  - tui
+
+roles: []

@@ -1,0 +1,30 @@
+id: sysz
+name: sysz
+version: 1.0.0
+author: Joe Hillenbrand
+description: fzf-driven menu for systemctl that lists systemd units and acts on the ones you select
+license: Unlicense
+platforms:
+  # sysz is a single shell script that drives systemctl through fzf.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget fzf &&
+      t=$(mktemp -d) && cd "$t" &&
+      wget -q -O sysz https://github.com/joehillen/sysz/releases/download/1.4.3/sysz &&
+      echo "875f8ddfb7d339979ca9b36907f2640cbbd4e9ac861d40188455926dfdcdd576  sysz" | sha256sum -c --quiet &&
+      sudo install -m 755 sysz /usr/local/bin/sysz &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/sysz
+command: sysz
+args: ""
+source: https://github.com/joehillen/sysz
+website: https://github.com/joehillen/sysz
+documentation: https://github.com/joehillen/sysz#readme
+keywords:
+  - systemd
+  - systemctl
+  - services
+  - fzf
+  - tui
+
+roles: []

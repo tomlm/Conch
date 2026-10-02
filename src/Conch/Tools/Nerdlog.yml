@@ -1,0 +1,34 @@
+id: nerdlog
+name: Nerdlog
+version: 1.0.0
+author: Dmitry Frank
+description: Log viewer that fetches and filters logs from many remote hosts over SSH, with a timeline histogram
+license: BSD-2-Clause
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/dimonomid/nerdlog/releases/download/v1.12.0/nerdlog_1.12.0_linux_amd64.tar.gz; s=294de9561c2d9994dc65a9e16c72583ff37c2ffbb29c651b8d616787bb7ba669 ;;
+      aarch64) a=https://github.com/dimonomid/nerdlog/releases/download/v1.12.0/nerdlog_1.12.0_linux_arm64.tar.gz; s=0bd6cb4f974d6e8be4e946948fdd641282f36ea07ccc903bf90c6ad9f6cb0cc6 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 nerdlog /usr/local/bin/nerdlog &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/nerdlog
+command: nerdlog
+args: ""
+source: https://github.com/dimonomid/nerdlog
+website: https://dmitryfrank.com/projects/nerdlog/article
+documentation: https://github.com/dimonomid/nerdlog#readme
+screenshot: https://dmitryfrank.com/_media/projects/nerdlog/nerdlog_intro_3.png
+keywords:
+  - logs
+  - ssh
+  - syslog
+  - journalctl
+  - tui
+
+roles: []

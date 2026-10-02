@@ -1,0 +1,24 @@
+id: elia
+name: Elia
+version: 1.0.0
+author: Darren Burns
+description: Keyboard-centric chat client for large language models such as ChatGPT, Claude and local models served by Ollama
+license: Apache-2.0
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y pipx && sudo pipx install --global elia-chat
+    uninstall: sudo pipx uninstall --global elia-chat
+command: elia
+args: ""
+source: https://github.com/darrenburns/elia
+website: https://github.com/darrenburns/elia
+documentation: https://github.com/darrenburns/elia#readme
+screenshot: https://github.com/darrenburns/elia/assets/5740731/75f8563f-ce1a-4c9c-98c0-1bd1f7010814
+keywords:
+  - ai
+  - llm
+  - chat
+  - chatgpt
+  - textual
+
+roles: []

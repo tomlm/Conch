@@ -1,0 +1,25 @@
+id: pokete
+name: Pokete
+version: 1.0.0
+author: lxgr
+description: Pokemon-like role-playing game drawn in ASCII in the terminal
+license: GPL-3.0
+platforms:
+  # PyPI only carries 0.10.0 release candidates (no final release), and pipx skips
+  # pre-releases unless one is named, so the version is pinned.
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y pipx && sudo pipx install --global pokete==0.10.0rc4
+    uninstall: sudo pipx uninstall --global pokete
+command: pokete
+args: ""
+source: https://github.com/lxgr-linux/pokete
+website: https://lxgr-linux.github.io/pokete
+documentation: https://github.com/lxgr-linux/pokete#readme
+screenshot: https://raw.githubusercontent.com/lxgr-linux/pokete/564d6f320a6777fcd62293636eb28e37282abbd1/assets/ss/ss01.png
+keywords:
+  - game
+  - rpg
+  - ascii
+  - tui
+
+roles: []

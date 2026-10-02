@@ -1,0 +1,34 @@
+id: sidecar
+name: Sidecar
+version: 1.0.0
+author: Marcus Vorwaller
+description: Dashboard for AI coding agents that shows their sessions, git status, diffs and worktrees beside them
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/marcus/sidecar/releases/download/v1.15.1/sidecar_1.15.1_linux_amd64.tar.gz; s=7b62bfab43da143bb955910d95c83b96e352403e3083b9024596d120e78c465f ;;
+      aarch64) a=https://github.com/marcus/sidecar/releases/download/v1.15.1/sidecar_1.15.1_linux_arm64.tar.gz; s=62b985cc3b464abb5b8f699bd854d3a2a61f3724690e871304defe2d3f8056e3 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 sidecar /usr/local/bin/sidecar &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/sidecar
+command: sidecar
+args: ""
+source: https://github.com/marcus/sidecar
+website: https://github.com/marcus/sidecar
+documentation: https://github.com/marcus/sidecar#readme
+screenshot: https://raw.githubusercontent.com/marcus/sidecar/f0f83fdabda9367b83800bd57cc16769dfcad0bb/docs/screenshots/sidecar-hero.png
+keywords:
+  - ai
+  - agents
+  - git
+  - dashboard
+  - tui
+
+roles: []

@@ -1,0 +1,34 @@
+id: gitu
+name: gitu
+version: 1.0.0
+author: altsem
+description: Git client inspired by Magit, for staging, committing, rebasing and browsing history from the keyboard
+license: MIT
+platforms:
+  # The release has a static (musl) build for x86_64 only, packed as a zip with the binary
+  # in a versioned folder.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget unzip &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/altsem/gitu/releases/download/v0.43.0/gitu-v0.43.0-x86_64-unknown-linux-musl.zip; s=c721ffa539f5c91d4bb8ed1a5475d36d7a15549fd2f09daf9318df2ba2b6e368 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      unzip -q pkg && sudo install -m 755 gitu-v0.43.0-x86_64-unknown-linux-musl/gitu /usr/local/bin/gitu &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/gitu
+command: gitu
+args: ""
+source: https://github.com/altsem/gitu
+website: https://github.com/altsem/gitu
+documentation: https://github.com/altsem/gitu#readme
+screenshot: https://cdn.terminaltrove.com/m/575d02c7-1f99-4d19-a174-e482fa996449.png
+keywords:
+  - git
+  - version control
+  - magit
+  - tui
+
+roles: []

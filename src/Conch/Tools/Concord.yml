@@ -1,0 +1,33 @@
+id: concord
+name: Concord
+version: 1.0.0
+author: chojs23
+description: Discord client for the terminal with servers, channels, direct messages, markdown and media previews
+license: GPL-3.0
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget xz-utils libstdc++6 libasound2t64 libpipewire-0.3-0t64 libva2 libva-drm2 libdrm2 &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/chojs23/concord/releases/download/v2.6.1/concord-x86_64-unknown-linux-gnu.tar.xz; s=7849be7f1001ea24cb30adb95c6a887c75e88e0521fc4f48e8c1c796039fed5f ;;
+      aarch64) a=https://github.com/chojs23/concord/releases/download/v2.6.1/concord-aarch64-unknown-linux-gnu.tar.xz; s=e58a18edd36c2be7a53f1fcd20c8a3d3ce2a5aa9471b35529239a86954171ae7 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xJf pkg && sudo install -m 755 */concord /usr/local/bin/concord &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/concord
+command: concord
+args: ""
+source: https://github.com/chojs23/concord
+website: https://github.com/chojs23/concord
+documentation: https://github.com/chojs23/concord#readme
+screenshot: https://raw.githubusercontent.com/chojs23/concord/5bac7a24165d975eb140192d4f62e08ddea282ce/assets/example.png
+keywords:
+  - discord
+  - chat
+  - messaging
+  - tui
+
+roles: []

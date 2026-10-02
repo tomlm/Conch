@@ -1,0 +1,34 @@
+id: amp
+name: Amp
+version: 1.0.0
+author: Jordan MacDonald
+description: Modal text editor for the terminal, inspired by Vim, with fuzzy file finding and syntax highlighting
+license: GPL-3.0
+platforms:
+  # Debian has no amp package. The release ships a single static musl binary, for x86_64 only.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/jmacdonald/amp/releases/download/0.7.1/amp-x86_64-unknown-linux-musl; s=b9d3a1fcbdc683ce680a7c7f4f36570ba6772329fe02232a517659fecab56db3 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      sudo install -m 755 pkg /usr/local/bin/amp &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/amp
+command: amp
+args: "%1?"
+source: https://github.com/jmacdonald/amp
+website: https://amp.rs
+documentation: https://amp.rs/docs/
+screenshot: https://raw.githubusercontent.com/jmacdonald/amp/df97a3c01e6021a464af4204dd64d10eb205f149/screenshot.png
+keywords:
+  - text editor
+  - modal
+  - vim
+  - terminal
+
+roles:
+  - text-editor

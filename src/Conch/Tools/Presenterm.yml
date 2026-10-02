@@ -1,0 +1,37 @@
+id: presenterm
+name: presenterm
+version: 1.0.0
+author: Matias Fontanini
+description: Terminal slideshow tool that presents slides written in Markdown, with code highlighting and images
+license: BSD-2-Clause
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/mfontanini/presenterm/releases/download/v0.16.1/presenterm-0.16.1-x86_64-unknown-linux-musl.tar.gz; s=87512d7c88c3d961c7687aca3519f83c2b7611a550cf769c67c6f7948e8b8f54 ;;
+      aarch64) a=https://github.com/mfontanini/presenterm/releases/download/v0.16.1/presenterm-0.16.1-aarch64-unknown-linux-musl.tar.gz; s=c03c3744609d61587aac9dda4f431912748bd70d88d4fa6c0440b079001c64c3 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 presenterm-0.16.1/presenterm /usr/local/bin/presenterm &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/presenterm
+  windows:
+    install: winget install -e --id mfontanini.presenterm
+    uninstall: winget uninstall -e --id mfontanini.presenterm
+command: presenterm
+# The Markdown file holding the slides.
+args: "%1"
+source: https://github.com/mfontanini/presenterm
+website: https://mfontanini.github.io/presenterm/
+documentation: https://mfontanini.github.io/presenterm/
+screenshot: https://raw.githubusercontent.com/mfontanini/presenterm/5f8add11a24af9d257fd18da48c8004dd9c516f8/docs/src/assets/demo.gif
+keywords:
+  - presentation
+  - slides
+  - markdown
+  - tui
+
+roles: []

@@ -1,0 +1,33 @@
+id: cloudflare.speed.cli
+name: cloudflare-speed-cli
+version: 1.0.0
+author: Kaveh
+description: Internet speed test against Cloudflare's servers with live charts and a history of past runs
+license: GPL-3.0
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget xz-utils &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/kavehtehrani/cloudflare-speed-cli/releases/download/v1.0.9/cloudflare-speed-cli-x86_64-unknown-linux-musl.tar.xz; s=dae0431c8890a01c96cb993f59cb3c0d9e4aebb4542a22aff29411da7f525702 ;;
+      aarch64) a=https://github.com/kavehtehrani/cloudflare-speed-cli/releases/download/v1.0.9/cloudflare-speed-cli-aarch64-unknown-linux-musl.tar.xz; s=4661af86d2a9809270bd7ff2c862b0ba1bd6d7e6ab39ed1098ce047396185caa ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xJf pkg && sudo install -m 755 */cloudflare-speed-cli /usr/local/bin/cloudflare-speed-cli &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/cloudflare-speed-cli
+command: cloudflare-speed-cli
+args: ""
+source: https://github.com/kavehtehrani/cloudflare-speed-cli
+website: https://github.com/kavehtehrani/cloudflare-speed-cli
+documentation: https://github.com/kavehtehrani/cloudflare-speed-cli#readme
+screenshot: https://raw.githubusercontent.com/kavehtehrani/cloudflare-speed-cli/8aa1def396574d839bf3e870cedf545276d9a0d2/images/screenshot-charts.png
+keywords:
+  - speedtest
+  - network
+  - bandwidth
+  - tui
+
+roles: []

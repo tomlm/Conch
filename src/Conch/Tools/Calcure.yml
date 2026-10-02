@@ -1,0 +1,24 @@
+id: calcure
+name: Calcure
+version: 1.0.0
+author: Roman Anufriev
+description: Calendar and task manager with vim keys, subtasks, deadlines, timers and import from .ics files and calcurse
+license: MIT
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y pipx && sudo pipx install --global calcure
+    uninstall: sudo pipx uninstall --global calcure
+command: calcure
+args: ""
+source: https://github.com/anufrievroman/calcure
+website: https://anufrievroman.gitbook.io/calcure
+documentation: https://anufrievroman.gitbook.io/calcure
+screenshot: https://raw.githubusercontent.com/anufrievroman/calcure/c529fe27c5901c219576a7a51464947d30150b87/screenshot.png
+keywords:
+  - calendar
+  - tasks
+  - todo
+  - productivity
+  - tui
+
+roles: []

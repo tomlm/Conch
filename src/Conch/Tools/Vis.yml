@@ -1,0 +1,25 @@
+id: vis
+name: vis
+version: 1.0.0
+author: Marc André Tanner
+description: Vi-like text editor based on Plan 9's structural regular expressions
+license: ISC
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y vis
+    uninstall: sudo apt-get remove -y vis
+command: vis
+args: "%1?"
+source: https://github.com/martanne/vis
+website: https://github.com/martanne/vis
+documentation: https://github.com/martanne/vis#readme
+screenshot: https://asciinema.org/a/41361.png
+keywords:
+  - text editor
+  - vi
+  - modal
+  - structural regular expressions
+  - terminal
+
+roles:
+  - text-editor

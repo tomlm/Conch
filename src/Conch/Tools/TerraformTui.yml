@@ -1,0 +1,26 @@
+id: terraform.tui
+name: terraform-tui
+version: 1.0.0
+author: Ido Avraham
+description: Terminal UI for Terraform state that browses and searches resources, taints or removes them, and creates and applies plans
+license: Apache-2.0
+platforms:
+  # Not in Debian; Python app from PyPI (package and command are both tftui). It drives the
+  # terraform command, which is not in Debian and must be installed separately.
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y pipx && sudo pipx install --global tftui
+    uninstall: sudo pipx uninstall --global tftui
+command: tftui
+args: ""
+source: https://github.com/idoavrah/terraform-tui
+website: https://github.com/idoavrah/terraform-tui
+documentation: https://github.com/idoavrah/terraform-tui#readme
+screenshot: https://cdn.terminaltrove.com/m/35f905e5-bef8-423a-81b9-4a0c2d02e136.png
+keywords:
+  - tui
+  - terraform
+  - infrastructure as code
+  - devops
+  - textual
+
+roles: []

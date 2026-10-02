@@ -1,0 +1,22 @@
+id: textual.paint
+name: Textual Paint
+version: 1.0.0
+author: Isaiah Odhner
+description: MS Paint clone for the terminal with brushes, shapes, fill, text and image files
+license: MIT
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y pipx && sudo pipx install --global textual-paint
+    uninstall: sudo pipx uninstall --global textual-paint
+command: textual-paint
+args: "%1?"
+source: https://github.com/1j01/textual-paint
+website: https://github.com/1j01/textual-paint
+documentation: https://github.com/1j01/textual-paint#readme
+keywords:
+  - paint
+  - drawing
+  - art
+  - textual
+
+roles: []

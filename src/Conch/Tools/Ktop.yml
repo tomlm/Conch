@@ -1,0 +1,33 @@
+id: ktop
+name: ktop
+version: 1.0.0
+author: Vladimir Vivien
+description: Top-like monitor for Kubernetes clusters that shows nodes, pods and their resource usage
+license: Apache-2.0
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/vladimirvivien/ktop/releases/download/v0.5.3/ktop_v0.5.3_linux_amd64.tar.gz; s=f8104e5d09bb764da014ba87e5f75c73f55a26b907e9699f43176848a33dbea6 ;;
+      aarch64) a=https://github.com/vladimirvivien/ktop/releases/download/v0.5.3/ktop_v0.5.3_linux_arm64.tar.gz; s=448e574bead68b3bfeb745493a031015dfd7b3135af6e1a38eadf07c94d087be ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 ktop /usr/local/bin/ktop &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/ktop
+command: ktop
+args: ""
+source: https://github.com/vladimirvivien/ktop
+website: https://ktop.app/
+documentation: https://github.com/vladimirvivien/ktop#readme
+screenshot: https://raw.githubusercontent.com/vladimirvivien/ktop/0ecb4f9482910d09cafec9fb1eb08811844232f3/docs/images/ktop.png
+keywords:
+  - kubernetes
+  - k8s
+  - monitor
+  - tui
+
+roles: []

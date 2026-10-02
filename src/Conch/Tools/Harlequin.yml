@@ -1,0 +1,26 @@
+id: harlequin
+name: Harlequin
+version: 1.0.0
+author: Ted Conbeer
+description: SQL IDE for the terminal with a query editor, data catalog and results viewer, for DuckDB, SQLite and other databases through adapters
+license: MIT
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y pipx && sudo pipx install --global harlequin
+    uninstall: sudo pipx uninstall --global harlequin
+command: harlequin
+# With no argument it opens an in-memory DuckDB database; a path opens that database file.
+args: "%1?"
+source: https://github.com/tconbeer/harlequin
+website: https://harlequin.sh/
+documentation: https://harlequin.sh/docs/getting-started/index
+screenshot: https://cdn.terminaltrove.com/m/dfdd9716-f165-4507-a924-fdaf7ac65f5d.png
+keywords:
+  - sql
+  - database
+  - duckdb
+  - sqlite
+  - ide
+  - textual
+
+roles: []

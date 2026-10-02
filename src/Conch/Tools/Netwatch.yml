@@ -1,0 +1,37 @@
+id: netwatch
+name: NetWatch
+version: 1.0.0
+author: matthart1983
+description: Network diagnostics tool that shows interfaces, connections, latency and live packet capture
+license: MIT
+platforms:
+  # Packet capture and process attribution need privileges, so the install grants the
+  # binary the capabilities its README lists (setcap) instead of launching it through sudo.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget libcap2-bin &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/matthart1983/netwatch/releases/download/v0.34.0/netwatch-linux-x86_64.tar.gz; s=44ed79a2a7100b3b78cac89404e025dba4f056965f6d75896f38f1bf117c5aa8; b=netwatch-linux-x86_64 ;;
+      aarch64) a=https://github.com/matthart1983/netwatch/releases/download/v0.34.0/netwatch-linux-aarch64.tar.gz; s=3726f9dbf11d774f6d8a1f48c49797f9693ddd150c2a018fefd84892f96660c5; b=netwatch-linux-aarch64 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 "$b" /usr/local/bin/netwatch &&
+      sudo setcap cap_net_raw,cap_bpf,cap_perfmon+eip /usr/local/bin/netwatch &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/netwatch
+command: netwatch
+args: ""
+source: https://github.com/matthart1983/netwatch
+website: https://netwatchlabs.com
+documentation: https://github.com/matthart1983/netwatch/blob/main/docs/REFERENCE.md
+screenshot: https://raw.githubusercontent.com/matthart1983/netwatch/5d13d0e32da33f907ef7965c6e20893b1a79b2c4/docs/media/demo-dense.gif
+keywords:
+  - network
+  - diagnostics
+  - packet capture
+  - monitor
+  - tui
+
+roles: []

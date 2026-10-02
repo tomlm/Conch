@@ -1,0 +1,39 @@
+id: television
+name: Television
+version: 1.0.0
+author: Alex Pasmantier
+description: Fuzzy finder with a live preview that searches files, text, git repositories, environment variables and other channels
+license: MIT
+platforms:
+  # Not in Debian. Pinned upstream release, checked by hash. x86_64 uses the static musl
+  # build; upstream publishes only a glibc build for aarch64.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/alexpasmantier/television/releases/download/0.15.9/tv-0.15.9-x86_64-unknown-linux-musl.tar.gz; s=3410e34132f4e44fd439c711f08c15b3a21f51630657cb03f248b2c7aef3e29a; d=tv-0.15.9-x86_64-unknown-linux-musl ;;
+      aarch64) a=https://github.com/alexpasmantier/television/releases/download/0.15.9/tv-0.15.9-aarch64-unknown-linux-gnu.tar.gz; s=78a246170c9d83bea0f0c4a3fa8c9bc5cee80bbe66d34946d06fdc5a17a2cd1a; d=tv-0.15.9-aarch64-unknown-linux-gnu ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 "$d/tv" /usr/local/bin/tv &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/tv
+  windows:
+    install: winget install -e --id alexpasmantier.television
+    uninstall: winget uninstall -e --id alexpasmantier.television
+command: tv
+args: ""
+source: https://github.com/alexpasmantier/television
+website: https://alexpasmantier.github.io/television/
+documentation: https://alexpasmantier.github.io/television/
+screenshot: https://github.com/user-attachments/assets/6255d115-3490-45ee-82cb-b3a84b2e852d
+keywords:
+  - fuzzy finder
+  - search
+  - files
+  - preview
+  - tui
+
+roles: []

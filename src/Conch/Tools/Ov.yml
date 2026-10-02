@@ -1,0 +1,38 @@
+id: ov
+name: ov
+version: 1.0.0
+author: Noboru Saito
+description: Terminal pager with column and header modes, multi-color highlighting, sections and live follow
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget unzip &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/noborus/ov/releases/download/v0.55.0/ov_0.55.0_linux_amd64.zip; s=1f96c964fbba48b000ee4cba6ac9ba6d8ba322e0ccdcc2052501b96b4a989838 ;;
+      aarch64) a=https://github.com/noborus/ov/releases/download/v0.55.0/ov_0.55.0_linux_arm64.zip; s=0e5912383ae65af84be274f26fc920d0f493b237d1256123c1d1384a2e5e542f ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      unzip -q pkg && sudo install -m 755 ov /usr/local/bin/ov &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/ov
+  # Portable package: winget adds an ov alias to PATH.
+  windows:
+    install: winget install -e --id noborus.ov
+    uninstall: winget uninstall -e --id noborus.ov
+command: ov
+args: "%1"
+source: https://github.com/noborus/ov
+website: https://noborus.github.io/ov
+documentation: https://noborus.github.io/ov
+screenshot: https://raw.githubusercontent.com/noborus/ov/d98216f1b02d98077b799977a957c4c1cafe212a/docs/ps-ov.png
+keywords:
+  - pager
+  - less
+  - viewer
+  - text
+  - tui
+
+roles: []

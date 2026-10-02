@@ -1,0 +1,33 @@
+id: tgt
+name: tgt
+version: 1.0.0
+author: Federico Bruzzone
+description: Terminal client for Telegram
+license: Apache-2.0
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget libc++1 libc++abi1 libunwind-19 libasound2t64 libopus0 &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/FedericoBruzzone/tgt/releases/download/v1.0.0-rc1/tgt-v1.0.0-rc1-x86_64-unknown-linux-gnu.tar.gz; s=80b5e84520a36c2f7c3d3a11cec89c9edbe15123b724e25b64204a7db2ae225d ;;
+      aarch64) a=https://github.com/FedericoBruzzone/tgt/releases/download/v1.0.0-rc1/tgt-v1.0.0-rc1-aarch64-unknown-linux-gnu.tar.gz; s=66e8e98e8a564b59c404c227ef7ac809f86e4fac3d1f23af37d2b51c8b0f1b8b ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 tgt /usr/local/bin/tgt &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/tgt
+command: tgt
+args: ""
+source: https://github.com/FedericoBruzzone/tgt
+website: https://github.com/FedericoBruzzone/tgt
+documentation: https://github.com/FedericoBruzzone/tgt#readme
+screenshot: https://raw.githubusercontent.com/FedericoBruzzone/tgt/c9f2acc0df717ab28080c8dc9a9fe69025c9fb2d/imgs/example.png
+keywords:
+  - telegram
+  - chat
+  - messaging
+  - tui
+
+roles: []

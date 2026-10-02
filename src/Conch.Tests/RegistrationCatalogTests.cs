@@ -190,6 +190,39 @@ public class RegistrationCatalogTests
         Assert.DoesNotMatch(@"\.(svg|webp)$", path.ToLowerInvariant());
     }
 
+    /// <summary>
+    /// Debian packages no app's uninstall may take with it.
+    /// </summary>
+    /// <remarks>
+    /// Each is installed by default and something else depends on it: uninstalling "cfdisk"
+    /// once meant `apt-get remove fdisk`, which takes fdisk and sfdisk too, and "less" took the
+    /// pager man and git use. A registration for something inside one of these says so in its
+    /// uninstall and exits non-zero instead.
+    /// </remarks>
+    private static readonly HashSet<string> ProtectedPackages = new(StringComparer.Ordinal)
+    {
+        "apt", "bash", "coreutils", "dpkg", "fdisk", "less", "libc6", "login", "mount",
+        "passwd", "sudo", "systemd", "util-linux",
+    };
+
+    [Theory]
+    [MemberData(nameof(RegistrationFiles))]
+    public void UninstallNeverRemovesASystemPackage(string fileName)
+    {
+        var linux = Load(fileName).Platforms?.Linux;
+        if (linux == null)
+        {
+            return;
+        }
+
+        var removed = System.Text.RegularExpressions.Regex
+            .Matches(linux.Uninstall, @"apt-get\s+(?:remove|purge|autoremove)\s+(?:-\S+\s+)*([a-z0-9.+\- ]+)")
+            .SelectMany(m => m.Groups[1].Value.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+            .Where(p => !p.StartsWith('-'));
+
+        Assert.Empty(removed.Where(ProtectedPackages.Contains));
+    }
+
     [Fact]
     public void MicrosoftEditIsOnlyOfferedOnWindows()
     {

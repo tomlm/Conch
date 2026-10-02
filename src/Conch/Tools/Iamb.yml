@@ -1,0 +1,41 @@
+id: iamb
+name: iamb
+version: 1.0.0
+author: Ulyssa
+description: Matrix chat client with vim keybindings, threads, spaces and end-to-end encryption
+license: Apache-2.0
+platforms:
+  # Not in Debian. iamb will not start until ~/.config/iamb/config.toml names a profile (see
+  # the documentation). Pinned upstream release, checked by hash. Upstream publishes a static musl
+  # build for x86_64 and a glibc build for aarch64, each zipped.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget unzip &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/ulyssa/iamb/releases/download/v0.0.12/iamb-x86_64-unknown-linux-musl-binary.zip; s=6191123377e621e4a8b7ea5350a14b30034bdfbba344ab24775569ca7b65ee69 ;;
+      aarch64) a=https://github.com/ulyssa/iamb/releases/download/v0.0.12/iamb-aarch64-unknown-linux-gnu-binary.zip; s=7cee916aa655954b1f348c0a9a9068e4209460c4f113cea3a9e1359d196239ea ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      unzip -q pkg && sudo install -m 755 iamb /usr/local/bin/iamb &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/iamb
+  # Portable zip; winget adds the iamb alias to PATH.
+  windows:
+    install: winget install -e --id ulyssa.iamb
+    uninstall: winget uninstall -e --id ulyssa.iamb
+command: iamb
+args: ""
+source: https://github.com/ulyssa/iamb
+website: https://iamb.chat
+documentation: https://iamb.chat/configure.html
+screenshot: https://iamb.chat/static/images/iamb-demo.gif
+keywords:
+  - tui
+  - matrix
+  - chat
+  - messaging
+  - vim
+
+roles: []

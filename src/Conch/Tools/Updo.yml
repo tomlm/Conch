@@ -1,0 +1,33 @@
+id: updo
+name: Updo
+version: 1.0.0
+author: owloops
+description: Website uptime monitor that checks availability and response time and raises alerts
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/Owloops/updo/releases/download/v0.4.8/updo_Linux_x86_64; s=435da4f6d93ae987f11076493e61802db76c6bde1efe2af10c3bf451327c8c81 ;;
+      aarch64) a=https://github.com/Owloops/updo/releases/download/v0.4.8/updo_Linux_arm64; s=a09a73f5b7bc1a3304249a558dc1bc78e0d4b2fcec48803566acfc9b693ba5b1 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      sudo install -m 755 pkg /usr/local/bin/updo &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/updo
+command: updo
+args: "monitor %1"
+source: https://github.com/Owloops/updo
+website: https://github.com/Owloops/updo
+documentation: https://github.com/Owloops/updo#readme
+screenshot: https://raw.githubusercontent.com/Owloops/updo/45a7601ff6c1cc54ad8c8a740102724a22d0900e/images/demo.gif
+keywords:
+  - uptime
+  - monitoring
+  - http
+  - tui
+
+roles: []

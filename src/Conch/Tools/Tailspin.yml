@@ -1,0 +1,24 @@
+id: tailspin
+name: tailspin
+version: 1.0.0
+author: Ben Sadeh
+description: Log file highlighter that colors dates, numbers, IP addresses, URLs and keywords and pages the result
+license: MIT
+platforms:
+  # tspin opens the highlighted file in less, which the Debian package depends on.
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y tailspin
+    uninstall: sudo apt-get remove -y tailspin
+command: tspin
+args: "%1"
+source: https://github.com/bensadeh/tailspin
+website: https://github.com/bensadeh/tailspin
+documentation: https://github.com/bensadeh/tailspin#readme
+screenshot: https://raw.githubusercontent.com/bensadeh/tailspin/b414467e3fa2cafc87755a3bc75272771b50f968/assets/main.png
+keywords:
+  - logs
+  - highlighter
+  - pager
+  - tui
+
+roles: []

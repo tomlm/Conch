@@ -1,0 +1,25 @@
+id: glances
+name: Glances
+version: 1.0.0
+author: Nicolas Hennion
+description: Cross-platform system monitor in the style of top and htop, showing processor, memory, disks, network, sensors and processes
+license: LGPL-3.0
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y glances
+    uninstall: sudo apt-get remove -y glances
+command: glances
+args: ""
+source: https://github.com/nicolargo/glances
+website: https://nicolargo.github.io/glances/
+documentation: https://glances.readthedocs.io/
+screenshot: https://raw.githubusercontent.com/nicolargo/glances/e8ec4fff3b33c096782259721b20721a3ce6d61c/docs/_static/glances-summary.png
+keywords:
+  - monitor
+  - system
+  - processes
+  - cpu
+  - memory
+
+roles:
+  - system-monitor

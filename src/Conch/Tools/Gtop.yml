@@ -1,0 +1,25 @@
+id: gtop
+name: gtop
+version: 1.0.0
+author: Can Güney Aksakalli
+description: System monitoring dashboard with charts for processor, memory, network, disk and processes
+license: MIT
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y npm && sudo npm install -g gtop
+    uninstall: sudo npm uninstall -g gtop
+command: gtop
+args: ""
+source: https://github.com/aksakalli/gtop
+website: https://github.com/aksakalli/gtop
+documentation: https://github.com/aksakalli/gtop#readme
+screenshot: https://raw.githubusercontent.com/aksakalli/gtop/ac6c2e11a683d41ae25c41912646d6b320285f8b/img/demo.gif
+keywords:
+  - tui
+  - monitor
+  - dashboard
+  - cpu
+  - memory
+
+roles:
+  - system-monitor

@@ -1,0 +1,27 @@
+id: lf
+name: lf
+version: 1.0.0
+author: Gökçehan Kara
+description: Terminal file manager inspired by ranger, with vi-style keys and a single fast binary
+license: MIT
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y lf
+    uninstall: sudo apt-get remove -y lf
+  windows:
+    install: winget install -e --id gokcehan.lf
+    uninstall: winget uninstall -e --id gokcehan.lf
+command: lf
+args: "%1?"
+source: https://github.com/gokcehan/lf
+website: https://github.com/gokcehan/lf
+documentation: https://github.com/gokcehan/lf/blob/master/doc.md
+screenshot: https://github.com/user-attachments/assets/d5623462-05ab-4921-aeb3-d377d4732f9e
+keywords:
+  - file manager
+  - files
+  - tui
+  - terminal
+
+roles:
+  - file-explorer

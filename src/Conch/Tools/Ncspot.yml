@@ -1,0 +1,40 @@
+id: ncspot
+name: ncspot
+version: 1.0.0
+author: Henrik Friedrichsen
+description: Ncurses Spotify client with vim-like keys, playlists, search and a play queue
+license: BSD-2-Clause
+platforms:
+  # Not in Debian. Pinned upstream release, checked by hash. The binary is linked against
+  # PulseAudio and OpenSSL, so those libraries come from apt first. Playback needs a Spotify
+  # Premium account.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget libpulse0 libssl3t64 &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/hrkfdn/ncspot/releases/download/v1.5.0/ncspot-v1.5.0-linux-x86_64.tar.gz; s=b4c3afe8805d46c3bd381fe16d3d53e374f64646eff66e9a04b1bf5dbc3b26d6 ;;
+      aarch64) a=https://github.com/hrkfdn/ncspot/releases/download/v1.5.0/ncspot-v1.5.0-linux-arm64.tar.gz; s=e137b2090be7411ac72d91273ed6a8c4b033080afb0b03c0027c6009954f103e ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 ncspot /usr/local/bin/ncspot &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/ncspot
+  windows:
+    install: winget install -e --id hrkfdn.ncspot
+    uninstall: winget uninstall -e --id hrkfdn.ncspot
+command: ncspot
+args: ""
+source: https://github.com/hrkfdn/ncspot
+website: https://github.com/hrkfdn/ncspot
+documentation: https://github.com/hrkfdn/ncspot/blob/main/doc/users.md
+screenshot: https://raw.githubusercontent.com/hrkfdn/ncspot/662118b0b67c3261b4f55a3dddbfdc3170259b06/images/screenshot.png
+keywords:
+  - spotify
+  - music
+  - player
+  - ncurses
+  - tui
+
+roles: []

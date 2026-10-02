@@ -1,0 +1,24 @@
+id: dolphie
+name: Dolphie
+version: 1.0.0
+author: Charles Thompson
+description: Real-time monitor for MySQL, MariaDB and ProxySQL that shows queries, replication, locks and server metrics
+license: GPL-3.0
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y pipx && sudo pipx install --global dolphie
+    uninstall: sudo pipx uninstall --global dolphie
+command: dolphie
+args: ""
+source: https://github.com/charles-001/dolphie
+website: https://github.com/charles-001/dolphie
+documentation: https://github.com/charles-001/dolphie#readme
+screenshot: https://github.com/user-attachments/assets/b23426ad-060e-4a3a-bb10-66cf0ac95bd0
+keywords:
+  - mysql
+  - mariadb
+  - database
+  - monitoring
+  - textual
+
+roles: []

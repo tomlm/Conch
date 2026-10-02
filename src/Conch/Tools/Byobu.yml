@@ -1,0 +1,24 @@
+id: byobu
+name: Byobu
+version: 1.0.0
+author: Dustin Kirkland
+description: Text-based window manager and terminal multiplexer built on tmux, with a status bar of system information
+license: GPL-3.0
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y byobu
+    uninstall: sudo apt-get remove -y byobu
+command: byobu
+args: ""
+source: https://github.com/dustinkirkland/byobu
+website: https://byobu.org/
+documentation: https://manpages.debian.org/trixie/byobu/byobu.1.en.html
+screenshot: https://cdn.terminaltrove.com/m/63dfd2e3-cd91-404a-bec7-dbff02667521.png
+keywords:
+  - multiplexer
+  - tmux
+  - window manager
+  - terminal
+  - tui
+
+roles: []

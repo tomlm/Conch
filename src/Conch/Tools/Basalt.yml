@@ -1,0 +1,35 @@
+id: basalt
+name: Basalt
+version: 1.0.0
+author: Erik Kinnunen
+description: Terminal UI for browsing and editing the notes in Obsidian vaults
+license: Apache-2.0
+platforms:
+  # Not in Debian. Pinned upstream release (static musl builds), checked by hash. The binary
+  # sits in a folder named after the target inside the archive.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/erikjuhani/basalt/releases/download/basalt/v0.12.7/basalt-0.12.7-x86_64-unknown-linux-musl.tar.gz; s=3ed2788769463387c2050440b078476b7ce496258b37a7559aa5483ca2906cf8 ;;
+      aarch64) a=https://github.com/erikjuhani/basalt/releases/download/basalt/v0.12.7/basalt-0.12.7-aarch64-unknown-linux-musl.tar.gz; s=993cb14614a7ad78e10d1ed17d031c29f84ebe0ed8620ea045101590881e1f35 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 basalt-0.12.7-$(uname -m)-unknown-linux-musl/basalt /usr/local/bin/basalt &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/basalt
+command: basalt
+args: ""
+source: https://github.com/erikjuhani/basalt
+website: https://basalt.page
+documentation: https://github.com/erikjuhani/basalt#readme
+screenshot: https://cdn.terminaltrove.com/m/1de2415f-704c-4fc4-b89d-76182b1aeadf.png
+keywords:
+  - tui
+  - notes
+  - obsidian
+  - markdown
+
+roles: []

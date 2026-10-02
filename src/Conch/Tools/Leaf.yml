@@ -1,0 +1,33 @@
+id: leaf
+name: leaf
+version: 1.0.0
+author: Rivo Link
+description: Markdown previewer for the terminal with a file picker, themes and live reload
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/RivoLink/leaf/releases/download/1.28.3/leaf-linux-x86_64; s=5a5e1c60938b2ea61c0207f94f6899a3e460e0836a30816e512595eba380b7d4 ;;
+      aarch64) a=https://github.com/RivoLink/leaf/releases/download/1.28.3/leaf-linux-arm64; s=80c9d579d38791ab5fb48d3674b7fbde2166e41a7ad7477a8173e634de5e1bb8 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      sudo install -m 755 pkg /usr/local/bin/leaf &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/leaf
+command: leaf
+args: "%1?"
+source: https://github.com/RivoLink/leaf
+website: https://leaf.rivolink.mg
+documentation: https://github.com/RivoLink/leaf#readme
+screenshot: https://raw.githubusercontent.com/RivoLink/leaf/e4d08754c2d7f1e4fffa7650488f97f5d2513e4f/images/preview.png
+keywords:
+  - markdown
+  - viewer
+  - preview
+  - tui
+
+roles: []

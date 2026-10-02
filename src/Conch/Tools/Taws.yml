@@ -1,0 +1,35 @@
+id: taws
+name: taws
+version: 1.0.0
+author: Hüseyin Babal
+description: AWS resource viewer and manager for browsing, observing and acting on resources across profiles and regions
+license: MIT
+platforms:
+  # Every taws release so far is tagged as a release candidate; this pins the newest one.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/huseyinbabal/taws/releases/download/v1.3.0-rc.8/taws-x86_64-unknown-linux-musl.tar.gz; s=021c935ad19a038cc5c59f436cb2b480ff9f981266c830ad20cc80d58250f8b5 ;;
+      aarch64) a=https://github.com/huseyinbabal/taws/releases/download/v1.3.0-rc.8/taws-aarch64-unknown-linux-musl.tar.gz; s=e104794af55fbd51f654478a743e546c51cd3dbe2accbdd50198ac8ae22f21ea ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 taws /usr/local/bin/taws &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/taws
+command: taws
+args: ""
+source: https://github.com/huseyinbabal/taws
+website: https://github.com/huseyinbabal/taws
+documentation: https://github.com/huseyinbabal/taws#readme
+screenshot: https://raw.githubusercontent.com/huseyinbabal/taws/bbb510e901b111e6bffc7f4fd6fac35daff8052f/assets/screenshot-ec2.png
+keywords:
+  - aws
+  - cloud
+  - devops
+  - infrastructure
+  - tui
+
+roles: []

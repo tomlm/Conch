@@ -1,0 +1,36 @@
+id: openapi.tui
+name: openapi-tui
+version: 1.0.0
+author: Hamed Zaghaghi
+description: Browser for the APIs described in an OpenAPI v3 file or URL that can also send their requests
+license: MIT
+platforms:
+  # Not in Debian. Pinned upstream release, checked by hash (glibc builds, no musl offered).
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/zaghaghi/openapi-tui/releases/download/0.10.2/openapi-tui-0.10.2-linux-x86_64.tar.gz; s=433d95b763e72a11ea5e676b33624e6c8b3dcdd5c997737bef59d51af27bbf46 ;;
+      aarch64) a=https://github.com/zaghaghi/openapi-tui/releases/download/0.10.2/openapi-tui-0.10.2-linux-arm64.tar.gz; s=aeba3c08e0eea3683ec1998f4a2a4b7b9f75c7a7a19d8c85e71cb498875ef493 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 openapi-tui /usr/local/bin/openapi-tui &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/openapi-tui
+command: openapi-tui
+# --input is required: a JSON or YAML OpenAPI spec, as a file path or URL.
+args: "-i %1"
+source: https://github.com/zaghaghi/openapi-tui
+website: https://github.com/zaghaghi/openapi-tui
+documentation: https://github.com/zaghaghi/openapi-tui#readme
+screenshot: https://raw.githubusercontent.com/zaghaghi/openapi-tui/e36c971e0d5086eda21b8fe9815511f5d3ae4b06/static/demo.gif
+keywords:
+  - tui
+  - openapi
+  - api
+  - rest
+  - http
+
+roles: []

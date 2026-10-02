@@ -1,0 +1,37 @@
+id: lstr
+name: lstr
+version: 1.0.0
+author: Brandon Greenwell
+description: Directory tree viewer with an interactive mode for browsing, searching and opening files
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget xz-utils &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/bgreenwell/lstr/releases/download/v0.4.0/lstr-x86_64-unknown-linux-musl.tar.xz; s=fb1124606d0cb67e8efa38e375fa16a7df02c4c345fc62788de3acc77fa0eeea ;;
+      aarch64) a=https://github.com/bgreenwell/lstr/releases/download/v0.4.0/lstr-aarch64-unknown-linux-gnu.tar.xz; s=2f35a1a49307739957128c459e797fcbf9a19d23dc7eaac0c09e828ef4e8b08d ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xJf pkg && sudo install -m 755 */lstr /usr/local/bin/lstr &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/lstr
+  # The MSI adds its install folder to PATH.
+  windows:
+    install: winget install -e --id bgreenwell.lstr
+    uninstall: winget uninstall -e --id bgreenwell.lstr
+command: lstr
+args: "interactive %1?"
+source: https://github.com/bgreenwell/lstr
+website: https://github.com/bgreenwell/lstr
+documentation: https://github.com/bgreenwell/lstr#readme
+screenshot: https://raw.githubusercontent.com/bgreenwell/lstr/dcd72f5a653d042249eecb94aaa6406382ca8a1d/assets/lstr-demo.gif
+keywords:
+  - tree
+  - directory
+  - files
+  - tui
+
+roles: []

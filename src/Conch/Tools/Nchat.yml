@@ -1,0 +1,34 @@
+id: nchat
+name: nchat
+version: 1.0.0
+author: Kristofer Berggren
+description: Terminal messaging client with support for Telegram, WhatsApp and Signal
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/d99kris/nchat/releases/download/v5.19.18/nchat-5.19.18-linux-x86_64-musl.tar.gz; s=696cabaa93fad1b596c295bdb07eb421144ea6ee3daf055e9a78ed26c0ec096a ;;
+      aarch64) a=https://github.com/d99kris/nchat/releases/download/v5.19.18/nchat-5.19.18-linux-arm64-musl.tar.gz; s=995cecf2c5d03aeedf162c701856af3b83f8db693882535471056a4b5a472416 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 nchat-*/bin/nchat /usr/local/bin/nchat &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/nchat
+command: nchat
+args: ""
+source: https://github.com/d99kris/nchat
+website: https://github.com/d99kris/nchat
+documentation: https://github.com/d99kris/nchat#readme
+screenshot: https://raw.githubusercontent.com/d99kris/nchat/9368b20be731a74b230cafad7df2f4284f4a3d7f/doc/screenshot-nchat.png
+keywords:
+  - chat
+  - messaging
+  - telegram
+  - whatsapp
+  - tui
+
+roles: []

@@ -1,0 +1,24 @@
+id: cava
+name: cava
+version: 1.0.0
+author: Karl Stavestrand
+description: Console audio visualizer that draws a live spectrum of the sound playing through ALSA, PulseAudio, PipeWire and others
+license: MIT
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y cava
+    uninstall: sudo apt-get remove -y cava
+command: cava
+args: ""
+source: https://github.com/karlstav/cava
+website: https://github.com/karlstav/cava
+documentation: https://github.com/karlstav/cava#readme
+screenshot: https://raw.githubusercontent.com/karlstav/cava/299219826379e137f0f4c48bfdc96019360964ec/example_files/cava.gif
+keywords:
+  - audio
+  - visualizer
+  - spectrum
+  - music
+  - tui
+
+roles: []

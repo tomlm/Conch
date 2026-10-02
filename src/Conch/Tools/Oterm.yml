@@ -1,0 +1,24 @@
+id: oterm
+name: oterm
+version: 1.0.0
+author: Yiorgis Gozadinos
+description: Terminal chat client for Ollama, OpenAI, Anthropic and other providers supported by pydantic-ai
+license: MIT
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y pipx && sudo pipx install --global oterm
+    uninstall: sudo pipx uninstall --global oterm
+command: oterm
+args: ""
+source: https://github.com/ggozad/oterm
+website: https://ggozad.github.io/oterm/
+documentation: https://ggozad.github.io/oterm/
+screenshot: https://raw.githubusercontent.com/ggozad/oterm/108d1f2922723b4335429aedefe7dca60028fd65/docs/img/splash.gif
+keywords:
+  - ai
+  - llm
+  - ollama
+  - chat
+  - textual
+
+roles: []

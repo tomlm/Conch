@@ -1,0 +1,26 @@
+id: vlc
+name: VLC (ncurses)
+version: 1.0.0
+author: VideoLAN
+description: VLC media player in its ncurses terminal interface, for playing audio files, streams and playlists
+license: GPL-2.0
+platforms:
+  # nvlc, from vlc-bin, starts VLC with its ncurses interface. vlc-plugin-base brings the
+  # codecs, demuxers, ALSA/PulseAudio output and the ncurses interface itself, without the
+  # Qt desktop interface that the full vlc package pulls in.
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y vlc-bin vlc-plugin-base
+    uninstall: sudo apt-get remove -y vlc-bin vlc-plugin-base
+command: nvlc
+args: "%1?"
+source: https://github.com/videolan/vlc
+website: https://www.videolan.org/vlc/
+documentation: https://wiki.videolan.org/Documentation:Command_line/
+keywords:
+  - media player
+  - music
+  - audio
+  - ncurses
+  - terminal
+
+roles: []

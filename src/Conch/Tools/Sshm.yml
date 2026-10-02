@@ -1,0 +1,37 @@
+id: sshm
+name: sshm
+version: 1.0.0
+author: Guillaume Archambault
+description: SSH host manager that lists, searches, edits and connects to the hosts in the SSH config, with port forwarding
+license: MIT
+platforms:
+  # Not in Debian. Pinned upstream release, checked by hash; static Go binary. sshm runs the
+  # ssh client to connect, so openssh-client comes from apt alongside it.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget openssh-client &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/Gu1llaum-3/sshm/releases/download/v1.11.0/sshm_Linux_x86_64.tar.gz; s=8fbec778c28a403a4e8c43f58c476dfa09b66297df8429982ec79503b4cefa37 ;;
+      aarch64) a=https://github.com/Gu1llaum-3/sshm/releases/download/v1.11.0/sshm_Linux_arm64.tar.gz; s=fd57bdfba1da4a15cfd9d9846f3688e240376a0f5991fd412119f96e091183f2 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 sshm /usr/local/bin/sshm &&
+      cd / && rm -rf "$t"
+    # openssh-client stays: other programs use it, and apt owns it.
+    uninstall: sudo rm -f /usr/local/bin/sshm
+command: sshm
+args: ""
+source: https://github.com/Gu1llaum-3/sshm
+website: https://github.com/Gu1llaum-3/sshm
+documentation: https://github.com/Gu1llaum-3/sshm#readme
+screenshot: https://raw.githubusercontent.com/Gu1llaum-3/sshm/9c639206f766b20cd50cfedfea7403d88ae9cfba/images/sshm.gif
+keywords:
+  - tui
+  - ssh
+  - remote
+  - hosts
+  - port forwarding
+
+roles: []

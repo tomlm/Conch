@@ -1,0 +1,39 @@
+id: codex
+name: Codex
+version: 1.0.0
+author: OpenAI
+description: Lightweight coding agent from OpenAI that runs in the terminal
+license: Apache-2.0
+platforms:
+  # Not in Debian. The release ships a static musl binary per architecture, named after
+  # its target triple; it is installed as plain "codex".
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) b=codex-x86_64-unknown-linux-musl; s=306865417d4ee7a927785852910a527f41e1e159add390ac5ae3accb67d44a13 ;;
+      aarch64) b=codex-aarch64-unknown-linux-musl; s=883620139925f677e5a12c95ba87a1d7f421388ebb797b1c10aba42a04ede9d7 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "https://github.com/openai/codex/releases/download/rust-v0.160.0/$b.tar.gz" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 "$b" /usr/local/bin/codex &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/codex
+  windows:
+    install: winget install -e --id OpenAI.Codex
+    uninstall: winget uninstall -e --id OpenAI.Codex
+command: codex
+args: ""
+source: https://github.com/openai/codex
+website: https://developers.openai.com/codex/cli
+documentation: https://github.com/openai/codex#readme
+screenshot: https://raw.githubusercontent.com/openai/codex/fd75aa116c4a6d1db0fa1e0a0f896e3368349649/.github/codex-cli-splash.png
+keywords:
+  - ai
+  - coding agent
+  - llm
+  - tui
+  - terminal
+
+roles: []

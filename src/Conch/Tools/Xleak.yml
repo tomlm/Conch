@@ -1,0 +1,39 @@
+id: xleak
+name: xleak
+version: 1.0.0
+author: Brandon Greenwell
+description: Spreadsheet viewer for Excel, OpenDocument and CSV files in the terminal
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget xz-utils &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/bgreenwell/xleak/releases/download/v0.2.6/xleak-x86_64-unknown-linux-musl.tar.xz; s=a306f6982864d7331463b29e2d7c7da9a29dc08cf74c3188f5f62b981aba7a1f ;;
+      aarch64) a=https://github.com/bgreenwell/xleak/releases/download/v0.2.6/xleak-aarch64-unknown-linux-gnu.tar.xz; s=549e4f6d430a2fbc373ffb5492a2dad77db6071d26cf680e89082c46b6106c97 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xJf pkg && sudo install -m 755 */xleak /usr/local/bin/xleak &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/xleak
+  # The MSI adds its install folder to PATH.
+  windows:
+    install: winget install -e --id bgreenwell.xleak
+    uninstall: winget uninstall -e --id bgreenwell.xleak
+command: xleak
+args: "-i %1"
+source: https://github.com/bgreenwell/xleak
+website: https://github.com/bgreenwell/xleak
+documentation: https://github.com/bgreenwell/xleak#readme
+screenshot: https://raw.githubusercontent.com/bgreenwell/xleak/ef6560c8e16815e2e74acf3973c0a5958a2c6523/assets/demo.gif
+keywords:
+  - excel
+  - spreadsheet
+  - xlsx
+  - csv
+  - viewer
+  - tui
+
+roles: []

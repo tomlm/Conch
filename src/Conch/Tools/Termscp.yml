@@ -1,0 +1,35 @@
+id: termscp
+name: termscp
+version: 1.0.0
+author: Christian Visintin
+description: File transfer client and explorer for SCP, SFTP, FTP, S3, SMB and WebDAV, with a two-pane local and remote view
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/veeso/termscp/releases/download/v1.2.0/termscp-v1.2.0-x86_64-unknown-linux-musl.tar.gz; s=058b9d5d6e44465e3508460ca0c65c25de227d573423bbb6286141fa6d3f7683 ;;
+      aarch64) a=https://github.com/veeso/termscp/releases/download/v1.2.0/termscp-v1.2.0-aarch64-unknown-linux-musl.tar.gz; s=4a4bac2209b497d191ed013dc4ac05e424d7c62a5cfd34b7e674feb35d94ae1f ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 termscp /usr/local/bin/termscp &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/termscp
+command: termscp
+args: "%1?"
+source: https://github.com/veeso/termscp
+website: https://termscp.rs
+documentation: https://github.com/veeso/termscp#readme
+screenshot: https://raw.githubusercontent.com/veeso/termscp/4120311bf62e48e6a08ba322aad4e292ee36f434/assets/images/explorer.gif
+keywords:
+  - file transfer
+  - sftp
+  - scp
+  - ftp
+  - s3
+  - tui
+
+roles: []

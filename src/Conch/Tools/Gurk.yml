@@ -1,0 +1,34 @@
+id: gurk
+name: gurk
+version: 1.0.0
+author: boxdot
+description: Signal Messenger client for the terminal, linked to a phone as a secondary device
+license: AGPL-3.0
+platforms:
+  # Not in Debian. Pinned upstream release (static musl builds), checked by hash.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/boxdot/gurk-rs/releases/download/v0.10.1/gurk-x86_64-unknown-linux-musl.tar.gz; s=7614fcbeb75074cd166f6e59c64d673d98cf33432778e6b64b90a40d15ac4d2b ;;
+      aarch64) a=https://github.com/boxdot/gurk-rs/releases/download/v0.10.1/gurk-aarch64-unknown-linux-musl.tar.gz; s=2747b2334bc31f4cb853bd3588d119130a5e625653256ee279a9da700f259638 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 gurk /usr/local/bin/gurk &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/gurk
+command: gurk
+args: ""
+source: https://github.com/boxdot/gurk-rs
+website: https://github.com/boxdot/gurk-rs
+documentation: https://github.com/boxdot/gurk-rs#readme
+screenshot: https://raw.githubusercontent.com/boxdot/gurk-rs/46f2e506d5a60671c92fa0bd3db9fa50d70c8a04/screenshot.png
+keywords:
+  - tui
+  - signal
+  - messaging
+  - chat
+
+roles: []

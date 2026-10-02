@@ -1,0 +1,34 @@
+id: nap
+name: Nap
+version: 1.0.0
+author: Maas Lalani
+description: Code snippet manager for creating, browsing and organizing snippets in the terminal
+# The README says MIT; the repository has no LICENSE file.
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/maaslalani/nap/releases/download/v0.1.1/nap_0.1.1_linux_amd64.tar.gz; s=6d9ded2bfadee19a41a085c8f6cb5890efe9feaa52d0c58cba5e85635360f781 ;;
+      aarch64) a=https://github.com/maaslalani/nap/releases/download/v0.1.1/nap_0.1.1_linux_arm64.tar.gz; s=da7e73bcf6c898923c98d3a8b400ef1fbb17ebfe856dbab2f331eb2bfbed7ba7 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 nap /usr/local/bin/nap &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/nap
+command: nap
+args: ""
+source: https://github.com/maaslalani/nap
+website: https://github.com/maaslalani/nap
+documentation: https://github.com/maaslalani/nap#readme
+screenshot: https://user-images.githubusercontent.com/42545625/202545409-eb53f92a-233a-4f78-b598-a59c65248ad3.png
+keywords:
+  - snippets
+  - code
+  - charm
+  - tui
+
+roles: []

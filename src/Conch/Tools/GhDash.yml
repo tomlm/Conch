@@ -1,0 +1,37 @@
+id: gh.dash
+name: gh-dash
+version: 1.0.0
+author: Dolev Hadar
+description: GitHub dashboard for the terminal that lists and acts on pull requests, issues and notifications
+license: MIT
+platforms:
+  # gh-dash is a gh extension but also runs on its own; it takes the GitHub login from the
+  # gh CLI (run "gh auth login" once), so gh comes from apt.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget gh &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/dlvhdr/gh-dash/releases/download/v4.26.0/gh-dash_v4.26.0_linux-amd64; s=469012a8c607a503a4e873bc3862adedbc2c1c31878c62a396cd9874555f25ac ;;
+      aarch64) a=https://github.com/dlvhdr/gh-dash/releases/download/v4.26.0/gh-dash_v4.26.0_linux-arm64; s=eb73585f0d873e1039729bd9bc5b2c2dcdfc22ab30b47f96aece51270a5332d4 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      sudo install -m 755 pkg /usr/local/bin/gh-dash &&
+      cd / && rm -rf "$t"
+    # gh stays: apt owns it and other tools use it.
+    uninstall: sudo rm -f /usr/local/bin/gh-dash
+command: gh-dash
+args: ""
+source: https://github.com/dlvhdr/gh-dash
+website: https://gh-dash.dev/
+documentation: https://gh-dash.dev/
+screenshot: https://raw.githubusercontent.com/dlvhdr/gh-dash/1b14dd961ea47e2ad53eae5fed7fc942219bcc01/docs/src/assets/overview.gif
+keywords:
+  - github
+  - git
+  - pull requests
+  - dashboard
+  - tui
+
+roles: []

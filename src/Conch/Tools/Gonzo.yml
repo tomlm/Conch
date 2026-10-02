@@ -1,0 +1,40 @@
+id: gonzo
+name: Gonzo
+version: 1.0.0
+author: ControlTheory
+description: Real-time log analysis dashboard with charts, severity tracking, filtering and optional AI insights
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/control-theory/gonzo/releases/download/v0.4.3/gonzo-0.4.3-linux-amd64.tar.gz; s=c4d7db82117a57d35e033fd03d509d0b64802c7d321936aab9948cc1c8c28ab3 ;;
+      aarch64) a=https://github.com/control-theory/gonzo/releases/download/v0.4.3/gonzo-0.4.3-linux-arm64.tar.gz; s=b191a21ab72461e9e8d8b4be5617705b413dbae553fb7858a2bdc124e3a340d3 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 gonzo /usr/local/bin/gonzo &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/gonzo
+  # Portable package; winget adds a gonzo alias.
+  windows:
+    install: winget install -e --id control-theory.gonzo
+    uninstall: winget uninstall -e --id control-theory.gonzo
+# Gonzo reads logs from stdin or from -f files; launched from the shell there is no pipe,
+# so it asks for a log file (a glob such as "/var/log/*.log" also works).
+command: gonzo
+args: "-f %1"
+source: https://github.com/control-theory/gonzo
+website: https://www.controltheory.com/gonzo/
+documentation: https://docs.controltheory.com/
+screenshot: https://raw.githubusercontent.com/control-theory/gonzo/47c41a5856c7ad94c4c3b6063ca8c281e796da48/docs/gonzo-stats.png
+keywords:
+  - logs
+  - log analysis
+  - observability
+  - otlp
+  - tui
+
+roles: []

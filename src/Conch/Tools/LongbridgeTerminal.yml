@@ -1,0 +1,37 @@
+id: longbridge
+name: Longbridge Terminal
+version: 1.0.0
+author: Longbridge
+description: Terminal client for Longbridge Securities with real-time quotes, portfolio and trading for HK, US, A-share and SG markets
+license: Apache-2.0
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/longbridge/longbridge-terminal/releases/download/v0.28.7/longbridge-terminal-linux-musl-amd64.tar.gz; s=2e2a8bb2add75c77248d0311c83e02f5d5a06cbeacd7162887d25b7d96fc1e97 ;;
+      aarch64) a=https://github.com/longbridge/longbridge-terminal/releases/download/v0.28.7/longbridge-terminal-linux-musl-arm64.tar.gz; s=e67468d6abf34b5b0c4b82921b2ac0ebf43d459f27c179320d217f725aec46b0 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 longbridge /usr/local/bin/longbridge &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/longbridge
+  # Portable package; winget adds a longbridge alias.
+  windows:
+    install: winget install -e --id Longbridge.LongbridgeTerminal
+    uninstall: winget uninstall -e --id Longbridge.LongbridgeTerminal
+command: longbridge
+args: "tui"
+source: https://github.com/longbridge/longbridge-terminal
+website: https://open.longbridge.com/docs/cli
+documentation: https://github.com/longbridge/longbridge-terminal#readme
+keywords:
+  - finance
+  - stocks
+  - trading
+  - portfolio
+  - tui
+
+roles: []

@@ -1,0 +1,26 @@
+id: far2l
+name: far2l
+version: 1.0.0
+author: elfmz
+description: Two-panel file manager ported from Far Manager v2, with a built-in terminal, viewer and editor
+license: GPL-2.0
+platforms:
+  # --tty forces the terminal backend; the GUI backend (far2l-wx) is only a Suggests and is
+  # not installed.
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y far2l
+    uninstall: sudo apt-get remove -y far2l
+command: far2l
+args: "--tty %1?"
+source: https://github.com/elfmz/far2l
+website: https://github.com/elfmz/far2l
+documentation: https://github.com/elfmz/far2l#readme
+screenshot: https://raw.githubusercontent.com/elfmz/far2l/c12197bceb57b645dcbac99af6c51be815cb756b/far2l/DE/screenshots/far2l.png
+keywords:
+  - file manager
+  - far manager
+  - two-panel
+  - tui
+
+roles:
+  - file-explorer

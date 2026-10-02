@@ -1,0 +1,37 @@
+id: oryx
+name: oryx
+version: 1.0.0
+author: pythops
+description: Network traffic sniffer that uses eBPF to show live traffic, statistics and firewall rules
+license: GPL-3.0
+platforms:
+  # oryx loads eBPF programs, so it needs root: it is launched through sudo and detected by
+  # its path. Linux only (the README asks for kernel 6.10+ for every feature).
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/pythops/oryx/releases/download/v0.8.0/oryx-x86_64-unknown-linux-musl; s=f82821b1baa63a5645a38b2e3e9983f38ffa71ae5925b86e7207bb3c82bd0eaa ;;
+      aarch64) a=https://github.com/pythops/oryx/releases/download/v0.8.0/oryx-aarch64-unknown-linux-musl; s=a4f6d1c0fafcd0db1d164f75f530d6e8fbe8bf48cfb1999c3854f977ebe9bff9 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      sudo install -m 755 pkg /usr/local/bin/oryx &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/oryx
+    detect: test -x /usr/local/bin/oryx
+command: sudo
+args: "oryx"
+source: https://github.com/pythops/oryx
+website: https://github.com/pythops/oryx
+documentation: https://github.com/pythops/oryx#readme
+screenshot: https://cdn.terminaltrove.com/m/eab43e49-8d0d-4bc0-a853-3bc52ad5bbc6.png
+keywords:
+  - network
+  - sniffer
+  - ebpf
+  - firewall
+  - tui
+
+roles: []

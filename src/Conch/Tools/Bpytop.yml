@@ -1,0 +1,25 @@
+id: bpytop
+name: bpytop
+version: 1.0.0
+author: aristocratos
+description: Python resource monitor that shows usage and stats for processor, memory, disks, network and processes
+license: Apache-2.0
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y bpytop
+    uninstall: sudo apt-get remove -y bpytop
+command: bpytop
+args: ""
+source: https://github.com/aristocratos/bpytop
+website: https://github.com/aristocratos/bpytop
+documentation: https://github.com/aristocratos/bpytop#readme
+screenshot: https://raw.githubusercontent.com/aristocratos/bpytop/2034232931324f7b277b9b970a36277297a9ed43/Imgs/main.png
+keywords:
+  - tui
+  - monitor
+  - cpu
+  - memory
+  - terminal
+
+roles:
+  - system-monitor

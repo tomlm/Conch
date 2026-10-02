@@ -1,0 +1,39 @@
+id: spotify.player
+name: spotify_player
+version: 1.0.0
+author: Thang Pham
+description: Spotify player for the terminal with playback, search, library browsing and lyrics
+license: MIT
+platforms:
+  # Not in Debian. Pinned upstream release, checked by hash. The binary is linked against
+  # ALSA, D-Bus and OpenSSL, so those libraries come from apt first. Playback needs a
+  # Spotify Premium account.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget libasound2t64 libdbus-1-3 libssl3t64 &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/aome510/spotify-player/releases/download/v0.25.1/spotify_player-x86_64-unknown-linux-gnu.tar.gz; s=e68dce205e995f80107149c55ace7b93125dbf73805363b7b0f9bfe8475c50ba ;;
+      aarch64) a=https://github.com/aome510/spotify-player/releases/download/v0.25.1/spotify_player-aarch64-unknown-linux-gnu.tar.gz; s=c8e02b108ed4d0abc8d705510deaa2db1dfb03af60489b67cd037cd864cb5e53 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 spotify_player /usr/local/bin/spotify_player &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/spotify_player
+  windows:
+    install: winget install -e --id aome510.spotify-player
+    uninstall: winget uninstall -e --id aome510.spotify-player
+command: spotify_player
+args: ""
+source: https://github.com/aome510/spotify-player
+website: https://github.com/aome510/spotify-player
+documentation: https://github.com/aome510/spotify-player#readme
+screenshot: https://user-images.githubusercontent.com/40011582/172966798-0aadc431-b0c3-4433-adf3-7526684fc2a0.png
+keywords:
+  - spotify
+  - music
+  - player
+  - tui
+
+roles: []

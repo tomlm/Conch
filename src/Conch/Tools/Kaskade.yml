@@ -1,0 +1,23 @@
+id: kaskade
+name: Kaskade
+version: 1.0.0
+author: Saúl Piña
+description: Terminal UI for Apache Kafka that browses topics, partitions and consumer groups and consumes records
+license: MIT
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y pipx && sudo pipx install --global kaskade
+    uninstall: sudo pipx uninstall --global kaskade
+command: kaskade
+args: "admin -b %1"
+source: https://github.com/sauljabin/kaskade
+website: https://sauljabin.github.io/kaskade/
+documentation: https://github.com/sauljabin/kaskade/blob/main/USAGE.md
+screenshot: https://cdn.terminaltrove.com/m/80199594-cc06-43c5-8d3c-cdb5913c3bdd.png
+keywords:
+  - kafka
+  - message queue
+  - tui
+  - textual
+
+roles: []

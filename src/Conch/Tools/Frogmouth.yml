@@ -1,0 +1,23 @@
+id: frogmouth
+name: Frogmouth
+version: 1.0.0
+author: Textualize
+description: Markdown browser for the terminal, with navigation history, bookmarks and a table of contents
+license: MIT
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y pipx && sudo pipx install --global frogmouth
+    uninstall: sudo pipx uninstall --global frogmouth
+command: frogmouth
+args: "%1?"
+source: https://github.com/Textualize/frogmouth
+website: https://github.com/Textualize/frogmouth
+documentation: https://github.com/Textualize/frogmouth#readme
+screenshot: https://user-images.githubusercontent.com/554369/235172015-555565a0-3df0-4e5d-b621-23e84fec82a3.png
+keywords:
+  - markdown
+  - viewer
+  - browser
+  - textual
+
+roles: []

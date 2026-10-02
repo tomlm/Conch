@@ -1,0 +1,35 @@
+id: wrkflw
+name: wrkflw
+version: 1.0.0
+author: bahdotsh
+description: Validator and local runner for GitHub Actions workflows and GitLab CI pipelines
+license: MIT
+platforms:
+  # Running jobs needs Docker or Podman; validation and the emulation runtime work without.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/bahdotsh/wrkflw/releases/download/v0.8.0/wrkflw-x86_64-unknown-linux-musl.tar.gz; s=7606fecdc6816f8d1503929f41f1a9d57b25362b13193aaef2732df061a4de30 ;;
+      aarch64) a=https://github.com/bahdotsh/wrkflw/releases/download/v0.8.0/wrkflw-aarch64-unknown-linux-gnu.tar.gz; s=44b9d02e3624aa808dfab22bbcc12f65564079e30bc5b7d82a3f32e1f0830234 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 wrkflw /usr/local/bin/wrkflw &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/wrkflw
+command: wrkflw
+args: "tui"
+source: https://github.com/bahdotsh/wrkflw
+website: https://github.com/bahdotsh/wrkflw
+documentation: https://github.com/bahdotsh/wrkflw#readme
+screenshot: https://cdn.terminaltrove.com/m/f1e1fe29-5c5c-4ee4-b8c6-0852117a0f68.png
+keywords:
+  - github actions
+  - ci
+  - workflows
+  - devops
+  - tui
+
+roles: []

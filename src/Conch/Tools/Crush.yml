@@ -1,0 +1,39 @@
+id: crush
+name: Crush
+version: 1.0.0
+author: Charm
+description: AI coding agent for the terminal from Charm that works with many LLM providers
+license: FSL-1.1-MIT
+platforms:
+  # Not in Debian. The release tarball holds the binary in a folder named after the
+  # release and platform.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) d=crush_0.97.1_Linux_x86_64; s=1b7cbe0600a3797538a74dc00dd8c4bac54ac4b8f4455ba5ff2312b29c7bd598 ;;
+      aarch64) d=crush_0.97.1_Linux_arm64; s=16c9477a178d69e02a51bf4babe6174e62051314b2cd7f36b1ec5fea47e25a88 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "https://github.com/charmbracelet/crush/releases/download/v0.97.1/$d.tar.gz" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 "$d/crush" /usr/local/bin/crush &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/crush
+  windows:
+    install: winget install -e --id charmbracelet.crush
+    uninstall: winget uninstall -e --id charmbracelet.crush
+command: crush
+args: ""
+source: https://github.com/charmbracelet/crush
+website: https://charm.land/crush
+documentation: https://github.com/charmbracelet/crush#readme
+screenshot: https://github.com/user-attachments/assets/58280caf-851b-470a-b6f7-d5c4ea8a1968
+keywords:
+  - ai
+  - coding agent
+  - llm
+  - tui
+  - charm
+
+roles: []

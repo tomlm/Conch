@@ -1,0 +1,29 @@
+id: glow
+name: Glow
+version: 1.0.0
+author: Charm
+description: Markdown reader that finds, renders and pages through Markdown files in the terminal
+license: MIT
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y glow
+    uninstall: sudo apt-get remove -y glow
+  windows:
+    install: winget install -e --id charmbracelet.glow
+    uninstall: winget uninstall -e --id charmbracelet.glow
+# With no argument glow opens its file browser on the current folder; given a file it only
+# prints the rendered text and exits, so no path is passed.
+command: glow
+args: ""
+source: https://github.com/charmbracelet/glow
+website: https://github.com/charmbracelet/glow
+documentation: https://github.com/charmbracelet/glow#readme
+screenshot: https://cdn.terminaltrove.com/m/4290a918-9d64-4450-a5fe-c81f0df5d2ef.gif
+keywords:
+  - markdown
+  - reader
+  - viewer
+  - tui
+  - charm
+
+roles: []

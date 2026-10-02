@@ -1,0 +1,36 @@
+id: abtop
+name: abtop
+version: 1.0.0
+author: graykode
+description: Monitor for AI coding agent sessions that shows token usage, context window, rate limits, child processes and open ports
+license: MIT
+platforms:
+  # Covers Claude Code, Codex CLI and OpenCode sessions; OpenCode discovery also needs the
+  # sqlite3 CLI, which comes from apt.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget xz-utils sqlite3 &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/graykode/abtop/releases/download/v0.5.5/abtop-x86_64-unknown-linux-gnu.tar.xz; s=ae2f264561c11751748b4a6fb254a1648d5951fb541cf6d8e074f2cf75bdedf8 ;;
+      aarch64) a=https://github.com/graykode/abtop/releases/download/v0.5.5/abtop-aarch64-unknown-linux-gnu.tar.xz; s=4820294003933717ec5e906d9bbc475f2f751c03ed079d25eda1ebcd9e2ab58c ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xJf pkg --strip-components=1 && sudo install -m 755 abtop /usr/local/bin/abtop &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/abtop
+command: abtop
+args: ""
+source: https://github.com/graykode/abtop
+website: https://github.com/graykode/abtop
+documentation: https://github.com/graykode/abtop#readme
+screenshot: https://raw.githubusercontent.com/graykode/abtop/4b96568666c1f3b887202d14b0a1c6171315e520/assets/demo.gif
+keywords:
+  - ai
+  - agents
+  - claude code
+  - monitor
+  - tui
+
+roles: []

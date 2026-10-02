@@ -1,0 +1,36 @@
+id: bluetui
+name: bluetui
+version: 1.0.0
+author: Badr (pythops)
+description: Bluetooth manager for scanning, pairing, connecting and trusting devices through BlueZ
+license: GPL-3.0
+platforms:
+  # bluetui talks to the BlueZ daemon over D-Bus, so bluez is installed alongside it. The
+  # uninstall leaves bluez in place: it is the system's Bluetooth stack, not part of bluetui.
+  # The release assets are bare static (musl) binaries, so there is no archive to unpack.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget bluez &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/pythops/bluetui/releases/download/v0.8.1/bluetui-x86_64-linux-musl; s=c6d133930af3ef85d5fb6492c98982958619284d1f583c2c8ecf46992460d60e ;;
+      aarch64) a=https://github.com/pythops/bluetui/releases/download/v0.8.1/bluetui-aarch64-linux-musl; s=66a5b1dbf5ab5274a05f6926c62bb4bd27601e15a67606c41df625a0a1f1284f ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      sudo install -m 755 pkg /usr/local/bin/bluetui &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/bluetui
+command: bluetui
+args: ""
+source: https://github.com/pythops/bluetui
+website: https://github.com/pythops/bluetui
+documentation: https://github.com/pythops/bluetui#readme
+screenshot: https://github.com/user-attachments/assets/f937535d-5675-4427-b347-8086c8830e23
+keywords:
+  - bluetooth
+  - bluez
+  - devices
+  - tui
+
+roles: []

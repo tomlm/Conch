@@ -1,0 +1,38 @@
+id: impala
+name: impala
+version: 1.0.0
+author: Badr (pythops)
+description: Wi-Fi manager for scanning, connecting to and managing wireless networks through iwd
+license: GPL-3.0
+platforms:
+  # impala drives iwd, not NetworkManager. The install does not add iwd: upstream asks for
+  # NetworkManager and wpa_supplicant to be disabled first, and doing that from an install
+  # line could cut the machine off the network. Without a running iwd, impala reports an
+  # error and exits. The release assets are bare static (musl) binaries.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/pythops/impala/releases/download/v0.9.0/impala-x86_64-unknown-linux-musl; s=8dd39cec5137277717821c48d04cfd49d95b1393c8ff342bd77e538d87684acd ;;
+      aarch64) a=https://github.com/pythops/impala/releases/download/v0.9.0/impala-aarch64-unknown-linux-musl; s=7010a1b854c18e89c696d2d870c0d3e06f6dd8ce62aad6da5fd7b1d75b7f0786 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      sudo install -m 755 pkg /usr/local/bin/impala &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/impala
+command: impala
+args: ""
+source: https://github.com/pythops/impala
+website: https://github.com/pythops/impala
+documentation: https://github.com/pythops/impala#readme
+screenshot: https://github.com/user-attachments/assets/55c800ff-d0aa-4454-aa6b-3990833ce530
+keywords:
+  - wifi
+  - wireless
+  - network
+  - iwd
+  - tui
+
+roles: []

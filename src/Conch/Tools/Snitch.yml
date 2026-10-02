@@ -1,0 +1,35 @@
+id: snitch
+name: snitch
+version: 1.0.0
+author: karol-broda
+description: Network connection inspector, like netstat for humans, with a live view of sockets and the processes that own them
+license: MIT
+platforms:
+  # Without root it lists every socket but only the owning processes of the current user.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/karol-broda/snitch/releases/download/v0.2.2/snitch_0.2.2_linux_amd64.tar.gz; s=2f96c67306bade30270fb424f462f4d00e4d33112c946fec0c4511efc6e3dce1 ;;
+      aarch64) a=https://github.com/karol-broda/snitch/releases/download/v0.2.2/snitch_0.2.2_linux_arm64.tar.gz; s=32b486ad5ade3821783d3c4fa71531902bc33c2362c0f0aaa1ddc1ef247b190f ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 snitch /usr/local/bin/snitch &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/snitch
+command: snitch
+args: ""
+source: https://github.com/karol-broda/snitch
+website: https://github.com/karol-broda/snitch
+documentation: https://github.com/karol-broda/snitch#readme
+screenshot: https://raw.githubusercontent.com/karol-broda/snitch/9b1d21d134f02eda61edd0fc1512cac05fd71a69/demo/demo.gif
+keywords:
+  - network
+  - netstat
+  - sockets
+  - connections
+  - tui
+
+roles: []

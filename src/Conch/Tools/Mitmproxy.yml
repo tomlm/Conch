@@ -1,0 +1,29 @@
+id: mitmproxy
+name: mitmproxy
+version: 1.0.0
+author: mitmproxy contributors
+description: Interactive TLS-capable intercepting HTTP proxy with a console interface for inspecting and changing traffic
+license: MIT
+platforms:
+  # Not in Debian 13; published on PyPI with prebuilt wheels for its Rust parts.
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y pipx && sudo pipx install --global mitmproxy
+    uninstall: sudo pipx uninstall --global mitmproxy
+  # The installer adds mitmproxy, mitmdump and mitmweb to the PATH.
+  windows:
+    install: winget install -e --id mitmproxy.mitmproxy
+    uninstall: winget uninstall -e --id mitmproxy.mitmproxy
+command: mitmproxy
+args: ""
+source: https://github.com/mitmproxy/mitmproxy
+website: https://mitmproxy.org/
+documentation: https://docs.mitmproxy.org/stable/
+screenshot: https://cdn.terminaltrove.com/m/56c8e7bd-729b-4a52-b445-688463411d10.png
+keywords:
+  - proxy
+  - http
+  - tls
+  - debugging
+  - security
+
+roles: []

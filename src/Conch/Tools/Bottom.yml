@@ -1,0 +1,39 @@
+id: bottom
+name: bottom
+version: 1.0.0
+author: Clement Tsang
+description: Graphical process and system monitor with charts for processor, memory, network, disks, temperatures and processes
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/ClementTsang/bottom/releases/download/0.14.9/bottom_x86_64-unknown-linux-musl.tar.gz; s=b4bee5b193e7d3f6e090ac14f0ca15acec2e7fe4ef64988e0bfc492e16c28c9a ;;
+      aarch64) a=https://github.com/ClementTsang/bottom/releases/download/0.14.9/bottom_aarch64-unknown-linux-musl.tar.gz; s=7b6d532f6a6af356970f4e8d7d3a792590485aa4a53ebf038e10d20366125533 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 btm /usr/local/bin/btm &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/btm
+  # The MSI adds its install folder to PATH.
+  windows:
+    install: winget install -e --id Clement.bottom
+    uninstall: winget uninstall -e --id Clement.bottom
+command: btm
+args: ""
+source: https://github.com/ClementTsang/bottom
+website: https://bottom.pages.dev/
+documentation: https://bottom.pages.dev/stable/
+screenshot: https://raw.githubusercontent.com/ClementTsang/bottom/cea754767635df5e161e53f983262cd3f25fd399/demos/demo.gif
+keywords:
+  - tui
+  - monitor
+  - cpu
+  - memory
+  - processes
+
+roles:
+  - system-monitor

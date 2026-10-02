@@ -7,7 +7,9 @@ license: GPL-3.0
 platforms:
   linux:
     install: sudo apt-get update && sudo apt-get install -y less
-    uninstall: sudo apt-get remove -y less
+    # Not removed from here: Debian installs less by default, and man, git and others use it
+    # as their pager.
+    uninstall: echo "less is the system pager on Debian (man and git use it), so Conch does not remove it." && exit 1
   windows:
     install: winget install -e --id jftuga.less
     uninstall: winget uninstall -e --id jftuga.less

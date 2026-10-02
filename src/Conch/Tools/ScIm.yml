@@ -1,0 +1,24 @@
+id: sc.im
+name: sc-im
+version: 1.0.0
+author: Andrés Martinelli
+description: Ncurses spreadsheet program with vim-like keys that reads and writes CSV, XLSX and other formats
+license: BSD-4-Clause
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y sc-im
+    uninstall: sudo apt-get remove -y sc-im
+command: sc-im
+args: "%1?"
+source: https://github.com/andmarti1424/sc-im
+website: https://github.com/andmarti1424/sc-im
+documentation: https://github.com/andmarti1424/sc-im#readme
+screenshot: https://raw.githubusercontent.com/andmarti1424/sc-im/b5645711b2d2d7d106f93ca5ba2a32b75b49813e/screenshots/scim6.png
+keywords:
+  - spreadsheet
+  - csv
+  - vim
+  - ncurses
+  - tui
+
+roles: []

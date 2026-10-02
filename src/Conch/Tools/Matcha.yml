@@ -1,0 +1,37 @@
+id: matcha
+name: Matcha
+version: 1.0.0
+author: floatpane
+description: Email client for the terminal
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/floatpane/matcha/releases/download/v1.0.1/matcha_1.0.1_linux_amd64.tar.gz; s=877cab6bfc0a7313bb0a6d52f0ab7d74abaf58264dd6eec6e873e4d0f2c8c6bd ;;
+      aarch64) a=https://github.com/floatpane/matcha/releases/download/v1.0.1/matcha_1.0.1_linux_arm64.tar.gz; s=deb2df357a03dfbefa9a36b4d9eb60c827b28faaec9605d3bd52e19802bd359a ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 matcha /usr/local/bin/matcha &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/matcha
+  windows:
+    install: winget install -e --id floatpane.matcha
+    uninstall: winget uninstall -e --id floatpane.matcha
+command: matcha
+args: ""
+source: https://github.com/floatpane/matcha
+website: https://matcha.email
+documentation: https://github.com/floatpane/matcha#readme
+screenshot: https://raw.githubusercontent.com/floatpane/matcha/25c091b386859f42e6104c03fcbb7ac6ef7c9689/public/assets/demo.gif
+keywords:
+  - email
+  - mail
+  - imap
+  - tui
+  - charm
+
+roles: []

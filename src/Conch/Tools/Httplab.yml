@@ -1,0 +1,35 @@
+id: httplab
+name: HTTPLab
+version: 1.0.0
+author: Gustavo Chaín
+description: HTTP server for inspecting incoming requests and answering them with responses you edit
+license: MIT
+platforms:
+  # The last release (2017) has a Linux build for x86_64 only.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/qustavo/httplab/releases/download/v0.4.0/httplab_0.4.0_linux_amd64.tar.gz; s=451b569db7261e1e97f9145e8c635ed19bbf848921410b722637d9d4a8f8c12c ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 httplab /usr/local/bin/httplab &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/httplab
+command: httplab
+# Listens on port 10080 by default.
+args: ""
+source: https://github.com/qustavo/httplab
+website: https://github.com/qustavo/httplab
+documentation: https://github.com/qustavo/httplab#readme
+screenshot: https://raw.githubusercontent.com/qustavo/httplab/005426c2557cc2365afcfd7a364a07dff70e9adc/images/screencast.gif
+keywords:
+  - http
+  - web server
+  - mock
+  - debugging
+  - tui
+
+roles: []

@@ -1,0 +1,23 @@
+id: nethack
+name: NetHack
+version: 1.0.0
+author: NetHack DevTeam
+description: Single-player dungeon exploration game in the roguelike tradition
+license: NGPL
+platforms:
+  # nethack-console registers /usr/games/nethack as an alternative pointing at its tty build.
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y nethack-console
+    uninstall: sudo apt-get remove -y nethack-console
+command: nethack
+args: ""
+source: https://github.com/NetHack/NetHack
+website: https://www.nethack.org/
+documentation: https://www.nethack.org/v367/Guidebook.html
+keywords:
+  - game
+  - roguelike
+  - dungeon
+  - terminal
+
+roles: []

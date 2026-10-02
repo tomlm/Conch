@@ -1,0 +1,23 @@
+id: kew
+name: kew
+version: 1.0.0
+author: Ravachol
+description: Terminal music player that opens a library view and builds playlists from partial track or folder names
+license: GPL-2.0
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y kew
+    uninstall: sudo apt-get remove -y kew
+command: kew
+args: ""
+source: https://github.com/ravachol/kew
+website: https://kewplayer.com
+documentation: https://github.com/ravachol/kew#readme
+screenshot: https://kewplayer.com/images/kew-terminal-music-player-screenshot.png
+keywords:
+  - music
+  - audio
+  - player
+  - tui
+
+roles: []

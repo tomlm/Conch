@@ -1,0 +1,30 @@
+id: wikiman
+name: wikiman
+version: 1.0.0
+author: Filip Parag
+description: Offline search engine for manual pages, distro wikis and other documentation with a fuzzy-finder picker
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      wget -q -O wikiman.deb https://github.com/filiparag/wikiman/releases/download/2.14.1/wikiman-2.14.1-1_any.deb &&
+      echo "caf9bb05b5a5d74604a32e04d9ddf3abebba33e74e46b62b34a988e329003d63  wikiman.deb" | sha256sum -c --quiet &&
+      sudo apt-get install -y ./wikiman.deb &&
+      cd / && rm -rf "$t"
+    uninstall: sudo apt-get remove -y wikiman
+command: wikiman
+args: ""
+source: https://github.com/filiparag/wikiman
+website: https://github.com/filiparag/wikiman
+documentation: https://github.com/filiparag/wikiman#readme
+screenshot: https://raw.githubusercontent.com/filiparag/wikiman/353e165bf95cd1237e6bdf7590a1cbf1001c7a70/demo.gif
+keywords:
+  - documentation
+  - man pages
+  - wiki
+  - search
+  - tui
+
+roles: []

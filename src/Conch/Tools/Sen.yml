@@ -1,0 +1,23 @@
+id: sen
+name: sen
+version: 1.0.0
+author: Tomas Tomecek
+description: Terminal user interface for Docker that lists, inspects and manages containers and images
+license: MIT
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y sen
+    uninstall: sudo apt-get remove -y sen
+command: sen
+args: ""
+source: https://github.com/TomasTomecek/sen
+website: https://github.com/TomasTomecek/sen
+documentation: https://github.com/TomasTomecek/sen#readme
+screenshot: https://raw.githubusercontent.com/TomasTomecek/sen/3a31c949f3732910a1f2e58ef8ee88c4758c1107/data/sen-preview.gif
+keywords:
+  - docker
+  - containers
+  - tui
+  - urwid
+
+roles: []

@@ -1,0 +1,24 @@
+id: nvitop
+name: nvitop
+version: 1.0.0
+author: Xuehai Pan
+description: Interactive NVIDIA GPU process viewer that shows device usage and the processes running on each GPU
+license: Apache-2.0
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y nvitop
+    uninstall: sudo apt-get remove -y nvitop
+command: nvitop
+args: ""
+source: https://github.com/XuehaiPan/nvitop
+website: https://github.com/XuehaiPan/nvitop
+documentation: https://nvitop.readthedocs.io/
+screenshot: https://user-images.githubusercontent.com/16078332/171005261-1aad126e-dc27-4ed3-a89b-7f9c1c998bf7.png
+keywords:
+  - gpu
+  - nvidia
+  - monitor
+  - processes
+  - tui
+
+roles: []

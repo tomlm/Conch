@@ -1,0 +1,24 @@
+id: sqlit
+name: sqlit
+version: 1.0.0
+author: Peter Adams
+description: Terminal UI for SQL databases such as SQLite, PostgreSQL, MySQL and SQL Server
+license: MIT
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y pipx && sudo pipx install --global sqlit-tui
+    uninstall: sudo pipx uninstall --global sqlit-tui
+command: sqlit
+args: ""
+source: https://github.com/Maxteabag/sqlit
+website: https://github.com/Maxteabag/sqlit
+documentation: https://github.com/Maxteabag/sqlit#readme
+screenshot: https://raw.githubusercontent.com/Maxteabag/sqlit/v1.6.4/docs/demos/demo-providers.gif
+keywords:
+  - sql
+  - database
+  - sqlite
+  - postgresql
+  - tui
+
+roles: []

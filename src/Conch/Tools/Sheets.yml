@@ -1,0 +1,34 @@
+id: sheets
+name: Sheets
+version: 1.0.0
+author: Maas Lalani
+description: Minimal spreadsheet editor and CSV viewer for the terminal
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/maaslalani/sheets/releases/download/v0.3.0/sheets_Linux_x86_64.tar.gz; s=24369b958de79989832da49cc25bf00fafb0f5bf0119761ea3dbbbfa2a75edaf ;;
+      aarch64) a=https://github.com/maaslalani/sheets/releases/download/v0.3.0/sheets_Linux_arm64.tar.gz; s=22d615cbab83a81a94d6e70fa212d0218f9a2b2de50185aff8814acd46b376aa ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 sheets /usr/local/bin/sheets &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/sheets
+command: sheets
+args: "%1?"
+source: https://github.com/maaslalani/sheets
+website: https://github.com/maaslalani/sheets
+documentation: https://github.com/maaslalani/sheets#readme
+screenshot: https://github.com/user-attachments/assets/6531c666-34dd-4616-b341-e0ac9c54ec7c
+keywords:
+  - spreadsheet
+  - csv
+  - viewer
+  - charm
+  - tui
+
+roles: []

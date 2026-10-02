@@ -1,0 +1,33 @@
+id: chess.tui
+name: chess-tui
+version: 1.0.0
+author: Thomas Mauran
+description: Chess game for the terminal, against another player, a chess engine or opponents on Lichess
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/thomas-mauran/chess-tui/releases/download/2.7.1/chess-tui-2.7.1-x86_64-unknown-linux-gnu.tar.gz; s=aee19296918964d9f51b2232edb4cd8b0d8288fe6ec3d0b32eae7c2f96a9f04a ;;
+      aarch64) a=https://github.com/thomas-mauran/chess-tui/releases/download/2.7.1/chess-tui-2.7.1-aarch64-unknown-linux-gnu.tar.gz; s=c8c6f5ac82cc0fa497717ead96b2f8452236c4d86ec3792078b1d1eec91de034 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 chess-tui /usr/local/bin/chess-tui &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/chess-tui
+command: chess-tui
+args: ""
+source: https://github.com/thomas-mauran/chess-tui
+website: https://thomas-mauran.github.io/chess-tui/
+documentation: https://thomas-mauran.github.io/chess-tui/
+screenshot: https://raw.githubusercontent.com/thomas-mauran/chess-tui/a69f933701dccf6fdee2158c2ade809f79a18886/examples/ratatui.gif
+keywords:
+  - chess
+  - game
+  - tui
+  - ratatui
+
+roles: []

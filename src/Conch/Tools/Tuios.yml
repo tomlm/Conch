@@ -1,0 +1,34 @@
+id: tuios
+name: TUIOS
+version: 1.0.0
+author: Gaurav Gosain
+description: Terminal window manager with tiling panes, workspaces and persistent sessions
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/Gaurav-Gosain/tuios/releases/download/v0.8.5/tuios_0.8.5_Linux_x86_64.tar.gz; s=48c8604f266ad8680b925f8ba6618d9506de46c2bce5d5e507b86a5c91646f1e ;;
+      aarch64) a=https://github.com/Gaurav-Gosain/tuios/releases/download/v0.8.5/tuios_0.8.5_Linux_arm64.tar.gz; s=8be4855546fb3567de25a65d7268d6ed8de28ccefbd07b5b34785e2bea8b2851 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 tuios /usr/local/bin/tuios &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/tuios
+command: tuios
+args: ""
+source: https://github.com/Gaurav-Gosain/tuios
+website: https://tuios.dev
+documentation: https://tuios.dev
+screenshot: https://raw.githubusercontent.com/Gaurav-Gosain/tuios/v0.8.5/assets/tuios.gif
+keywords:
+  - multiplexer
+  - window manager
+  - tiling
+  - sessions
+  - tui
+
+roles: []

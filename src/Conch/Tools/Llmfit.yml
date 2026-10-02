@@ -1,0 +1,39 @@
+id: llmfit
+name: llmfit
+version: 1.0.0
+author: Alex Jones
+description: Tool that finds which LLM models can run on your system's RAM, CPU and GPU
+license: MIT
+platforms:
+  # Not in Debian. The release tarball holds the static musl binary in a folder named after
+  # the release and target.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) d=llmfit-v1.1.16-x86_64-unknown-linux-musl; s=9c974f97ac72371d61044eb22ddabff27e9393f681f1c141dbe467699fe3bc48 ;;
+      aarch64) d=llmfit-v1.1.16-aarch64-unknown-linux-musl; s=36c8fdd82e329733633f6236e174961b51beaa3f9d2f4b5ada1d43a4a2dd93cc ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "https://github.com/alexsjones/llmfit/releases/download/v1.1.16/$d.tar.gz" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 "$d/llmfit" /usr/local/bin/llmfit &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/llmfit
+  windows:
+    install: winget install -e --id AlexsJones.llmfit
+    uninstall: winget uninstall -e --id AlexsJones.llmfit
+command: llmfit
+args: ""
+source: https://github.com/alexsjones/llmfit
+website: https://github.com/alexsjones/llmfit
+documentation: https://github.com/alexsjones/llmfit#readme
+screenshot: https://raw.githubusercontent.com/alexsjones/llmfit/ca864d0977460042dd08831659f21b8463514e8b/assets/demo.gif
+keywords:
+  - ai
+  - llm
+  - hardware
+  - gpu
+  - tui
+
+roles: []

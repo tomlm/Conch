@@ -1,0 +1,24 @@
+id: mdp
+name: mdp
+version: 1.0.0
+author: Michael Göhler
+description: Markdown presentation tool that shows the slides of a Markdown file in the terminal
+license: GPL-3.0
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y mdp
+    uninstall: sudo apt-get remove -y mdp
+command: mdp
+# mdp needs the Markdown file to present.
+args: "%1"
+source: https://github.com/visit1985/mdp
+website: https://github.com/visit1985/mdp
+documentation: https://github.com/visit1985/mdp#readme
+screenshot: https://cloud.githubusercontent.com/assets/2237222/5810237/797c494c-a043-11e4-9dbd-959cab4055fa.gif
+keywords:
+  - presentation
+  - slides
+  - markdown
+  - tui
+
+roles: []

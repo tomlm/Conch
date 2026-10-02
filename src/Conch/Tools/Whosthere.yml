@@ -1,0 +1,34 @@
+id: whosthere
+name: whosthere
+version: 1.0.0
+author: Ramon Vermeulen
+description: Local network discovery tool that finds devices with unprivileged mDNS, SSDP and ARP scans
+license: Apache-2.0
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/ramonvermeulen/whosthere/releases/download/v0.9.0/whosthere_0.9.0_linux_amd64.tar.gz; s=d4b5e7f6fd120b7042f74ebe5b275b201cccc922d05594f219a3981ec78b3a67 ;;
+      aarch64) a=https://github.com/ramonvermeulen/whosthere/releases/download/v0.9.0/whosthere_0.9.0_linux_arm64.tar.gz; s=de577cc3ad3a9fb29c61032a6b6af434dff01892b615f3c76543a3b03e82805c ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 whosthere /usr/local/bin/whosthere &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/whosthere
+command: whosthere
+args: ""
+source: https://github.com/ramonvermeulen/whosthere
+website: https://github.com/ramonvermeulen/whosthere
+documentation: https://github.com/ramonvermeulen/whosthere#readme
+screenshot: https://raw.githubusercontent.com/ramonvermeulen/whosthere/c5fe23117670884b128e02f8106dd34a7764d382/.github/assets/demo.gif
+keywords:
+  - network
+  - lan
+  - discovery
+  - scanner
+  - tui
+
+roles: []

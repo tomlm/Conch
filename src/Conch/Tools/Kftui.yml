@@ -1,0 +1,33 @@
+id: kftui
+name: kftui
+version: 1.0.0
+author: Henrique Cavarsan
+description: Manager for kubectl port-forwards that starts and stops many forwards at once, with UDP and proxy support
+license: GPL-3.0
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget libdbus-1-3 &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/hcavarsan/kftray/releases/download/v0.29.2/kftui_linux_amd64.tar.gz; s=c7aaf61f284b9576dd305924d5b1182af73de912940f4fd07e495a70c134c2ee ;;
+      aarch64) a=https://github.com/hcavarsan/kftray/releases/download/v0.29.2/kftui_linux_arm64.tar.gz; s=7b88bef4caed9a83a1b1d61a337b0f2bf6ec49286301570d4b5e32d28f929ead ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 kftui_linux_* /usr/local/bin/kftui &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/kftui
+command: kftui
+args: ""
+source: https://github.com/hcavarsan/kftray
+website: https://kftray.app/
+documentation: https://github.com/hcavarsan/kftray#readme
+keywords:
+  - kubernetes
+  - kubectl
+  - port-forward
+  - network
+  - tui
+
+roles: []

@@ -1,0 +1,36 @@
+id: zenith
+name: zenith
+version: 1.0.0
+author: Benjamin Vaisvil
+description: System monitor with zoomable charts for processor, memory, network and disk usage, plus a process list
+license: MIT
+platforms:
+  # Debian 13 has no zenith package. The musl builds are static.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/bvaisvil/zenith/releases/download/0.15.1/zenith-Linux-musl-x86_64.tar.gz; s=bf3a3235066442ae74909c3867ee1f0a3ede065623fef0520f6924201af743c9 ;;
+      aarch64) a=https://github.com/bvaisvil/zenith/releases/download/0.15.1/zenith-Linux-musl-arm64.tar.gz; s=060d10f820d4d93a8546f2405f5aff6859270b41c78c2b600357aa6ac1efa7e3 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 zenith /usr/local/bin/zenith &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/zenith
+command: zenith
+args: ""
+source: https://github.com/bvaisvil/zenith
+website: https://github.com/bvaisvil/zenith
+documentation: https://github.com/bvaisvil/zenith#readme
+screenshot: https://raw.githubusercontent.com/bvaisvil/zenith/b65891608978bb6f9654931d393a3797d33a8306/assets/zenith_screenshot.png
+keywords:
+  - monitor
+  - cpu
+  - memory
+  - processes
+  - tui
+
+roles:
+  - system-monitor

@@ -1,0 +1,35 @@
+id: sampler
+name: Sampler
+version: 1.0.0
+author: Alexander Lukyanchikov
+description: Terminal dashboard that runs shell commands on a schedule and shows their output as charts, gauges and text
+license: GPL-3.0
+platforms:
+  # Only an x86_64 build is published. The binary links against ALSA (it can beep on
+  # triggers), so libasound2t64 comes from apt.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget libasound2t64 &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/sqshq/sampler/releases/download/v1.1.0/sampler-1.1.0-linux-amd64; s=16ebaa71be225d98801cfed6fcfca466002f604a2354a333029ba280c11601b4 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      sudo install -m 755 pkg /usr/local/bin/sampler &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/sampler
+command: sampler
+# Sampler refuses to start without a YAML config describing what to sample.
+args: "--config %1"
+source: https://github.com/sqshq/sampler
+website: https://sampler.dev/
+documentation: https://github.com/sqshq/sampler#readme
+screenshot: https://cdn.terminaltrove.com/m/ef9b6901-f0b6-4475-9564-27e17cacde61.png
+keywords:
+  - dashboard
+  - monitoring
+  - charts
+  - tui
+
+roles: []

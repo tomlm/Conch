@@ -1,0 +1,25 @@
+id: ntop
+name: NTop
+version: 1.0.0
+author: Gian Saß
+description: htop-like process viewer and system monitor for Windows
+license: GPL-3.0
+platforms:
+  windows:
+    install: winget install -e --id gsass1.NTop
+    uninstall: winget uninstall -e --id gsass1.NTop
+command: ntop
+args: ""
+source: https://github.com/gsass1/NTop
+website: https://github.com/gsass1/NTop
+documentation: https://github.com/gsass1/NTop#readme
+screenshot: https://user-images.githubusercontent.com/4589491/56905702-3c3d5c80-6a90-11e9-991c-b7a398742614.PNG
+keywords:
+  - monitor
+  - processes
+  - htop
+  - windows
+  - tui
+
+roles:
+  - system-monitor

@@ -1,0 +1,37 @@
+id: termusic
+name: termusic
+version: 1.0.0
+author: tramhao
+description: Music and podcast player with a tag editor, lyrics, album art and downloads from YouTube and other sites
+license: MIT AND GPL-3.0
+platforms:
+  # The release holds two glibc binaries: termusic (the TUI) and termusic-server (playback,
+  # started by the TUI), which links libmpv, GStreamer and ALSA, installed here from Debian.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget xz-utils libmpv2 libgstreamer1.0-0 libasound2t64 &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) d=termusic-v0.13.2-x86_64-linux; s=e3be68fae4e04aaba2949f5ecab5d76a760a145802d645028587e1fe97b1d884 ;;
+      aarch64) d=termusic-v0.13.2-aarch64-linux; s=992a6750a14e718ccbec4795b218596767e20a7665eb1ca7e40b46c668e926d1 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "https://github.com/tramhao/termusic/releases/download/v0.13.2/$d.tar.xz" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xJf pkg && sudo install -m 755 "$d/termusic" "$d/termusic-server" /usr/local/bin/ &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/termusic /usr/local/bin/termusic-server
+    detect: test -x /usr/local/bin/termusic && test -x /usr/local/bin/termusic-server
+command: termusic
+args: "%1?"
+source: https://github.com/tramhao/termusic
+website: https://github.com/tramhao/termusic
+documentation: https://github.com/tramhao/termusic#readme
+screenshot: https://raw.githubusercontent.com/tramhao/termusic/2a08f9ff270136d8c373e66117295b6b503d4181/screenshots/main.png
+keywords:
+  - music
+  - player
+  - podcast
+  - audio
+  - tui
+
+roles: []

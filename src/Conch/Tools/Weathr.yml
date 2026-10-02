@@ -1,0 +1,37 @@
+id: weathr
+name: weathr
+version: 1.0.0
+author: Veirt
+description: Terminal weather app that shows current conditions as ASCII animations, detecting the location when none is configured
+license: GPL-3.0
+platforms:
+  # The release assets are bare static (musl) binaries, so there is no archive to unpack.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/Veirt/weathr/releases/download/v1.4.0/weathr-linux-musl-amd64; s=e0082c17373cc4c28871ce5c59ce9b75ba594e6c88df7856939666e959d39972 ;;
+      aarch64) a=https://github.com/Veirt/weathr/releases/download/v1.4.0/weathr-linux-musl-arm64; s=f6dcccc1272aaff2aae38d932ef4d9a8cec24d943088b54375db000e86231c2a ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      sudo install -m 755 pkg /usr/local/bin/weathr &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/weathr
+  windows:
+    install: winget install -e --id Veirt.weathr
+    uninstall: winget uninstall -e --id Veirt.weathr
+command: weathr
+args: ""
+source: https://github.com/Veirt/weathr
+website: https://github.com/Veirt/weathr
+documentation: https://github.com/Veirt/weathr#readme
+screenshot: https://raw.githubusercontent.com/Veirt/weathr/7d403a0c4039aca37ff4609ffe613e39552307f2/docs/thunderstorm-night.gif
+keywords:
+  - weather
+  - ascii
+  - animation
+  - tui
+
+roles: []

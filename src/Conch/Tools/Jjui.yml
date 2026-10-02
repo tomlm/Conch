@@ -1,0 +1,44 @@
+id: jjui
+name: Jujutsu UI
+version: 1.0.0
+author: Ibrahim Dursun
+description: Terminal interface for the Jujutsu version control system with revset editing, rebase, squash, bookmarks and the operation log
+license: MIT
+platforms:
+  # jjui drives the jj command line, which Debian does not package, so the install also takes
+  # the static jj release binary (jjui needs jj 0.37 or newer). Uninstall removes both.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget unzip &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) u=amd64; s=cffa8892f25e762a114d8483ad7b98920a8f408ace0200b44e222f0c067ba7d4; j=x86_64; js=f35438350b5d61963aac5dd74ede510b31d6b9690769d1a6268cf058cc825f72 ;;
+      aarch64) u=arm64; s=cd79a028ccddc21e513cd5523d72068b88fa893d646e8cc9064ead04b0f3f584; j=aarch64; js=7349a43dd5a20dbc998b10114daa0ee63d2ab863fb822c7eb6b0ebca5903cc69 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "https://github.com/idursun/jjui/releases/download/v0.10.11/jjui-0.10.11-linux-$u.zip" && echo "$s  pkg" | sha256sum -c --quiet &&
+      wget -q -O jj.tgz "https://github.com/jj-vcs/jj/releases/download/v0.45.1/jj-v0.45.1-$j-unknown-linux-musl.tar.gz" && echo "$js  jj.tgz" | sha256sum -c --quiet &&
+      unzip -q pkg && tar -xzf jj.tgz ./jj &&
+      sudo install -m 755 "jjui-0.10.11-linux-$u" /usr/local/bin/jjui &&
+      sudo install -m 755 jj /usr/local/bin/jj &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/jjui /usr/local/bin/jj
+    detect: test -x /usr/local/bin/jjui && command -v jj >/dev/null
+  # Portable package with a jjui alias; it needs jj on PATH too (winget id jj-vcs.jj).
+  windows:
+    install: winget install -e --id IbrahimDursun.jjui
+    uninstall: winget uninstall -e --id IbrahimDursun.jjui
+command: jjui
+args: ""
+source: https://github.com/idursun/jjui
+website: https://idursun.github.io/jjui/
+documentation: https://idursun.github.io/jjui/
+screenshot: https://raw.githubusercontent.com/idursun/jjui/ccd12f23c26aca1e628be3a951ee808cd5d883c7/public/gifs/jjui_revset.gif
+keywords:
+  - jujutsu
+  - jj
+  - version control
+  - vcs
+  - tui
+
+roles: []

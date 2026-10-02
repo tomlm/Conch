@@ -1,0 +1,36 @@
+id: jnv
+name: jnv
+version: 1.0.0
+author: ynqa
+description: Interactive JSON viewer and jq filter editor that shows the filtered result as you type
+license: MIT
+platforms:
+  # Not in Debian. Pinned upstream release, checked by hash. x86_64 uses the static musl
+  # build; upstream publishes only a glibc build for aarch64.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget xz-utils &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/ynqa/jnv/releases/download/v0.7.1/jnv-x86_64-unknown-linux-musl.tar.xz; s=43bc90e8875f10790e2e69adba5dcc48cff393d0ebc59b9947449feb349b42e8; d=jnv-x86_64-unknown-linux-musl ;;
+      aarch64) a=https://github.com/ynqa/jnv/releases/download/v0.7.1/jnv-aarch64-unknown-linux-gnu.tar.xz; s=88b1a1f5cbc703d2f45fec6b8b4a8f9c35e9969c84565c00d27cc84baa0c0da8; d=jnv-aarch64-unknown-linux-gnu ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xJf pkg && sudo install -m 755 "$d/jnv" /usr/local/bin/jnv &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/jnv
+command: jnv
+args: "%1"
+source: https://github.com/ynqa/jnv
+website: https://github.com/ynqa/jnv
+documentation: https://github.com/ynqa/jnv#readme
+screenshot: https://raw.githubusercontent.com/ynqa/ynqa/c33e541296ea9aee35ee8b05e501602526ea4c85/demo/jnv.gif
+keywords:
+  - json
+  - jq
+  - filter
+  - viewer
+  - tui
+
+roles: []

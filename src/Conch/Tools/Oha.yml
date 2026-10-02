@@ -1,0 +1,37 @@
+id: oha
+name: oha
+version: 1.0.0
+author: hatoo
+description: HTTP load generator that shows live request rates and latencies while it sends load to a web application
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/hatoo/oha/releases/download/v1.16.0/oha-linux-amd64; s=620bb9e16fb53eabc9a3fc45f88bdb41fefa3fee5c05e75892011ce320391716 ;;
+      aarch64) a=https://github.com/hatoo/oha/releases/download/v1.16.0/oha-linux-arm64; s=99a790eb8c3e0feaca974bd6b32f0f8d4426a0c5b289f39e833e5b2c7529cd39 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      sudo install -m 755 pkg /usr/local/bin/oha &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/oha
+  windows:
+    install: winget install -e --id hatoo.oha
+    uninstall: winget uninstall -e --id hatoo.oha
+command: oha
+# The URL to load-test.
+args: "%1"
+source: https://github.com/hatoo/oha
+website: https://github.com/hatoo/oha
+documentation: https://github.com/hatoo/oha#readme
+screenshot: https://raw.githubusercontent.com/hatoo/oha/0d6d370ed37108385d79a4ce34c0b8a8d7c9b6fe/demo.gif
+keywords:
+  - http
+  - load testing
+  - benchmark
+  - tui
+
+roles: []

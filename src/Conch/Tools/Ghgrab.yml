@@ -1,0 +1,34 @@
+id: ghgrab
+name: ghgrab
+version: 1.0.0
+author: Abhinav A
+description: Browser for GitHub repositories that downloads selected files and folders without cloning the repository
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/abhixdd/ghgrab/releases/download/v2.1.0/ghgrab-linux; s=435ad8df609d3a715c880ce6dcbca31d720ebf1736540d8c52ea86155a06d334 ;;
+      aarch64) a=https://github.com/abhixdd/ghgrab/releases/download/v2.1.0/ghgrab-linux-arm64; s=3daff212a98519cac7fabc992d95f8304ea1da5c3ffb480c4b66cb7484102a7a ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O ghgrab "$a" && echo "$s  ghgrab" | sha256sum -c --quiet &&
+      sudo install -m 755 ghgrab /usr/local/bin/ghgrab &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/ghgrab
+command: ghgrab
+args: "%1?"
+source: https://github.com/abhixdd/ghgrab
+website: https://github.com/abhixdd/ghgrab
+documentation: https://ghgrab.readthedocs.io/
+screenshot: https://raw.githubusercontent.com/abhixdd/ghgrab/75123845436fe15c5ef0e2a27ced79b050522092/assets/ghgrab.gif
+keywords:
+  - github
+  - download
+  - git
+  - files
+  - tui
+
+roles: []

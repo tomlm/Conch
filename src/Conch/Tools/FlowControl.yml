@@ -1,0 +1,40 @@
+id: flow.control
+name: Flow Control
+version: 1.0.0
+author: CJ van den Berg
+description: Programmer's text editor with tree-sitter syntax highlighting, language server support, multiple cursors and Vim, Helix or Emacs keybindings
+license: MIT
+platforms:
+  # The release archive holds one statically linked flow binary.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/neurocyte/flow/releases/download/v0.7.2/flow-v0.7.2-linux-x86_64.tar.gz; s=3f647aa06e3910d047a72b2c0d8af222b9f0f4f9325d8778f72d58acad1f8157 ;;
+      aarch64) a=https://github.com/neurocyte/flow/releases/download/v0.7.2/flow-v0.7.2-linux-aarch64.tar.gz; s=9f58071c97cf4108d1e0814e95772773007e42b296ddf64613af35d0a03f3bae ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 flow /usr/local/bin/flow &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/flow
+  # Portable package holding flow.exe (terminal) and flow-gui.exe; winget links both by name.
+  windows:
+    install: winget install -e --id neurocyte.flow
+    uninstall: winget uninstall -e --id neurocyte.flow
+command: flow
+args: "%1?"
+source: https://github.com/neurocyte/flow
+website: https://flow-control.dev
+documentation: https://github.com/neurocyte/flow#readme
+screenshot: https://cdn.terminaltrove.com/m/e4e29b85-90a1-4426-ab8e-e51b93f092d1.png
+keywords:
+  - text editor
+  - code editor
+  - lsp
+  - tree-sitter
+  - zig
+
+roles:
+  - text-editor

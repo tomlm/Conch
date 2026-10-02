@@ -1,0 +1,39 @@
+id: hunk
+name: Hunk
+version: 1.0.0
+author: Modem
+description: Review-first terminal diff viewer for Git changes, built for reading agent-authored changesets
+license: MIT
+platforms:
+  # The release tarball holds the hunk binary next to the bundled skills that
+  # "hunk skill path" points at, so the folder goes to /opt/hunk and a symlink lands on PATH.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget git &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/modem-dev/hunk/releases/download/v0.23.0/hunkdiff-linux-x64.tar.gz; s=79ab6406cbb2b800e73c6fbc2546afb97ed4fbc3b50aad072eb9ad12151581e6 ;;
+      aarch64) a=https://github.com/modem-dev/hunk/releases/download/v0.23.0/hunkdiff-linux-arm64.tar.gz; s=5b8928ae1e987b2b1775d1fe62eebabcc08b9fc9940154e0cef27d24941cb7e4 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      sudo rm -rf /opt/hunk && sudo mkdir -p /opt/hunk &&
+      sudo tar -xzf pkg -C /opt/hunk --strip-components=1 &&
+      sudo ln -sf /opt/hunk/hunk /usr/local/bin/hunk &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -rf /usr/local/bin/hunk /opt/hunk
+    detect: test -x /opt/hunk/hunk
+command: hunk
+# Plain "hunk" prints help; "hunk diff" reviews the working tree of the current repository.
+args: "diff"
+source: https://github.com/modem-dev/hunk
+website: https://github.com/modem-dev/hunk
+documentation: https://github.com/modem-dev/hunk#readme
+screenshot: https://cdn.terminaltrove.com/m/68630f17-a29b-4d4d-820e-72fd71112264.png
+keywords:
+  - git
+  - diff
+  - code review
+  - tui
+
+roles: []

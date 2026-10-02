@@ -1,0 +1,37 @@
+id: doxx
+name: doxx
+version: 1.0.0
+author: Brandon Greenwell
+description: Viewer for Microsoft Word .docx files in the terminal, with tables, lists and images
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget xz-utils &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/bgreenwell/doxx/releases/download/v0.1.4/doxx-x86_64-unknown-linux-musl.tar.xz; s=bd03ae75c333211d1b6f9085834010b7d3ffed60a13915291a76b667c62f2e85 ;;
+      aarch64) a=https://github.com/bgreenwell/doxx/releases/download/v0.1.4/doxx-aarch64-unknown-linux-gnu.tar.xz; s=e401be69d0d6bd428d0b850317ed524656472849f50034d4b26f6725e43b8030 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xJf pkg --strip-components=1 && sudo install -m 755 doxx /usr/local/bin/doxx &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/doxx
+  windows:
+    install: winget install -e --id bgreenwell.doxx
+    uninstall: winget uninstall -e --id bgreenwell.doxx
+command: doxx
+args: "%1"
+source: https://github.com/bgreenwell/doxx
+website: https://bgreenwell.github.io/doxx/
+documentation: https://github.com/bgreenwell/doxx#readme
+screenshot: https://raw.githubusercontent.com/bgreenwell/doxx/062819a10f423f2b2ce52be6d264e9069b1b9a40/assets/demo.gif
+keywords:
+  - docx
+  - word
+  - viewer
+  - documents
+  - tui
+
+roles: []

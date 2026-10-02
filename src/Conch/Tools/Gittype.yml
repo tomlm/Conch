@@ -1,0 +1,38 @@
+id: gittype
+name: GitType
+version: 1.0.0
+author: Yuji Ueki
+description: Code-typing game that turns the source code of a git repository into typing challenges
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget git &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/unhappychoice/gittype/releases/download/v0.10.2/gittype-v0.10.2-x86_64-unknown-linux-gnu.tar.gz; s=76d3b9b56554d5aab102cb98adb77f71faaa33b3d469ead585c8ccec37dc6539 ;;
+      aarch64) a=https://github.com/unhappychoice/gittype/releases/download/v0.10.2/gittype-v0.10.2-aarch64-unknown-linux-gnu.tar.gz; s=56d086a47524907689bec0640a140090c87fa257ad0e02e92e9c0579a743f2ae ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 gittype /usr/local/bin/gittype &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/gittype
+  # Portable package; winget adds a gittype alias.
+  windows:
+    install: winget install -e --id unhappychoice.gittype
+    uninstall: winget uninstall -e --id unhappychoice.gittype
+command: gittype
+args: "%1?"
+source: https://github.com/unhappychoice/gittype
+website: https://github.com/unhappychoice/gittype
+documentation: https://github.com/unhappychoice/gittype#readme
+screenshot: https://cdn.terminaltrove.com/m/7fbeba4a-a3ea-4516-812b-4aa2f00d7678.png
+keywords:
+  - typing
+  - game
+  - git
+  - code
+  - tui
+
+roles: []

@@ -1,0 +1,37 @@
+id: gotop
+name: gotop
+version: 1.0.0
+author: Sean Russell
+description: Graphical activity monitor that charts processor, memory, disk, network and temperature usage alongside a process list
+license: MIT-Festival
+platforms:
+  # Debian 13 has no gotop package. v4.2.0 (2022) is the latest release; the tgz holds the
+  # gotop binary at its root.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/xxxserxxx/gotop/releases/download/v4.2.0/gotop_v4.2.0_linux_amd64.tgz; s=7dbf3619f07b82a8a6145dce7ad8149067550dd950e4f2ca54208b45380394b7 ;;
+      aarch64) a=https://github.com/xxxserxxx/gotop/releases/download/v4.2.0/gotop_v4.2.0_linux_arm64.tgz; s=eda4be392d641c5a654adbe2606c8a2a045117ea6a6dd1a5f4454c3326fc5987 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 gotop /usr/local/bin/gotop &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/gotop
+command: gotop
+args: ""
+source: https://github.com/xxxserxxx/gotop
+website: https://github.com/xxxserxxx/gotop
+documentation: https://github.com/xxxserxxx/gotop#readme
+screenshot: https://raw.githubusercontent.com/xxxserxxx/gotop/2872dab02cffc1dcc621b87a0a0f1dc4dac2ec6e/assets/screenshots/demo.gif
+keywords:
+  - monitor
+  - cpu
+  - memory
+  - processes
+  - tui
+
+roles:
+  - system-monitor

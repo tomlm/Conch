@@ -1,0 +1,36 @@
+id: jira.cli
+name: Jira CLI
+version: 1.0.0
+author: Ankit Pokhrel
+description: Jira client for the terminal that lists, searches, creates and moves issues, epics and sprints
+license: MIT
+platforms:
+  # Not in Debian. Pinned upstream release, checked by hash. It needs a one-time "jira init"
+  # with a Jira server and API token before the issue list can open.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/ankitpokhrel/jira-cli/releases/download/v1.7.0/jira_1.7.0_linux_x86_64.tar.gz; s=b5e0ba4804f3f11f92c483d9a6ea9ebccec1c735cd2e12b0440cab9d7afd626a; d=jira_1.7.0_linux_x86_64 ;;
+      aarch64) a=https://github.com/ankitpokhrel/jira-cli/releases/download/v1.7.0/jira_1.7.0_linux_arm64.tar.gz; s=80aa3cc02790892b29e1580a8e49eb49a6550815b362c5ef8c05aea1dee73a95; d=jira_1.7.0_linux_arm64 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 "$d/bin/jira" /usr/local/bin/jira &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/jira
+command: jira
+# Plain "jira" prints help; "issue list" opens the interactive issue browser.
+args: "issue list"
+source: https://github.com/ankitpokhrel/jira-cli
+website: https://github.com/ankitpokhrel/jira-cli
+documentation: https://github.com/ankitpokhrel/jira-cli#readme
+screenshot: https://raw.githubusercontent.com/ankitpokhrel/jira-cli/e74646e604c38f0855a71137e1e626b3a0ab8913/.github/assets/markdown.jpg
+keywords:
+  - jira
+  - issues
+  - project management
+  - tui
+
+roles: []

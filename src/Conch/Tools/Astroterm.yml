@@ -1,0 +1,34 @@
+id: astroterm
+name: astroterm
+version: 1.0.0
+author: Dalton Luce
+description: Star map for the terminal that shows the stars, planets and constellations above a given place and time
+license: MIT
+platforms:
+  # Upstream publishes a Linux build for x86_64 only.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/da-luce/astroterm/releases/download/v1.2.0/astroterm-linux-x86_64; s=57a542bd37d01337a5dfd8582015a76c9949c0a514e4b9335e0c1aa44445b3df ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      sudo install -m 755 pkg /usr/local/bin/astroterm &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/astroterm
+command: astroterm
+args: ""
+source: https://github.com/da-luce/astroterm
+website: https://github.com/da-luce/astroterm
+documentation: https://github.com/da-luce/astroterm#readme
+screenshot: https://raw.githubusercontent.com/da-luce/astroterm/5c571959dbd7ceca95b964e9a92154192bc76a09/assets/SYD_2025-01-06.png
+keywords:
+  - astronomy
+  - stars
+  - planets
+  - sky
+  - tui
+
+roles: []

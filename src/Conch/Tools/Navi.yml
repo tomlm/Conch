@@ -1,0 +1,38 @@
+id: navi
+name: navi
+version: 1.0.0
+author: Denis Isidoro
+description: Interactive cheatsheet tool for the command line that fills in arguments and runs the chosen command
+license: Apache-2.0
+platforms:
+  # Not in Debian. navi drives fzf for its menus and clones cheatsheet repos with git, so both
+  # come from apt alongside the release binary (static musl on x86_64; the aarch64 build is
+  # the only arm64 one offered).
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget fzf git &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/denisidoro/navi/releases/download/v2.24.0/navi-v2.24.0-x86_64-unknown-linux-musl.tar.gz; s=f334047479241f7c8b48d091f4e814dcc798a51a74dfd04ee63cbf67e8c921ba ;;
+      aarch64) a=https://github.com/denisidoro/navi/releases/download/v2.24.0/navi-v2.24.0-aarch64-unknown-linux-gnu.tar.gz; s=de99e69906a0e06ffd30a329645e15f9e96a6b42c49eaac8baccac9bc314768a ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 navi /usr/local/bin/navi &&
+      cd / && rm -rf "$t"
+    # fzf and git stay: other programs use them, and apt owns them.
+    uninstall: sudo rm -f /usr/local/bin/navi
+command: navi
+args: ""
+source: https://github.com/denisidoro/navi
+website: https://github.com/denisidoro/navi
+documentation: https://github.com/denisidoro/navi#readme
+screenshot: https://cdn.terminaltrove.com/m/5a113553-0481-4955-adad-29f35aff06e9.png
+keywords:
+  - cheatsheet
+  - shell
+  - commands
+  - fzf
+  - tui
+
+roles: []

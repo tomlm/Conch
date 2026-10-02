@@ -1,0 +1,26 @@
+id: recoverpy
+name: RecoverPy
+version: 1.0.0
+author: Pablo Lecolinet
+description: Terminal tool that searches raw block devices to find and recover deleted or overwritten files
+license: GPL-3.0
+platforms:
+  # Needs root to read block devices and relies on grep, dd and lsblk; launched through sudo.
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y pipx && sudo pipx install --global recoverpy
+    uninstall: sudo pipx uninstall --global recoverpy
+    detect: test -x /usr/local/bin/recoverpy
+command: sudo
+args: "recoverpy"
+source: https://github.com/PabloLec/RecoverPy
+website: https://github.com/PabloLec/RecoverPy
+documentation: https://github.com/PabloLec/RecoverPy#readme
+screenshot: https://raw.githubusercontent.com/pablolec/recoverpy/5ed7ab07b3cb9e5849da5c94950b76484f5d4c80/docs/assets/demo.gif
+keywords:
+  - recovery
+  - files
+  - forensics
+  - filesystem
+  - tui
+
+roles: []

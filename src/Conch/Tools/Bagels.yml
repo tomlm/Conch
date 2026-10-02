@@ -1,0 +1,24 @@
+id: bagels
+name: Bagels
+version: 1.0.0
+author: Jax Tam
+description: Expense tracker for recording transactions across accounts and categories, with budgets and spending charts
+license: GPL-3.0
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y pipx && sudo pipx install --global bagels
+    uninstall: sudo pipx uninstall --global bagels
+command: bagels
+args: ""
+source: https://github.com/EnhancedJax/Bagels
+website: https://github.com/EnhancedJax/Bagels
+documentation: https://github.com/EnhancedJax/Bagels#readme
+screenshot: https://raw.githubusercontent.com/EnhancedJax/Bagels/e8fe086a0a18bc31b9fa106516ba2177e60c78d7/public/screenshots/thumb1.png
+keywords:
+  - finance
+  - expenses
+  - budget
+  - textual
+  - tui
+
+roles: []

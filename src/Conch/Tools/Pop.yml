@@ -1,0 +1,39 @@
+id: pop
+name: Pop
+version: 1.0.0
+author: Charmbracelet
+description: Email composer that sends messages from the terminal through SMTP or the Resend API
+license: MIT
+platforms:
+  # Pop needs a sending account before its compose screen opens: RESEND_API_KEY, or the
+  # POP_SMTP_* variables, set in the environment. Without them it prints setup help and exits.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/charmbracelet/pop/releases/download/v0.5.0/pop_0.5.0_Linux_x86_64.tar.gz; s=5017aad5378fede81c5879e4205f869a5a94841df3b65649c0248ab1a6a3d536; d=pop_0.5.0_Linux_x86_64 ;;
+      aarch64) a=https://github.com/charmbracelet/pop/releases/download/v0.5.0/pop_0.5.0_Linux_arm64.tar.gz; s=79a4785d48548974a225ad44f160de447e627ba9291e973341c5fcb9fd96e0f5; d=pop_0.5.0_Linux_arm64 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 "$d/pop" /usr/local/bin/pop &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/pop
+  windows:
+    install: winget install -e --id charmbracelet.pop
+    uninstall: winget uninstall -e --id charmbracelet.pop
+command: pop
+args: ""
+source: https://github.com/charmbracelet/pop
+website: https://github.com/charmbracelet/pop
+documentation: https://github.com/charmbracelet/pop#readme
+screenshot: https://vhs.charm.sh/vhs-5Dyv3pvzB2YwtUSr72LqSz.gif
+keywords:
+  - email
+  - smtp
+  - mail
+  - charm
+  - tui
+
+roles: []

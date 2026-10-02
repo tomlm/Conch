@@ -1,0 +1,24 @@
+id: vifm
+name: Vifm
+version: 1.0.0
+author: Vifm contributors
+description: File manager with a curses interface and Vim-like keys, two panes and a command line
+license: GPL-2.0
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y vifm
+    uninstall: sudo apt-get remove -y vifm
+command: vifm
+args: "%1?"
+source: https://github.com/vifm/vifm
+website: https://vifm.info
+documentation: https://vifm.info/manual.shtml
+screenshot: https://raw.githubusercontent.com/vifm/vifm/d9b2f49786ae077babfa6516f6b9ccea247c6f21/data/graphics/screenshot.png
+keywords:
+  - file manager
+  - vim
+  - files
+  - tui
+
+roles:
+  - file-explorer

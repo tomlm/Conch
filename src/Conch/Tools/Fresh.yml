@@ -1,0 +1,37 @@
+id: fresh
+name: Fresh
+version: 1.0.0
+author: Noam Lewis
+description: Terminal text editor with familiar keys, mouse support, multiple cursors, a command palette and language server support
+license: GPL-3.0
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/sinelaw/fresh/releases/download/v0.5.2/fresh-editor-x86_64-unknown-linux-musl.tar.gz; s=2dde1d4e7f5956fdbff5c36561525c98cece2422e284937c897ff2eb17c4037d ;;
+      aarch64) a=https://github.com/sinelaw/fresh/releases/download/v0.5.2/fresh-editor-aarch64-unknown-linux-musl.tar.gz; s=a60fa1eb19bc483b7586efff220d37fb3cfd079f1b1cb34a48a1a19b09df5f08 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 "fresh-editor-$(uname -m)-unknown-linux-musl/fresh" /usr/local/bin/fresh &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/fresh
+  windows:
+    install: winget install -e --id sinelaw.fresh-editor
+    uninstall: winget uninstall -e --id sinelaw.fresh-editor
+command: fresh
+args: "%1?"
+source: https://github.com/sinelaw/fresh
+website: https://github.com/sinelaw/fresh
+documentation: https://github.com/sinelaw/fresh#readme
+screenshot: https://cdn.terminaltrove.com/m/0237d92b-d4b0-4eb6-b0e8-d8c8a33ee59c.png
+keywords:
+  - text editor
+  - code editor
+  - lsp
+  - terminal
+
+roles:
+  - text-editor

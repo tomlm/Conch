@@ -1,0 +1,25 @@
+id: gemini.cli
+name: Gemini CLI
+version: 1.0.0
+author: Google
+description: AI agent from Google that brings Gemini models into the terminal
+license: Apache-2.0
+platforms:
+  # Not in Debian and no prebuilt binary; published on npm and runs on Debian 13's Node 20.
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y npm && sudo npm install -g @google/gemini-cli
+    uninstall: sudo npm uninstall -g @google/gemini-cli
+command: gemini
+args: ""
+source: https://github.com/google-gemini/gemini-cli
+website: https://geminicli.com/
+documentation: https://github.com/google-gemini/gemini-cli#readme
+screenshot: https://raw.githubusercontent.com/google-gemini/gemini-cli/fb972b2f87fe7d5b06d37eac711490162d98de2c/docs/assets/gemini-screenshot.png
+keywords:
+  - ai
+  - coding agent
+  - llm
+  - gemini
+  - tui
+
+roles: []

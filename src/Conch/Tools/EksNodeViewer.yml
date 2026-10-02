@@ -1,0 +1,34 @@
+id: eks.node.viewer
+name: eks-node-viewer
+version: 1.0.0
+author: awslabs
+description: Kubernetes node viewer that shows the scheduled pod resource requests and allocatable capacity of each node in a cluster, with EKS pricing
+license: Apache-2.0
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/awslabs/eks-node-viewer/releases/download/v0.7.4/eks-node-viewer_Linux_x86_64; s=b1ca7d41485deea85c846caeccde28219fd5925a8c64585a4f87ae131b70d01a ;;
+      aarch64) a=https://github.com/awslabs/eks-node-viewer/releases/download/v0.7.4/eks-node-viewer_Linux_arm64; s=5f25b2f647a54a2743132c37049e2ffc34331e5a5b6bb3f24e2e523f904481d3 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O eks-node-viewer "$a" && echo "$s  eks-node-viewer" | sha256sum -c --quiet &&
+      sudo install -m 755 eks-node-viewer /usr/local/bin/eks-node-viewer &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/eks-node-viewer
+command: eks-node-viewer
+args: ""
+source: https://github.com/awslabs/eks-node-viewer
+website: https://github.com/awslabs/eks-node-viewer
+documentation: https://github.com/awslabs/eks-node-viewer#readme
+screenshot: https://raw.githubusercontent.com/awslabs/eks-node-viewer/eb57fd296e4620d0935ea1dcaba170c712b163c3/.static/screenshot.png
+keywords:
+  - kubernetes
+  - eks
+  - aws
+  - nodes
+  - tui
+
+roles: []

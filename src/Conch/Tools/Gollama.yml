@@ -1,0 +1,34 @@
+id: gollama
+name: Gollama
+version: 1.0.0
+author: Sam McLeod
+description: Terminal interface for managing Ollama models, listing, inspecting and linking them
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget unzip &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/sammcj/gollama/releases/download/v2.0.6/gollama-linux-amd64.zip; s=cc4693ebfd8850c404780cd3d822842b8a39989b4eac329e35cec9e74e7bf433 ;;
+      aarch64) a=https://github.com/sammcj/gollama/releases/download/v2.0.6/gollama-linux-arm64.zip; s=526a79d0d9c21d395fe2fdbd827076510790a1db3c4640ed7e31e37532178a90 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      unzip -q pkg && sudo install -m 755 gollama /usr/local/bin/gollama &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/gollama
+command: gollama
+args: ""
+source: https://github.com/sammcj/gollama
+website: https://github.com/sammcj/gollama
+documentation: https://github.com/sammcj/gollama#readme
+screenshot: https://raw.githubusercontent.com/sammcj/gollama/168cddf360ef38ad9e7a51c3c9a2c3254cea61db/screenshots/gollama-v1.0.0.jpg
+keywords:
+  - ollama
+  - llm
+  - ai
+  - models
+  - tui
+
+roles: []

@@ -1,0 +1,35 @@
+id: dry
+name: dry
+version: 1.0.0
+author: moncho
+description: Docker manager that shows and controls containers, images, networks and Swarm services
+license: MIT
+platforms:
+  # Not in Debian. The release ships plain static binaries; dry talks to an existing Docker
+  # daemon and does not install one.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/moncho/dry/releases/download/v0.13.0/dry-linux-amd64; s=c160dea554c74544f68f1de5d406a9d211462caa75cab46c2ae8a46df28e0e36 ;;
+      aarch64) a=https://github.com/moncho/dry/releases/download/v0.13.0/dry-linux-arm64; s=cb3c466b1bda509155b66361bd00c131da8699aeaa8a2b70196b51cd6555991d ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      sudo install -m 755 pkg /usr/local/bin/dry &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/dry
+command: dry
+args: ""
+source: https://github.com/moncho/dry
+website: https://moncho.github.io/dry/
+documentation: https://github.com/moncho/dry#readme
+screenshot: https://cdn.terminaltrove.com/m/1f6f0485-831a-4f31-b569-721be403249b.png
+keywords:
+  - docker
+  - containers
+  - devops
+  - tui
+
+roles: []

@@ -1,0 +1,28 @@
+id: critique
+name: critique
+version: 1.0.0
+author: remorses
+description: Terminal UI for reviewing git diffs, with a tree of the changed files beside the diff
+license: MIT
+platforms:
+  # Not in Debian. critique runs on Bun, not Node.js (its entry point is "#!/usr/bin/env bun"),
+  # so Bun's own npm package is installed with it; that package fetches the matching Bun
+  # binary for the architecture. git comes from apt too.
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y npm git && sudo npm install -g bun critique
+    # bun, npm and git stay: other programs may use them.
+    uninstall: sudo npm uninstall -g critique
+command: critique
+# Run inside a git repository; with no arguments it shows the unstaged changes.
+args: ""
+source: https://github.com/remorses/critique
+website: https://github.com/remorses/critique
+documentation: https://github.com/remorses/critique#readme
+screenshot: https://cdn.terminaltrove.com/m/f11d99bb-be97-4678-ac80-3e3483cc2fe9.png
+keywords:
+  - tui
+  - git
+  - diff
+  - code review
+
+roles: []

@@ -1,0 +1,36 @@
+id: process.compose
+name: Process Compose
+version: 1.0.0
+author: Eugene Berger
+description: Scheduler and orchestrator for non-containerized processes, with a dashboard to start, stop and follow each one
+license: Apache-2.0
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/F1bonacc1/process-compose/releases/download/v1.122.0/process-compose_linux_amd64.tar.gz; s=9b6dbc38324c0b0481f1cd1dd828ffdc78117129ec797678f4bf8c4023311281 ;;
+      aarch64) a=https://github.com/F1bonacc1/process-compose/releases/download/v1.122.0/process-compose_linux_arm64.tar.gz; s=52fa7d5a2d5e0db470faec5976204fc215ed7e3d13689e930cf522becfb63778 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 process-compose /usr/local/bin/process-compose &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/process-compose
+# Without a project file in the working directory process-compose exits at once, so the
+# launch asks for the process-compose.yaml to run.
+command: process-compose
+args: "-f %1"
+source: https://github.com/F1bonacc1/process-compose
+website: https://f1bonacc1.github.io/process-compose/
+documentation: https://f1bonacc1.github.io/process-compose/
+screenshot: https://raw.githubusercontent.com/F1bonacc1/process-compose/23b0acacc937d745279fb1551337f4031c4fc865/imgs/tui.png
+keywords:
+  - processes
+  - orchestration
+  - devops
+  - dashboard
+  - tui
+
+roles: []

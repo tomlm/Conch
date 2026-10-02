@@ -1,0 +1,36 @@
+id: tabiew
+name: Tabiew
+version: 1.0.0
+author: shshemi
+description: Viewer for tabular data files such as CSV, TSV, Parquet, JSON and SQLite, with SQL queries over the loaded tables
+license: MIT
+platforms:
+  # The release assets are bare static (musl) binaries named tw, so there is no archive to unpack.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/shshemi/tabiew/releases/download/v0.15.1/tw-x86_64-unknown-linux-musl; s=404ecd9f68c29d89c0205acf40d6b6397fd5cc0d19323e51244c78b4f651a593 ;;
+      aarch64) a=https://github.com/shshemi/tabiew/releases/download/v0.15.1/tw-aarch64-unknown-linux-musl; s=a5707622c8cc26071b91fba2926ec286c6c4330e702816ea1bde6c1c36402f13 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      sudo install -m 755 pkg /usr/local/bin/tw &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/tw
+command: tw
+args: "%1"
+source: https://github.com/shshemi/tabiew
+website: https://github.com/shshemi/tabiew
+documentation: https://github.com/shshemi/tabiew#readme
+screenshot: https://cdn.terminaltrove.com/m/c89d724d-7aa3-4eab-8f42-4d35ea55565a.png
+keywords:
+  - csv
+  - parquet
+  - sql
+  - data
+  - viewer
+  - tui
+
+roles: []

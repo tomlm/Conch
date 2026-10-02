@@ -1,0 +1,35 @@
+id: dblab
+name: dblab
+version: 1.0.0
+author: Daniel Vergara
+description: Interactive database client for PostgreSQL, MySQL, SQLite, Oracle and SQL Server that asks for connection details when started without flags
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/danvergara/dblab/releases/download/v0.51.0/dblab_0.51.0_linux_amd64.tar.gz; s=85181d2ad35b41a352cd92346982cb14005a700e8cdab12da63fc794f8ff1499 ;;
+      aarch64) a=https://github.com/danvergara/dblab/releases/download/v0.51.0/dblab_0.51.0_linux_arm64.tar.gz; s=f27a78b2495b07f6ef4998dd016e09c1c9b69295c49bf004a2e67e8b450961b8 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 dblab /usr/local/bin/dblab &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/dblab
+command: dblab
+args: ""
+source: https://github.com/danvergara/dblab
+website: https://dblab.app
+documentation: https://github.com/danvergara/dblab#readme
+screenshot: https://raw.githubusercontent.com/danvergara/dblab/49ef18c0ff2de5e4276eabede8aee8fd9d7a0eba/screenshots/dblab-cover.png
+keywords:
+  - database
+  - sql
+  - postgresql
+  - mysql
+  - sqlite
+  - tui
+
+roles: []

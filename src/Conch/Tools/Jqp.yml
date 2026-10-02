@@ -1,0 +1,25 @@
+id: jqp
+name: jqp
+version: 1.0.0
+author: Noah Gorstein
+description: Playground for building jq queries interactively against a JSON or NDJSON file
+license: MIT
+platforms:
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y jqp
+    uninstall: sudo apt-get remove -y jqp
+# jqp reads its input from stdin or a file; launched from the shell there is no stdin, so
+# the launch asks for the file.
+command: jqp
+args: "-f %1"
+source: https://github.com/noahgorstein/jqp
+website: https://github.com/noahgorstein/jqp
+documentation: https://github.com/noahgorstein/jqp#readme
+screenshot: https://user-images.githubusercontent.com/23270779/191256434-05aeda9d-9ee2-4b5e-a23f-6548dac08fdb.gif
+keywords:
+  - json
+  - jq
+  - query
+  - tui
+
+roles: []

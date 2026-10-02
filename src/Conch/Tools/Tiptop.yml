@@ -1,0 +1,27 @@
+id: tiptop
+name: tiptop
+version: 1.0.0
+author: Nico Schlömer
+description: System monitor that shows processor, memory, network, disk and process usage with live graphs
+license: MIT
+platforms:
+  # Debian's "tiptop" package is an unrelated hardware performance counter tool,
+  # so this installs nschloe/tiptop from PyPI.
+  linux:
+    install: sudo apt-get update && sudo apt-get install -y pipx && sudo pipx install --global tiptop
+    uninstall: sudo pipx uninstall --global tiptop
+command: tiptop
+args: ""
+source: https://github.com/nschloe/tiptop
+website: https://github.com/nschloe/tiptop
+documentation: https://github.com/nschloe/tiptop#readme
+screenshot: https://raw.githubusercontent.com/nschloe/tiptop/2176cad17e40c22a339f052c88dea18166c9c7df/screenshot.png
+keywords:
+  - monitor
+  - cpu
+  - memory
+  - processes
+  - textual
+
+roles:
+  - system-monitor

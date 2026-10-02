@@ -1,0 +1,36 @@
+id: intelli.shell
+name: IntelliShell
+version: 1.0.0
+author: Luis Alberto Santos
+description: Library of bookmarked shell command templates with variables, searched and filled in from an interactive picker
+license: Apache-2.0
+platforms:
+  # Not in Debian. Pinned upstream release (static musl builds), checked by hash.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/lasantosr/intelli-shell/releases/download/v3.4.5/intelli-shell-x86_64-unknown-linux-musl.tar.gz; s=b5fac76d6f4b81fd2ff155ab0bf83ed7e571bf6e87d916d4dea4b1e02979dfd4 ;;
+      aarch64) a=https://github.com/lasantosr/intelli-shell/releases/download/v3.4.5/intelli-shell-aarch64-unknown-linux-musl.tar.gz; s=593d225635bf22d1369b0afdb94e44c1ae71b49732a3c701e6351a4eae752a30 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 intelli-shell /usr/local/bin/intelli-shell &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/intelli-shell
+command: intelli-shell
+# With no subcommand it only prints help; "search -i" opens the interactive command picker.
+args: "search -i"
+source: https://github.com/lasantosr/intelli-shell
+website: https://lasantosr.github.io/intelli-shell/
+documentation: https://lasantosr.github.io/intelli-shell/
+screenshot: https://raw.githubusercontent.com/lasantosr/intelli-shell/fecf5c2ba5ecf648e8e582361f4568f937e014ff/docs/src/images/demo.gif
+keywords:
+  - tui
+  - shell
+  - commands
+  - snippets
+  - cheatsheet
+
+roles: []

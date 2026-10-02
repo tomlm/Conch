@@ -1,0 +1,34 @@
+id: slumber
+name: Slumber
+version: 1.0.0
+author: Lucas Pickering
+description: HTTP/REST client for the terminal that sends requests defined in a YAML collection file
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget xz-utils &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/lucaspickering/slumber/releases/download/v5.3.0/slumber-x86_64-unknown-linux-musl.tar.xz; s=3a813dcbed2b28a4438f9cb777566d8c06f026aa74e0623706ca4a2c48e2a8b4 ;;
+      aarch64) a=https://github.com/lucaspickering/slumber/releases/download/v5.3.0/slumber-aarch64-unknown-linux-musl.tar.xz; s=b85f6bbfd47ca3f04065aee0cb92ee04cef0a234c8a2971ee2a6fc81278675ad ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xJf pkg && sudo install -m 755 */slumber /usr/local/bin/slumber &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/slumber
+command: slumber
+args: ""
+source: https://github.com/LucasPickering/slumber
+website: https://slumber.lucaspickering.me/
+documentation: https://slumber.lucaspickering.me/
+screenshot: https://media.githubusercontent.com/media/lucaspickering/slumber/0697b7adcc415ccd3a22e12a015f9eab7a4bacd7/docs/src/images/demo.gif
+keywords:
+  - http
+  - rest
+  - api
+  - tui
+  - ratatui
+
+roles: []

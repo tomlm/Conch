@@ -1,0 +1,34 @@
+id: sshs
+name: sshs
+version: 1.0.0
+author: Nathanael Demacon
+description: SSH host picker that lists the hosts in your SSH config and connects to the one you choose
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget openssh-client &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/quantumsheep/sshs/releases/download/4.8.0/sshs-linux-amd64-musl; s=ce43f8180f11b7441641b40c4137f68b6a6c56fd814b8210c85953199c84c276 ;;
+      aarch64) a=https://github.com/quantumsheep/sshs/releases/download/4.8.0/sshs-linux-arm64; s=5a9f1b2e832406f26966dc6c62a6367d509978d76a568be5a40d643c9340f1f8 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O sshs "$a" && echo "$s  sshs" | sha256sum -c --quiet &&
+      sudo install -m 755 sshs /usr/local/bin/sshs &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/sshs
+command: sshs
+args: ""
+source: https://github.com/quantumsheep/sshs
+website: https://github.com/quantumsheep/sshs
+documentation: https://github.com/quantumsheep/sshs#readme
+screenshot: https://raw.githubusercontent.com/quantumsheep/sshs/f3838c07fdfb26a0456af2d2773a30bc73607943/.github/demo/demo.gif
+keywords:
+  - ssh
+  - remote
+  - hosts
+  - network
+  - tui
+
+roles: []

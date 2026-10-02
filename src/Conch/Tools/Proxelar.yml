@@ -1,0 +1,36 @@
+id: proxelar
+name: Proxelar
+version: 1.0.0
+author: Emanuele Micheletti
+description: Scriptable man-in-the-middle proxy to inspect, intercept, replay and rewrite HTTP(S) and WebSocket traffic
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/emanuele-em/proxelar/releases/download/v0.6.1/proxelar-v0.6.1-x86_64-unknown-linux-gnu.tar.gz; s=b5406a55d6bfc2adc34f1ed053d30e056a166fdee2376eeab71540db6a631877 ;;
+      aarch64) a=https://github.com/emanuele-em/proxelar/releases/download/v0.6.1/proxelar-v0.6.1-aarch64-unknown-linux-gnu.tar.gz; s=b0c1635ecd0f2b4640f6eb3831b021d75eac585408ec5aadee5d03a053637825 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 proxelar /usr/local/bin/proxelar &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/proxelar
+  windows:
+    install: winget install -e --id EmanueleMicheletti.Proxelar
+    uninstall: winget uninstall -e --id EmanueleMicheletti.Proxelar
+command: proxelar
+args: ""
+source: https://github.com/emanuele-em/proxelar
+website: https://proxelar.micheletti.io
+documentation: https://github.com/emanuele-em/proxelar#readme
+keywords:
+  - proxy
+  - mitm
+  - http
+  - network
+  - tui
+
+roles: []

@@ -1,0 +1,38 @@
+id: lazyssh
+name: lazyssh
+version: 1.0.0
+author: Adembc
+description: SSH manager that lists, adds and connects to the servers in ~/.ssh/config
+license: Apache-2.0
+platforms:
+  # Not in Debian. lazyssh hands connections to the ssh client, so openssh-client comes
+  # from apt alongside the release binary.
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget openssh-client &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/Adembc/lazyssh/releases/download/v0.3.0/lazyssh_Linux_x86_64.tar.gz; s=3e87196faf748905f98062040d5a0e056de0e0eb0247413b70c2fc03c3928ad9 ;;
+      aarch64) a=https://github.com/Adembc/lazyssh/releases/download/v0.3.0/lazyssh_Linux_arm64.tar.gz; s=d859663160af7d7752ec7bccfa1b6dcff5cb2d2a03cfb1d04b3a1127171f5e35 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 lazyssh /usr/local/bin/lazyssh &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/lazyssh
+  windows:
+    install: winget install -e --id Adembc.Lazyssh
+    uninstall: winget uninstall -e --id Adembc.Lazyssh
+command: lazyssh
+args: ""
+source: https://github.com/Adembc/lazyssh
+website: https://github.com/Adembc/lazyssh
+documentation: https://github.com/Adembc/lazyssh#readme
+screenshot: https://raw.githubusercontent.com/Adembc/lazyssh/07cb2abb1abf65d4036a7574c2b33a1808d5614f/docs/list%20server.png
+keywords:
+  - ssh
+  - servers
+  - network
+  - tui
+
+roles: []

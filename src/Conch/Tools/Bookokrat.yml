@@ -1,0 +1,34 @@
+id: bookokrat
+name: Bookokrat
+version: 1.0.0
+author: bugzmanov
+description: Ebook reader for the terminal that opens EPUB and PDF files
+license: AGPL-3.0
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/bugzmanov/bookokrat/releases/download/v0.3.12/bookokrat-v0.3.12-x86_64-unknown-linux-musl.tar.gz; s=79ee9afb68765d22c54b8dda1fc5d66a14f48b9056eaeb640c93a411c83139d5 ;;
+      aarch64) a=https://github.com/bugzmanov/bookokrat/releases/download/v0.3.12/bookokrat-v0.3.12-aarch64-unknown-linux-gnu.tar.gz; s=114739619aa85051566358fb2fc3c36840d2e77920a80b8d7310b15465089676 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 bookokrat /usr/local/bin/bookokrat &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/bookokrat
+command: bookokrat
+args: "%1?"
+source: https://github.com/bugzmanov/bookokrat
+website: https://bugzmanov.github.io/bookokrat/index.html
+documentation: https://github.com/bugzmanov/bookokrat#readme
+screenshot: https://cdn.terminaltrove.com/m/d02093f6-d0b2-448c-b962-e076599b3eca.png
+keywords:
+  - ebook
+  - epub
+  - pdf
+  - reader
+  - tui
+
+roles: []

@@ -1,0 +1,34 @@
+id: diffnav
+name: diffnav
+version: 1.0.0
+author: Dolev Hadar
+description: Git diff viewer with a file tree, like a GitHub pull request, that renders each file with delta
+license: MIT
+platforms:
+  linux:
+    install: >-
+      sudo apt-get update && sudo apt-get install -y wget git git-delta &&
+      t=$(mktemp -d) && cd "$t" &&
+      case "$(uname -m)" in
+      x86_64) a=https://github.com/dlvhdr/diffnav/releases/download/v0.12.0/diffnav_Linux_x86_64.tar.gz; s=1531569b74863f08dd82379041fbc9c0cf5103893ac5b3ff053453dd048bb807 ;;
+      aarch64) a=https://github.com/dlvhdr/diffnav/releases/download/v0.12.0/diffnav_Linux_arm64.tar.gz; s=5d23e9b5cc8e4d2be0463886d57ac0590c348e24b5611eb54a4bc84685e707c9 ;;
+      *) echo "unsupported architecture $(uname -m)"; exit 1 ;;
+      esac &&
+      wget -q -O pkg "$a" && echo "$s  pkg" | sha256sum -c --quiet &&
+      tar -xzf pkg && sudo install -m 755 diffnav /usr/local/bin/diffnav &&
+      cd / && rm -rf "$t"
+    uninstall: sudo rm -f /usr/local/bin/diffnav
+command: diffnav
+args: "--watch"
+source: https://github.com/dlvhdr/diffnav
+website: https://github.com/dlvhdr/diffnav
+documentation: https://github.com/dlvhdr/diffnav#readme
+screenshot: https://github.com/user-attachments/assets/104e156e-7e9d-4ea5-bea1-399ca71e12a5
+keywords:
+  - git
+  - diff
+  - pager
+  - delta
+  - tui
+
+roles: []
