@@ -21,15 +21,22 @@ namespace Conch.Services.Roles
 
         private readonly Func<string, IEnumerable<IRoleProvider>> _toolProviders;
         private readonly Func<string, string?> _readChoice;
+        private readonly Func<string, string?> _preferredDefault;
 
         /// <param name="toolProviders">Installed apps declaring a given role.</param>
         /// <param name="readChoice">The stored choice for a role, or null when unset.</param>
+        /// <param name="preferredDefault">
+        /// The app id a role should default to on this machine, or null for none. See
+        /// <see cref="ShellRoles.PreferredDefault"/>.
+        /// </param>
         public RoleRegistry(
             Func<string, IEnumerable<IRoleProvider>> toolProviders,
-            Func<string, string?> readChoice)
+            Func<string, string?> readChoice,
+            Func<string, string?>? preferredDefault = null)
         {
             _toolProviders = toolProviders;
             _readChoice = readChoice;
+            _preferredDefault = preferredDefault ?? (_ => null);
         }
 
         /// <summary>
@@ -71,7 +78,13 @@ namespace Conch.Services.Roles
                     .Select(id => _builtIns.First(p => p.Id == id)));
             }
 
-            candidates.AddRange(_toolProviders(role));
+            // The preferred default leads the apps, and the order does the rest: Resolve takes
+            // the first available candidate when nothing is chosen, and Settings shows that same
+            // first available one, so the two cannot disagree about what the default is. A stable
+            // sort, so the other apps keep the catalog's order.
+            var preferred = _preferredDefault(role);
+            candidates.AddRange(_toolProviders(role)
+                .OrderBy(p => string.Equals(p.Id, preferred, StringComparison.OrdinalIgnoreCase) ? 0 : 1));
             return candidates;
         }
 

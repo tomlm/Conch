@@ -116,7 +116,8 @@ namespace Conch.Views
                 role => App.Tools
                     .Where(t => t.IsAvailableHere && t.Roles.Contains(role, StringComparer.OrdinalIgnoreCase))
                     .Select(t => new ToolRoleProvider(t, (tool, values) => Apps.LaunchTool(tool, values))),
-                role => App.Settings.GetRoleChoice(role));
+                role => App.Settings.GetRoleChoice(role),
+                role => ShellRoles.PreferredDefault(role, Host.Current));
 
             registry.RegisterBuiltIn(ShellRoles.AppLauncher, new BuiltInRoleProvider(
                 "builtin.launcher", "App Launcher",

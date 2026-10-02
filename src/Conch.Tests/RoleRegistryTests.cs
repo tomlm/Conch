@@ -40,6 +40,52 @@ public class RoleRegistryTests
             role => choices != null && choices.TryGetValue(role, out var id) ? id : null);
     }
 
+    private static RoleRegistry BuildPreferring(string preferredId, params IRoleProvider[] tools)
+        => new(_ => tools, _ => null, _ => preferredId);
+
+    [Fact]
+    public void ThePreferredDefaultLeadsTheApps()
+    {
+        // vim comes first in the catalog, but nano is what a Debian user expects to land in.
+        var registry = BuildPreferring("gnu.nano",
+            new FakeProvider("vim"), new FakeProvider("gnu.nano"), new FakeProvider("edit.net"));
+
+        Assert.Equal(new[] { "gnu.nano", "vim", "edit.net" },
+            registry.CandidatesFor(ShellRoles.TextEditor).Select(c => c.Id));
+        Assert.Equal("gnu.nano", registry.Resolve(ShellRoles.TextEditor)?.Id);
+    }
+
+    [Fact]
+    public void APreferredDefaultThatIsNotInstalledFallsBackToOneThatIs()
+    {
+        // Edit on a Windows machine that has only nano: open nano, rather than nothing.
+        var registry = BuildPreferring("edit.exe",
+            new FakeProvider("gnu.nano"), new FakeProvider("edit.exe", available: false));
+
+        Assert.Equal("gnu.nano", registry.Resolve(ShellRoles.TextEditor)?.Id);
+    }
+
+    [Fact]
+    public void AStoredChoiceStillWinsOverThePreferredDefault()
+    {
+        var registry = new RoleRegistry(
+            _ => new IRoleProvider[] { new FakeProvider("gnu.nano"), new FakeProvider("vim") },
+            _ => "vim",
+            _ => "gnu.nano");
+
+        Assert.Equal("vim", registry.Resolve(ShellRoles.TextEditor)?.Id);
+    }
+
+    [Fact]
+    public void TheBuiltInStillLeadsAheadOfThePreferredApp()
+    {
+        var registry = BuildPreferring("ranger", new FakeProvider("nnn"), new FakeProvider("ranger"));
+        registry.RegisterBuiltIn(ShellRoles.FileExplorer, new FakeProvider("builtin.files", builtIn: true));
+
+        Assert.Equal(new[] { "builtin.files", "ranger", "nnn" },
+            registry.CandidatesFor(ShellRoles.FileExplorer).Select(c => c.Id));
+    }
+
     [Fact]
     public void TheBuiltInLeadsTheList()
     {

@@ -1,3 +1,5 @@
+using Conch.Utilities;
+
 namespace Conch.Services.Roles
 {
     /// <summary>
@@ -41,6 +43,29 @@ namespace Conch.Services.Roles
         /// have no server to reach.
         /// </summary>
         public const string AudioConfig = "audio-config";
+
+        /// <summary>
+        /// The app a role should default to on each OS, when nothing has been chosen.
+        /// </summary>
+        /// <remarks>
+        /// The editor each platform's own users already know. On Windows that is Microsoft's
+        /// Edit -- mouse-driven, like Conch, and MS-DOS Edit's successor. On Linux it is nano:
+        /// Debian installs it by default and points <c>editor</c> at it, so a Conchix user has
+        /// it before installing anything. vim-tiny is also there, and is not a default anybody
+        /// wants to find themselves in.
+        ///
+        /// A preference, not a requirement: when the app is not installed the role falls back
+        /// to whatever is, exactly as before.
+        /// </remarks>
+        private static readonly Dictionary<(string Role, HostOs Os), string> PreferredDefaults = new()
+        {
+            [(TextEditor, HostOs.Windows)] = "edit.exe",
+            [(TextEditor, HostOs.Linux)] = "gnu.nano",
+        };
+
+        /// <summary>The registration id <paramref name="role"/> should default to on <paramref name="os"/>, if any.</summary>
+        public static string? PreferredDefault(string role, HostOs os)
+            => PreferredDefaults.TryGetValue((role, os), out var id) ? id : null;
 
         /// <summary>Every role this build knows, in the order Settings should present them.</summary>
         public static readonly IReadOnlyList<string> All =
