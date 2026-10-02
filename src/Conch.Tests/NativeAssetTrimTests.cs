@@ -1,23 +1,25 @@
-using System.Reflection;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
+using System.Xml.Linq;
 using Xunit;
 
 namespace Conch.Tests;
 
 /// <summary>
-/// Guards the removal of the SkiaSharp and HarfBuzz native assets from the package.
+/// Guards what Conch.csproj trims from the package, and what it must keep.
 /// </summary>
 /// <remarks>
-/// Conch.csproj drops ~232MB of Skia and HarfBuzz natives, taking the tool package from
-/// 191MB to 7.4MB. That is only safe because Consolonia supplies its own
-/// <c>IPlatformRenderInterface</c> — it does manipulate bitmaps, via a pixel buffer rather
-/// than Skia — so the natives are never loaded.
+/// Avalonia drags ~232MB of Skia and HarfBuzz natives for every RID. Conch keeps libSkiaSharp
+/// for the five platforms it runs on, because Program.cs calls UseSkia so Consolonia can decode
+/// app screenshots, and drops everything else. Each half rests on a premise nothing at compile
+/// time enforces:
 ///
-/// Nothing at compile time enforces that. A Consolonia upgrade that started delegating to
-/// Skia would leave the packaged tool throwing DllNotFoundException at runtime, and the app
-/// would look fine until someone displayed an image. These tests assert the premise instead
-/// of the symptom, so the trim fails here rather than in the field.
+/// - HarfBuzz is never loaded because Consolonia replaces Avalonia's text shaper with its own.
+///   A Consolonia upgrade that stopped doing so would throw DllNotFoundException in the field.
+/// - Skia is loaded, so the trim must leave its natives for every platform Conch ships to, or
+///   the app starts and then fails the first time someone opens an app's details.
+///
+/// These assert the premises rather than the symptoms, so a broken trim fails here.
 ///
 /// A runtime test would be the stronger check, but Consolonia's DummyConsole still sets
 /// Console.TreatControlCAsInput in its base constructor, which throws under a test runner
@@ -48,45 +50,81 @@ public class NativeAssetTrimTests
 
     private static string Path(string assembly) => System.IO.Path.Combine(AppContext.BaseDirectory, assembly);
 
-    [Theory]
-    [MemberData(nameof(RenderingAssemblies))]
-    public void AssemblyDoesNotReferenceTrimmedNatives(string assembly)
+    private static IReadOnlyList<string> References(string assembly)
     {
-        Assert.True(File.Exists(Path(assembly)), $"{assembly} is not in the test output");
-
         using var stream = File.OpenRead(Path(assembly));
         using var pe = new PEReader(stream);
         var metadata = pe.GetMetadataReader();
 
-        var offenders = metadata.AssemblyReferences
+        return metadata.AssemblyReferences
             .Select(handle => metadata.GetString(metadata.GetAssemblyReference(handle).Name))
-            .Where(name => name.Contains("Skia", StringComparison.OrdinalIgnoreCase)
-                        || name.Contains("HarfBuzz", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+    }
+
+    // ---------------------------------------------------------------- HarfBuzz: trimmed ----
+
+    [Theory]
+    [MemberData(nameof(RenderingAssemblies))]
+    public void NothingConchDrawsWithReferencesHarfBuzz(string assembly)
+    {
+        Assert.True(File.Exists(Path(assembly)), $"{assembly} is not in the test output");
+
+        var offenders = References(assembly)
+            .Where(name => name.Contains("HarfBuzz", StringComparison.OrdinalIgnoreCase))
             .ToList();
 
         Assert.True(offenders.Count == 0,
-            $"{assembly} now references {string.Join(", ", offenders)}; the native assets trimmed in Conch.csproj are needed again.");
+            $"{assembly} now references {string.Join(", ", offenders)}; the HarfBuzz natives trimmed in Conch.csproj are needed again.");
     }
 
     [Theory]
     [MemberData(nameof(RenderingAssemblies))]
-    public void AssemblyDoesNotNameTrimmedNativesForReflection(string assembly)
+    public void NothingConchDrawsWithNamesHarfBuzzForReflection(string assembly)
     {
-        // An assembly reference is not the only way in: Type.GetType("SkiaSharp...") would
+        // An assembly reference is not the only way in: Type.GetType("HarfBuzzSharp...") would
         // load it without one. Any such call still leaves the name in the metadata strings.
-        var bytes = File.ReadAllBytes(Path(assembly));
-        var text = System.Text.Encoding.ASCII.GetString(bytes);
+        var text = System.Text.Encoding.ASCII.GetString(File.ReadAllBytes(Path(assembly)));
 
-        Assert.DoesNotContain("SkiaSharp", text, StringComparison.Ordinal);
         Assert.DoesNotContain("HarfBuzzSharp", text, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void ConsoloniaImplementsBitmapLoadingItself()
+    public void ConsoloniaShapesTextItself()
     {
-        // The positive half of the argument: Consolonia is not skipping bitmaps, it owns
-        // them. If these members disappear, bitmap work has moved somewhere else and the
-        // reasoning behind the trim needs revisiting.
+        // Why HarfBuzz can go: Consolonia binds its own ITextShaperImpl over Avalonia's.
+        var types = TypeNames("Consolonia.Core.dll");
+
+        Assert.Contains("TextShaper", types);
+    }
+
+    [Fact]
+    public void NoHarfBuzzAssemblyIsLoadedByRunningTheseTests()
+    {
+        var loaded = AppDomain.CurrentDomain.GetAssemblies()
+            .Select(a => a.GetName().Name ?? string.Empty)
+            .Where(n => n.Contains("HarfBuzz", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        Assert.True(loaded.Count == 0, $"HarfBuzz assemblies were loaded: {string.Join(", ", loaded)}");
+    }
+
+    // ------------------------------------------------------------------- Skia: kept ----
+
+    [Fact]
+    public void ConchLoadsSkiaOnPurpose()
+    {
+        // Program.cs calls UseSkia, which is what makes Consolonia's bitmap fallback exist.
+        // If this reference disappears, UseSkia went with it and the kept natives are dead
+        // weight -- or screenshots silently stopped working.
+        Assert.Contains("Avalonia.Skia", References("Conch.dll"));
+    }
+
+    [Fact]
+    public void ConsoloniaHandsBitmapDecodingToItsFallback()
+    {
+        // The other half of why Skia is needed: Consolonia defines the loading members but
+        // delegates PNG/JPEG/GIF to the renderer underneath it. If it ever decodes them itself,
+        // the Skia natives can be trimmed again.
         using var stream = File.OpenRead(Path("Consolonia.Core.dll"));
         using var pe = new PEReader(stream);
         var metadata = pe.GetMetadataReader();
@@ -103,35 +141,35 @@ public class NativeAssetTrimTests
             .ToHashSet(StringComparer.Ordinal);
 
         Assert.Contains("LoadBitmap", members);
-        Assert.Contains("CreateWriteableBitmap", members);
-        Assert.Contains("CreateRenderTargetBitmap", members);
     }
 
-    [Fact]
-    public void ConsoloniaShipsItsOwnBitmapImplementation()
+    [Theory]
+    [InlineData("linux-x64")]
+    [InlineData("linux-arm64")]
+    [InlineData("win-x64")]
+    [InlineData("win-arm64")]
+    [InlineData("osx")]
+    public void TheTrimKeepsSkiaForEveryPlatformConchRunsOn(string rid)
     {
-        using var stream = File.OpenRead(Path("Consolonia.Core.dll"));
+        // Read from the csproj rather than a built package: the test project does not pack,
+        // and the list is the single place the decision is made.
+        var csproj = System.IO.Path.GetFullPath(System.IO.Path.Combine(
+            AppContext.BaseDirectory, "..", "..", "..", "..", "Conch", "Conch.csproj"));
+        Assert.True(File.Exists(csproj), $"cannot find {csproj}");
+
+        var kept = XDocument.Load(csproj).Descendants("KeptSkiaRuntimes").Single().Value;
+
+        Assert.Contains($";{rid};", kept);
+    }
+
+    private static HashSet<string> TypeNames(string assembly)
+    {
+        using var stream = File.OpenRead(Path(assembly));
         using var pe = new PEReader(stream);
         var metadata = pe.GetMetadataReader();
 
-        var types = metadata.TypeDefinitions
+        return metadata.TypeDefinitions
             .Select(h => metadata.GetString(metadata.GetTypeDefinition(h).Name))
             .ToHashSet(StringComparer.Ordinal);
-
-        Assert.Contains("PixelBufferBitmapImpl", types);
-    }
-
-    [Fact]
-    public void NoSkiaAssemblyIsLoadedByRunningTheseTests()
-    {
-        // Cheap runtime backstop: the tests above have exercised Conch's model and utility
-        // code, and nothing has dragged in a rasteriser.
-        var loaded = AppDomain.CurrentDomain.GetAssemblies()
-            .Select(a => a.GetName().Name ?? string.Empty)
-            .Where(n => n.Contains("Skia", StringComparison.OrdinalIgnoreCase)
-                     || n.Contains("HarfBuzz", StringComparison.OrdinalIgnoreCase))
-            .ToList();
-
-        Assert.True(loaded.Count == 0, $"Skia/HarfBuzz assemblies were loaded: {string.Join(", ", loaded)}");
     }
 }

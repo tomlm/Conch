@@ -55,6 +55,28 @@ namespace Conch.ViewModel
         [ObservableProperty]
         private string _website = "about:blank";
 
+        /// <summary>Who makes the app, as the registration says.</summary>
+        [ObservableProperty]
+        private string _author = string.Empty;
+
+        /// <summary>The app's licence, as an SPDX id where the registration gives one.</summary>
+        [ObservableProperty]
+        private string _license = string.Empty;
+
+        /// <summary>
+        /// Link to a picture of the app running, or empty when there is none.
+        /// </summary>
+        /// <remarks>
+        /// A URL rather than a file in the catalog: the catalog is refreshed from GitHub file by
+        /// file, and a picture is worth fetching only when someone opens the app's details.
+        /// </remarks>
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasScreenshot))]
+        private string _screenshot = string.Empty;
+
+        public bool HasScreenshot => Uri.TryCreate(Screenshot, UriKind.Absolute, out var uri)
+            && (uri.Scheme == Uri.UriSchemeHttps || uri.Scheme == Uri.UriSchemeHttp);
+
         public PlatformInstallDefinitions Platforms { get; set; } = new();
 
         /// <summary>

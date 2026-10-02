@@ -59,20 +59,28 @@
        ever supported, plus their Windows debug symbols: 232MB of native code and
        300MB of .pdb, against 20MB for the rest of the app.
 
-       Conch draws through Consolonia's console renderer. It builds with
-       UseConsolonia(), never UsePlatformDetect(), so the Skia backend is never
-       initialised and these natives are never loaded. Dropping them is what makes
-       the tool package a sane download.
-
-       If a future change introduces a real Avalonia rendering path, this target is
-       the first thing to remove. -->
+       Conch draws through Consolonia's console renderer, but loads Skia behind it
+       (UseSkia in Program.cs) for the one thing Consolonia hands on: decoding the
+       screenshots in the app manager. So libSkiaSharp stays for the platforms Conch
+       runs on, and nothing else does:
+         - HarfBuzz: text shaping, which Consolonia replaces with its own TextShaper.
+         - Skia for every other RID (android, ios, wasm, musl, x86, ...).
+         - Native debug symbols.
+       NativeAssetTrimTests guards both halves. -->
+  <PropertyGroup>
+    <KeptSkiaRuntimes>;linux-x64;linux-arm64;win-x64;win-arm64;osx;</KeptSkiaRuntimes>
+  </PropertyGroup>
   <Target Name="TrimUnusedNativeAssets" AfterTargets="ComputeResolvedFilesToPublishList">
     <ItemGroup>
-      <ResolvedFileToPublish
-        Remove="@(ResolvedFileToPublish)"
-        Condition="$([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').StartsWith('runtimes')) AND (
-                   $([System.String]::Copy('%(ResolvedFileToPublish.Filename)').Contains('SkiaSharp')) OR
-                   $([System.String]::Copy('%(ResolvedFileToPublish.Filename)').Contains('HarfBuzz')) )" />
+      <_NativeAsset Include="@(ResolvedFileToPublish)"
+                    Condition="$([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').Replace('\','/').StartsWith('runtimes/'))">
+        <Rid>$([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').Replace('\','/').Split('/')[1])</Rid>
+      </_NativeAsset>
+      <_TrimmedNativeAsset Include="@(_NativeAsset)"
+                           Condition="$([System.String]::Copy('%(Filename)').Contains('HarfBuzz')) OR
+                                      ( $([System.String]::Copy('%(Filename)').Contains('SkiaSharp')) AND
+                                        ( '%(Extension)' == '.pdb' OR !$(KeptSkiaRuntimes.Contains(';%(Rid);')) ) )" />
+      <ResolvedFileToPublish Remove="@(_TrimmedNativeAsset)" />
     </ItemGroup>
   </Target>
 

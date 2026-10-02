@@ -42,7 +42,14 @@ namespace Conch
 
         public static AppBuilder BuildAvaloniaApp()
         {
+            // UseSkia before UseConsolonia, as Consolonia's own gallery does: Consolonia keeps
+            // every drawing operation for itself and hands Skia only what it cannot do, which is
+            // decoding PNG/JPEG/GIF -- an app's screenshot in the app manager. Without it,
+            // loading any such picture raises BitmapsNotSupported. The terminals are not
+            // affected: their Skia path asks the drawing context for a Skia lease, Consolonia's
+            // context has none, and they keep drawing as text.
             return AppBuilder.Configure<App>()
+                .UseSkia()
                 .UseConsolonia()
                 .UseAutoDetectedConsole()
                 .LogToException();

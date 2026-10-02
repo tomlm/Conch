@@ -8,9 +8,9 @@
 				  mc:Ignorable="d" d:DesignWidth="120" d:DesignHeight="40"
 				  x:Class="Conch.Views.AppManagerDialog"
 				  Title="Manage Apps"
-				  WindowState="Maximized"
+				  Width="110" Height="34"
 				  x:DataType="vm:AppManagerViewModel">
-	<Grid Margin="{console:OnPlatform Default='16', Console='1'}" RowDefinitions="Auto,*,Auto">
+	<Grid Margin="{console:OnPlatform Default='16', Console='1'}" RowDefinitions="Auto,*,Auto,Auto">
 		<TextBox Grid.Row="0" x:Name="SearchBox" PlaceholderText="Search apps..." Text="{Binding SearchText}"/>
 		<Grid Grid.Row="1"
 			  ColumnDefinitions="1*,1*" >
@@ -37,10 +37,28 @@
 			<Border Grid.Column="1" BorderBrush="Gray" BorderThickness="1" >
 				<ScrollViewer Grid.Column="1">
 					<StackPanel Orientation="Vertical">
+						<!--
+						The picture first: it is what tells you whether an app is the one you were
+						thinking of, faster than its description does. Height-bounded so a tall
+						screenshot cannot push every detail below the fold. In a console the units
+						are cells; Consolonia draws it as quad pixels (sixel when that lands).
+						-->
+						<Image Source="{Binding ScreenshotImage}"
+							   IsVisible="{Binding HasScreenshotImage}"
+							   Stretch="Uniform"
+							   StretchDirection="DownOnly"
+							   HorizontalAlignment="Center"
+							   MaxHeight="{console:OnPlatform Default='360', Console='18'}"
+							   Margin="{console:OnPlatform Default='0 0 0 8', Console='0 0 0 1'}"/>
+						<TextBlock Text="{Binding ScreenshotStatus}"
+								   IsVisible="{Binding !HasScreenshotImage}"
+								   Foreground="Gray"
+								   HorizontalAlignment="Center"
+								   Margin="{console:OnPlatform Default='0 0 0 8', Console='0 0 0 1'}"/>
 						<Grid x:Name="DetailsContent"
 							  x:DataType="vm:ToolViewModel"
 							  ColumnDefinitions="Auto,*"
-							  RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
+							  RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
 							  DataContext="{Binding SelectedTool}">
 							<TextBlock Grid.Row="0" Grid.Column="0" Text="ID:" FontWeight="Bold" />
 							<TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Id}" TextWrapping="Wrap"/>
@@ -68,17 +86,22 @@
 							<TextBlock Grid.Row="11" Grid.Column="1" Text="{Binding Install}" TextWrapping="Wrap"/>
 							<TextBlock Grid.Row="12" Grid.Column="0" Text="Uninstall:" FontWeight="Bold" />
 							<TextBlock Grid.Row="12" Grid.Column="1" Text="{Binding Uninstall}" TextWrapping="Wrap"/>
+							<TextBlock Grid.Row="13" Grid.Column="0" Text="Author:" FontWeight="Bold" />
+							<TextBlock Grid.Row="13" Grid.Column="1" Text="{Binding Author}" TextWrapping="Wrap"/>
+							<TextBlock Grid.Row="14" Grid.Column="0" Text="License:" FontWeight="Bold" />
+							<TextBlock Grid.Row="14" Grid.Column="1" Text="{Binding License}" TextWrapping="Wrap"/>
 						</Grid>
 					</StackPanel>
 				</ScrollViewer>
 			</Border>
 		</Grid>
-		<StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center"
+		<TextBlock Grid.Row="2" Text="{Binding CheckStatus}" Foreground="Gray" HorizontalAlignment="Center"/>
+		<StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center"
 					Spacing="{console:OnPlatform Default='8',Console='1'}">
 			<Button Content="RUN" Click="OnRun" IsEnabled="{Binding CanRun}"/>
 			<Button Content="INSTALL" Click="OnInstall" IsEnabled="{Binding CanInstall}"/>
 			<Button Content="UNINSTALL" Click="OnUninstall" IsEnabled="{Binding CanUninstall}"/>
-			<Button Content="RECHECK" Click="OnRecheck"/>
+			<Button Content="RECHECK" Click="OnRecheck" IsEnabled="{Binding CanRecheck}"/>
 			<Button Content="CLOSE" Click="OnClose"/>
 		</StackPanel>
 	</Grid>

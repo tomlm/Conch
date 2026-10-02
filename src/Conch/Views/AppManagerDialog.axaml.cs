@@ -41,17 +41,8 @@ public partial class AppManagerDialog : ManagedWindow
         await RecheckAsync();
     }
 
-    private async Task RecheckAsync()
-    {
-        try
-        {
-            await ToolDetector.RefreshAsync(_viewModel.AppViewModel.Tools);
-        }
-        catch (Exception ex)
-        {
-            Log.Error(LogCategory, "Detection sweep failed", ex);
-        }
-    }
+    private Task RecheckAsync()
+        => _viewModel.RecheckAsync(tools => ToolDetector.RefreshAsync(tools));
 
     private async void OnRecheck(object? sender, RoutedEventArgs e) => await RecheckAsync();
 

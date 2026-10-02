@@ -167,6 +167,29 @@ public class RegistrationCatalogTests
         }
     }
 
+    [Theory]
+    [MemberData(nameof(RegistrationFiles))]
+    public void AScreenshotIsAPictureOnTheWeb(string fileName)
+    {
+        // The details pane fetches it as-is. A misspelt key would silently drop the picture,
+        // so the raw file is checked too, not only the parsed value.
+        var tool = Load(fileName);
+        var raw = File.ReadAllText(Path.Combine(ToolsDirectory, fileName));
+
+        if (!raw.Contains("screenshot:", StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        Assert.True(tool.HasScreenshot, $"{fileName}: screenshot '{tool.Screenshot}' is not an http(s) URL");
+        Assert.Equal(Uri.UriSchemeHttps, new Uri(tool.Screenshot).Scheme);
+
+        // SVG and WebP are not decoded into a bitmap here, and are what a README badge or a
+        // logo usually is -- not a screenshot.
+        var path = new Uri(tool.Screenshot).AbsolutePath;
+        Assert.DoesNotMatch(@"\.(svg|webp)$", path.ToLowerInvariant());
+    }
+
     [Fact]
     public void MicrosoftEditIsOnlyOfferedOnWindows()
     {
