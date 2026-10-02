@@ -1,3 +1,4 @@
+using Avalonia.Threading;
 using Conch.Controls;
 using Conch.Utilities;
 using Conch.ViewModel;
@@ -132,6 +133,15 @@ namespace Conch.Services
             }
 
             window.Show(_windows);
+
+            // Activated again once the input that opened it has finished. ManagedWindow activates
+            // itself on Tapped as well as on press, and Avalonia raises Tapped AFTER a button's
+            // Click: so a click on INSTALL showed this window on top, and then the same click's
+            // Tapped reached the app manager and put it back above it. Background priority runs
+            // after the pointer event has been dispatched in full. A no-op when it is already
+            // active, as it is whenever nothing took activation back.
+            Dispatcher.UIThread.Post(window.Activate, DispatcherPriority.Background);
+
             return window;
         }
     }
