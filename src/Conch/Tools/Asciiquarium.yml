@@ -5,13 +5,39 @@ author: Kirk Baucom
 description: ASCII aquarium animation for the terminal
 license: GPL-2.0
 platforms:
+  # Debian packages neither asciiquarium nor the Term::Animation module it runs on, and has
+  # no snap by default. So the install puts the three files in place itself: the script, and
+  # Term::Animation's two pure-Perl modules in /usr/local/lib/site_perl, which Debian's perl
+  # searches whatever its version. Curses, the one compiled dependency, comes from apt. Both
+  # downloads are pinned -- a commit and a CPAN release -- and checked by hash before
+  # anything is written as root.
   linux:
-    install: sudo snap install asciiquarium
-    uninstall: sudo snap remove asciiquarium
+    install: >-
+      sudo apt-get update && sudo apt-get install -y libcurses-perl wget &&
+      t=$(mktemp -d) && cd "$t" &&
+      wget -q https://cpan.metacpan.org/authors/id/K/KB/KBAUCOM/Term-Animation-2.6.tar.gz &&
+      wget -q https://raw.githubusercontent.com/cmatsuoka/asciiquarium/8bdb7d441a36a5a9f64b853317a66f9d4a82f08f/asciiquarium &&
+      printf '%s\n'
+      '7d5c3c2d4f9b657a8b1dce7f5e2cbbe02ada2e97c72f3a0304bf3c99d084b045  Term-Animation-2.6.tar.gz'
+      '34b2613e559618aece477071f89d4120b58692582d5fc9c0c89ab8de62935926  asciiquarium'
+      | sha256sum -c --quiet &&
+      tar -xzf Term-Animation-2.6.tar.gz &&
+      sudo install -D -m 644 Term-Animation-2.6/lib/Term/Animation.pm /usr/local/lib/site_perl/Term/Animation.pm &&
+      sudo install -D -m 644 Term-Animation-2.6/lib/Term/Animation/Entity.pm /usr/local/lib/site_perl/Term/Animation/Entity.pm &&
+      sudo install -m 755 asciiquarium /usr/local/bin/asciiquarium &&
+      cd / && rm -rf "$t"
+    # libcurses-perl stays: other Perl programs use it, and apt owns it.
+    uninstall: >-
+      sudo rm -f /usr/local/bin/asciiquarium
+      /usr/local/lib/site_perl/Term/Animation.pm
+      /usr/local/lib/site_perl/Term/Animation/Entity.pm &&
+      { sudo rmdir /usr/local/lib/site_perl/Term/Animation /usr/local/lib/site_perl/Term 2>/dev/null || true; }
+    # The script alone is not an install: without its modules it dies on the first line.
+    detect: command -v asciiquarium >/dev/null && perl -MTerm::Animation -MCurses -e 1 2>/dev/null
 command: asciiquarium
 args: ""
 source: https://github.com/cmatsuoka/asciiquarium
-website: https://github.com/cmatsuoka/asciiquarium
+website: https://robobunny.com/projects/asciiquarium/html/
 documentation: https://github.com/cmatsuoka/asciiquarium#readme
 keywords:
   - tui
