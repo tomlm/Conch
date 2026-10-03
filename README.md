@@ -58,7 +58,7 @@ roles:
 `Tools → Settings` lists every role and what serves it. Some have an implementation
 built into Conch and that is the default; any of them can be pointed at an installed
 app instead. The roles are `app-launcher`, `file-explorer`, `app-manager`,
-`text-editor`, `system-monitor`, `network-config` and `audio-config`.
+`text-editor`, `system-monitor`, `network-config`, `audio-config` and `display-config`.
 
 Settings stores the choice, not the implementation, so uninstalling the app you chose
 falls back to the built-in rather than leaving the role broken.

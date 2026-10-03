@@ -33,6 +33,7 @@
 				you simply want to change networks.
 				-->
 				<MenuItem Header="_Network" Click="OnShowNetwork"/>
+				<MenuItem Header="_Display" Click="OnShowDisplay"/>
 				<MenuItem Header="_Settings" Click="OnShowSettings"/>
 				<Separator/>
 				<MenuItem Header="_Log" Click="OnShowLog"/>

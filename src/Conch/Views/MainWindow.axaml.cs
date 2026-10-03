@@ -180,6 +180,9 @@ namespace Conch.Views
         private void OnShowNetwork(object? sender, RoutedEventArgs e)
             => OpenRole(ShellRoles.NetworkConfig);
 
+        private void OnShowDisplay(object? sender, RoutedEventArgs e)
+            => OpenRole(ShellRoles.DisplayConfig);
+
         private void OnShowFiles(object? sender, RoutedEventArgs e)
             => OpenRole(ShellRoles.FileExplorer);
 

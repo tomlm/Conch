@@ -237,19 +237,20 @@ public class RegistrationCatalogTests
     }
 
     [Theory]
-    [InlineData(HostOs.Windows, "edit.exe")]
-    [InlineData(HostOs.Linux, "gnu.nano")]
-    public void TheDefaultEditorIsAShippedAppForThatPlatform(HostOs os, string expected)
+    [InlineData(ShellRoles.TextEditor, HostOs.Windows, "edit.exe")]
+    [InlineData(ShellRoles.TextEditor, HostOs.Linux, "gnu.nano")]
+    [InlineData(ShellRoles.DisplayConfig, HostOs.Linux, "conchix.display")]
+    public void EachPreferredDefaultIsAShippedAppForThatRoleAndPlatform(string role, HostOs os, string expected)
     {
-        // A preferred default naming an id the catalog does not ship, or one unavailable on
-        // that OS, would quietly prefer nothing.
-        Assert.Equal(expected, ShellRoles.PreferredDefault(ShellRoles.TextEditor, os));
+        // A preferred default naming an id the catalog does not ship, one that does not declare
+        // the role, or one unavailable on that OS, would quietly prefer nothing.
+        Assert.Equal(expected, ShellRoles.PreferredDefault(role, os));
 
         var tool = Directory.GetFiles(ToolsDirectory, "*.yml")
             .Select(f => Load(Path.GetFileName(f)))
             .Single(t => t.Id == expected);
 
-        Assert.Contains(ShellRoles.TextEditor, tool.Roles);
+        Assert.Contains(role, tool.Roles);
         Assert.True(tool.IsAvailableOn(os, wslAvailable: false));
     }
 

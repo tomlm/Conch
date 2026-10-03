@@ -45,6 +45,15 @@ namespace Conch.Services.Roles
         public const string AudioConfig = "audio-config";
 
         /// <summary>
+        /// Configure the display: on a console, the font and its size, which decide how many
+        /// columns and rows everything gets. No built-in, because where those live depends
+        /// entirely on what is drawing the console -- kmscon's config file on Conchix, a
+        /// terminal emulator's own settings anywhere else -- and Conch knows nothing about
+        /// either. A distribution fills the role with a tool of its own.
+        /// </summary>
+        public const string DisplayConfig = "display-config";
+
+        /// <summary>
         /// The app a role should default to on each OS, when nothing has been chosen.
         /// </summary>
         /// <remarks>
@@ -61,6 +70,10 @@ namespace Conch.Services.Roles
         {
             [(TextEditor, HostOs.Windows)] = "edit.exe",
             [(TextEditor, HostOs.Linux)] = "gnu.nano",
+
+            // Conchix's own tool. Conch does not detect Conchix: everywhere else this app is
+            // simply not installed, so the preference falls through to whatever is.
+            [(DisplayConfig, HostOs.Linux)] = "conchix.display",
         };
 
         /// <summary>The registration id <paramref name="role"/> should default to on <paramref name="os"/>, if any.</summary>
@@ -77,6 +90,7 @@ namespace Conch.Services.Roles
             SystemMonitor,
             NetworkConfig,
             AudioConfig,
+            DisplayConfig,
         ];
 
         private static readonly Dictionary<string, string> Names = new(StringComparer.OrdinalIgnoreCase)
@@ -88,6 +102,7 @@ namespace Conch.Services.Roles
             [SystemMonitor] = "System Monitor",
             [NetworkConfig] = "Network Configuration",
             [AudioConfig] = "Audio Configuration",
+            [DisplayConfig] = "Display Configuration",
         };
 
         /// <summary>True when this build recognises <paramref name="role"/>.</summary>
