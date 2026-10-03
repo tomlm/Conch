@@ -32,13 +32,27 @@ namespace Conch.Services
         }
 
         /// <summary>
-        /// Runs a command line typed by the user.
+        /// Runs a command line typed by the user, keeping the window once it finishes.
         /// </summary>
+        /// <remarks>
+        /// Kept, because what a typed command prints is usually the point of typing it: closed
+        /// on exit, "ls -la" was a window that flashed and took the listing with it. The title
+        /// says it has finished, so it does not pass for a program that is merely idle.
+        /// </remarks>
         public ManagedTerminalWindow LaunchCommandLine(string commandLine)
         {
             var command = ShellCommand.ForCommandLine(commandLine);
             Log.Info(LogCategory, $"Running '{commandLine}' as: {command}");
-            return Open(command, title: command.Process, closeOnExit: true);
+
+            var title = commandLine.Trim();
+            var window = Open(command, title, closeOnExit: false);
+            window.ProcessExited += (s, e) =>
+            {
+                var code = e.ExitCodeKnown ? e.ExitCode : -1;
+                window.Title = code == 0 ? $"{title} - finished" : $"{title} - exited ({code})";
+            };
+
+            return window;
         }
 
         /// <summary>

@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Reflection;
+using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Conch.Services.Roles;
 using Conch.Utilities;
@@ -7,8 +8,8 @@ using Conch.Utilities;
 namespace Conch.ViewModel
 {
     /// <summary>
-    /// Backs the Settings window: which app serves each role, how Conch looks, and what it is
-    /// running on.
+    /// Backs Conch Preferences: which app serves each role, the shell's hotkeys, how Conch
+    /// looks, and what it is running on.
     /// </summary>
     public partial class SettingsViewModel : ObservableObject
     {
@@ -50,9 +51,157 @@ namespace Conch.ViewModel
 
             Themes = new ObservableCollection<string>(ThemeNames);
 
+            Hotkeys = new ObservableCollection<HotkeyBindingViewModel>(
+                Services.Hotkeys.Actions.Select(a => new HotkeyBindingViewModel(a, StartRecording, ClearBinding, ResetBinding)));
+            foreach (var row in Hotkeys)
+            {
+                ShowBinding(row);
+            }
+
             _loading = true;
             SelectedTheme = app.Settings.Theme ?? AppViewModel.DefaultTheme;
+            StatusAsText = app.Settings.StatusAsText;
             _loading = false;
+        }
+
+        #region Keyboard
+
+        public ObservableCollection<HotkeyBindingViewModel> Hotkeys { get; }
+
+        /// <summary>What the Keyboard tab says under the list: the prompt, or why a binding was refused.</summary>
+        [ObservableProperty]
+        private string _keyboardMessage = DefaultKeyboardMessage;
+
+        private const string DefaultKeyboardMessage = "Click a binding, then press the new keys.";
+
+        private HotkeyBindingViewModel? _recording;
+
+        /// <summary>
+        /// Starts taking the next key press as <paramref name="row"/>'s binding.
+        /// </summary>
+        /// <remarks>
+        /// Through <see cref="HotkeyMap.Capture"/>, which the shell's key handler offers every
+        /// press to before anything else: otherwise pressing Alt+F2 to bind it would focus the
+        /// search box instead, and Esc would close this window.
+        /// </remarks>
+        public void StartRecording(HotkeyBindingViewModel row)
+        {
+            StopRecording();
+
+            _recording = row;
+            row.IsRecording = true;
+            row.Keys = "press keys...";
+            KeyboardMessage = $"Press the new keys for {row.Name}. Esc cancels.";
+            _app.Hotkeys.Capture = (key, modifiers) => OnKeyCaptured(row, key, modifiers);
+        }
+
+        /// <summary>Stops recording, keeping the binding as it was. Safe to call when not recording.</summary>
+        /// <remarks>
+        /// Must run when the window closes: a capture left behind would swallow every key press
+        /// the shell gets from then on.
+        /// </remarks>
+        public void StopRecording()
+        {
+            _app.Hotkeys.Capture = null;
+            if (_recording != null)
+            {
+                _recording.IsRecording = false;
+                ShowBinding(_recording);
+                _recording = null;
+            }
+        }
+
+        private void OnKeyCaptured(HotkeyBindingViewModel row, Key key, KeyModifiers modifiers)
+        {
+            if (key == Key.Escape && modifiers == KeyModifiers.None)
+            {
+                StopRecording();
+                KeyboardMessage = DefaultKeyboardMessage;
+                return;
+            }
+
+            // Alt on its own, on the way to Alt+F2: keep waiting.
+            var gesture = Services.Hotkeys.FromKeyPress(key, modifiers);
+            if (gesture == null)
+            {
+                return;
+            }
+
+            StopRecording();
+            Bind(row, gesture);
+        }
+
+        private void Bind(HotkeyBindingViewModel row, KeyGesture gesture)
+        {
+            var text = Services.Hotkeys.Format(gesture);
+
+            if (!Services.Hotkeys.IsBindable(gesture))
+            {
+                KeyboardMessage = $"{text} would stop that key typing. Include Ctrl, Alt or Super.";
+                return;
+            }
+
+            if (Services.Hotkeys.ReservedFor(gesture) is { } meaning)
+            {
+                KeyboardMessage = $"{text} belongs to the window manager: {meaning}.";
+                return;
+            }
+
+            if (_app.Hotkeys.ConflictFor(row.Action.Id, gesture) is { } clash)
+            {
+                KeyboardMessage = $"{text} is already {clash.Name}.";
+                return;
+            }
+
+            _app.Settings.SetHotkey(row.Action.Id, text);
+            ShowBinding(row);
+            KeyboardMessage = DefaultKeyboardMessage;
+        }
+
+        private void ClearBinding(HotkeyBindingViewModel row)
+        {
+            StopRecording();
+
+            // Empty, not removed: removing would bring the default back.
+            _app.Settings.SetHotkey(row.Action.Id, string.Empty);
+            ShowBinding(row);
+            KeyboardMessage = DefaultKeyboardMessage;
+        }
+
+        private void ResetBinding(HotkeyBindingViewModel row)
+        {
+            StopRecording();
+
+            if (Services.Hotkeys.Parse(row.Action.Default) is { } gesture
+                && _app.Hotkeys.ConflictFor(row.Action.Id, gesture) is { } clash)
+            {
+                KeyboardMessage = $"{row.Action.Default} is now {clash.Name}. Change that first.";
+                return;
+            }
+
+            _app.Settings.SetHotkey(row.Action.Id, null);
+            ShowBinding(row);
+            KeyboardMessage = DefaultKeyboardMessage;
+        }
+
+        private void ShowBinding(HotkeyBindingViewModel row)
+        {
+            var gesture = _app.Hotkeys.GestureFor(row.Action.Id);
+            row.Keys = gesture == null ? "(none)" : Services.Hotkeys.Format(gesture);
+        }
+
+        #endregion
+
+        /// <summary>Show the top bar's icons as words, for a console font without them.</summary>
+        [ObservableProperty]
+        private bool _statusAsText;
+
+        partial void OnStatusAsTextChanged(bool value)
+        {
+            if (!_loading)
+            {
+                _app.Settings.StatusAsText = value;
+            }
         }
 
         public ObservableCollection<RoleSettingViewModel> Roles { get; }

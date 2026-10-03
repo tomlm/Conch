@@ -17,6 +17,40 @@ conch
 Runs on Windows, Linux and macOS. On Windows, a registration that only describes a
 Linux build is launched and installed through WSL.
 
+## The top bar
+
+```
+ 🐚  [ Search or run a command ]   nano  [btop]                  ⇅  ♪  ▭  14:32
+```
+
+- **🐚** opens the one menu: Software Manager; Network, Display, Audio and Conch
+  Preferences; the log and About; Logout.
+- **The search box** is where everything starts. Empty, it lists the installed apps;
+  typed into, it finds apps, settings and commands, and offers to run anything else as a
+  command line in a terminal window that stays open once it finishes.
+- **The window list** has a button per open window. Clicking one brings it forward, or
+  minimizes it if it is already in front.
+- **The status area** has one indicator per thing worth fixing from there, each opening
+  its settings. Audio and Display appear only when something on the machine serves them.
+  On a console font without the glyphs, *Preferences → Appearance* shows them as words.
+
+### Hotkeys
+
+| Keys | Does |
+|---|---|
+| Alt+F2 | Search apps and settings |
+| Alt+F1 | Open the Conch menu |
+| Ctrl+Alt+T | New terminal |
+| Ctrl+Alt+E | Files |
+| Ctrl+F10 | Maximize or restore the window |
+| Ctrl+F4 | Close the window |
+| Ctrl+F6, Ctrl+Shift+F6 | Next, previous window |
+
+All but the last two can be changed in *Preferences → Keyboard*; those belong to the
+window manager. The defaults avoid the Windows/Super key, which Windows Terminal and
+desktop environments keep for themselves, and Alt+F4, which closes the terminal itself
+on Windows. Super combinations can still be bound where the terminal passes them through.
+
 ## App registrations
 
 An app is a YAML file. The seed catalog ships with the tool (see
@@ -55,18 +89,19 @@ roles:
   - text-editor
 ```
 
-`Tools → Settings` lists every role and what serves it. Some have an implementation
-built into Conch and that is the default; any of them can be pointed at an installed
-app instead. The roles are `app-launcher`, `file-explorer`, `app-manager`,
-`text-editor`, `system-monitor`, `network-config`, `audio-config` and `display-config`.
+*Preferences → Default Apps* lists every role and what serves it. Some have an
+implementation built into Conch and that is the default; any of them can be pointed at
+an installed app instead. The roles are `file-explorer`, `app-manager`, `text-editor`,
+`system-monitor`, `network-config`, `audio-config` and `display-config`.
 
-Settings stores the choice, not the implementation, so uninstalling the app you chose
+Preferences stores the choice, not the implementation, so uninstalling the app you chose
 falls back to the built-in rather than leaving the role broken.
 
 ## Session
 
 `conch --session` tells Conch it *is* the session rather than one program among many,
-which adds Restart and Shut Down to the System menu. Logging out is always available.
+which adds Restart and Shut Down to the Conch menu. Logout is always there; outside a
+session it is called Exit.
 Conchix sets the flag through `CONCH_ARGS` in `/etc/default/conch`.
 
 ## Building

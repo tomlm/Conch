@@ -42,8 +42,14 @@ namespace Conch.Utilities
         /// <summary>
         /// Directory holding Conch's per-user state (cached catalog, logs).
         /// </summary>
+        /// <remarks>
+        /// Created if missing. On Linux .NET otherwise answers an empty string when
+        /// ~/.local/share does not exist yet -- as on a new account, where Conch is the first
+        /// thing to run -- and every path built from it became relative: the catalog, the log
+        /// and settings landed in ./Conch, wherever the session happened to start.
+        /// </remarks>
         public static string StateDirectory { get; } = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData, Environment.SpecialFolderOption.Create),
             "Conch");
 
         /// <summary>

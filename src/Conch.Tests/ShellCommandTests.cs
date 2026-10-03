@@ -143,6 +143,32 @@ public class ShellCommandTests
     }
 
     [Fact]
+    public void ACommandOnPathFollowedByShellSyntaxStillRunsThroughAShell()
+    {
+        // echo is on PATH on Linux, and on Windows wherever Git is; run directly, the ';' and
+        // what follows were its arguments. Through a shell the line arrives whole.
+        const string typed = "echo hi; sleep 5";
+
+        var command = ShellCommand.ForCommandLine(typed);
+
+        Assert.Equal(typed, command.Args[^1]);
+        Assert.DoesNotContain("echo", Path.GetFileName(command.Process));
+    }
+
+    [Theory]
+    [InlineData("ls -la | less", true)]
+    [InlineData("make && make install", true)]
+    [InlineData("echo $HOME", true)]
+    [InlineData("ls *.txt", true)]
+    [InlineData("grep 'two words' notes", true)]
+    [InlineData("htop", false)]
+    [InlineData("ls -la /var/log", false)]
+    public void ShellSyntaxIsRecognised(string typed, bool expected)
+    {
+        Assert.Equal(expected, ShellCommand.HasShellSyntax(typed));
+    }
+
+    [Fact]
     public void DotnetToolShimIsRunThroughTheInterpreterThatUnderstandsIt()
     {
         // A .NET global tool installs a .cmd shim -- Edit.NET arrives on disk as

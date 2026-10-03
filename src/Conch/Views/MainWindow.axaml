@@ -4,63 +4,118 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:console="https://github.com/jinek/consolonia"
 		xmlns:wm="clr-namespace:Iciclecreek.Avalonia.WindowManager;assembly=Iciclecreek.Avalonia.WindowManager"
+		xmlns:controls="clr-namespace:Conch.Controls"
+		xmlns:vm="clr-namespace:Conch.ViewModel"
 		mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Conch.Views.MainWindow"
 		RequestedThemeVariant="Dark"
 		Title="Conch">
+	<Window.Styles>
+		<Style Selector="Button.window.active">
+			<Setter Property="Background" Value="{DynamicResource ThemeSelectionBackgroundBrush}"/>
+			<Setter Property="Foreground" Value="{DynamicResource ThemeSelectionForegroundBrush}"/>
+		</Style>
+	</Window.Styles>
+
 	<DockPanel>
 		<!--
-		The menu and the status area share the top row: the menu takes what it needs and the
-		status sits hard right. A Grid rather than two docked children so the status cannot be
-		pushed off the edge by a long menu.
+		One row, the three things every desktop has: a place to start things (the Conch menu
+		and the search box), what is open (the window list), and status. On a console every
+		row is the user's, so the bar takes one.
 		-->
-		<Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto">
-		<Menu Grid.Column="0">
-			<MenuItem Header="_Run">
-				<MenuItem Header="_Apps" Click="OnShowLauncher"/>
-				<MenuItem Header="_Files" Click="OnShowFiles"/>
-				<Separator/>
-				<MenuItem Header="_Command" Click="OnCustomTerminal"/>
-				<MenuItem Header="_Terminal" Click="OnNewTerminal"/>
-				<Separator/>
-				<MenuItem Header="E_xit" Click="OnExit"/>
-			</MenuItem>
-			<MenuItem Header="_Tools">
-				<MenuItem Header="_Manage" Click="OnManageApps"/>
-				<!--
-				Also reachable by clicking the network indicator, which is where you look when
-				the network is the problem. Here as well because a menu is where you look when
-				you simply want to change networks.
-				-->
-				<MenuItem Header="_Network" Click="OnShowNetwork"/>
-				<MenuItem Header="_Display" Click="OnShowDisplay"/>
-				<MenuItem Header="_Settings" Click="OnShowSettings"/>
-				<Separator/>
-				<MenuItem Header="_Log" Click="OnShowLog"/>
-			</MenuItem>
-			<MenuItem Header="_System">
-				<!--
-				Restart and Shut Down appear only when Conch was started as the session, so
-				a misclick on a machine that is merely running Conch cannot reboot it. See
-				CommandLineOptions.SessionFlag.
-				-->
-				<MenuItem Header="_Logout" Click="OnLogout"/>
-				<Separator x:Name="PowerSeparator"/>
-				<MenuItem x:Name="RestartItem" Header="_Restart" Click="OnRestart"/>
-				<MenuItem x:Name="ShutDownItem" Header="Shut _Down" Click="OnShutDown"/>
-			</MenuItem>
-		</Menu>
+		<Grid DockPanel.Dock="Top" ColumnDefinitions="Auto,Auto,*,Auto">
 
-			<StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0 0 1 0"
+			<!--
+			Everything that is not an app, behind one icon: the Start button, the Apple menu.
+			Apps are found by searching, so Files and Terminal are not here.
+			-->
+			<Menu Grid.Column="0">
+				<MenuItem x:Name="ConchMenu" ToolTip.Tip="Conch">
+					<!-- Groups: apps, settings, about, session. -->
+					<MenuItem Header="Software _Manager..." Click="OnManageApps"/>
+					<Separator/>
+					<!--
+					Each opens whatever serves the role (Conch's own Network, Conchix Display,
+					pulsemixer) and offers Preferences when nothing does.
+					-->
+					<MenuItem Header="_Network..." Click="OnShowNetwork"/>
+					<MenuItem Header="_Display..." Click="OnShowDisplay"/>
+					<MenuItem Header="A_udio..." Click="OnShowAudio"/>
+					<MenuItem Header="Conch _Preferences..." Click="OnShowSettings"/>
+					<Separator/>
+					<MenuItem Header="Lo_g" Click="OnShowLog"/>
+					<MenuItem Header="_About Conch" Click="OnShowAbout"/>
+					<Separator/>
+					<!--
+					Restart and Shut Down appear only when Conch was started as the session, so
+					a misclick on a machine that is merely running Conch cannot reboot it. See
+					CommandLineOptions.SessionFlag.
+					-->
+					<MenuItem x:Name="LogoutItem" Header="_Logout" Click="OnLogout"/>
+					<MenuItem x:Name="RestartItem" Header="_Restart" Click="OnRestart"/>
+					<MenuItem x:Name="ShutDownItem" Header="Shut _Down" Click="OnShutDown"/>
+				</MenuItem>
+			</Menu>
+
+			<!--
+			The search box: Start-menu search, Spotlight. Empty, it lists the installed apps;
+			typed into, it finds apps, settings and commands, and offers to run anything else
+			as a command line.
+			-->
+			<Panel x:Name="SearchArea" Grid.Column="1" Margin="1 0 1 0" x:DataType="vm:ShellSearchViewModel">
+				<TextBox x:Name="SearchBox"
+						 Width="28"
+						 PlaceholderText="Search or run a command"
+						 Text="{Binding Query, Mode=TwoWay}"/>
+				<Popup x:Name="SearchPopup"
+					   Placement="Bottom"
+					   IsLightDismissEnabled="True"
+					   MaxHeight="16">
+					<console:BorderPanel>
+						<ListBox x:Name="SearchResults"
+								 ItemsSource="{Binding Results}"
+								 SelectedItem="{Binding SelectedResult, Mode=TwoWay}"
+								 Width="48"
+								 Background="{DynamicResource ThemeAlternativeBackgroundBrush}"
+								 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+							<ListBox.ItemTemplate>
+								<DataTemplate x:DataType="vm:SearchItem">
+									<Grid ColumnDefinitions="*,Auto">
+										<TextBlock Grid.Column="0" Text="{Binding Title}"
+												   TextTrimming="CharacterEllipsis"/>
+										<TextBlock Grid.Column="1" Text="{Binding KindLabel}"
+												   Margin="1 0 0 0" Opacity="0.6"/>
+									</Grid>
+								</DataTemplate>
+							</ListBox.ItemTemplate>
+						</ListBox>
+					</console:BorderPanel>
+				</Popup>
+			</Panel>
+
+			<controls:WindowList x:Name="WindowList" Grid.Column="2"/>
+
+			<StackPanel Grid.Column="3" Orientation="Horizontal" Margin="1 0 1 0"
 						Spacing="{console:OnPlatform Default='8',Console='1'}">
 				<!--
-				A button rather than a label: clicking it opens whatever serves network-config,
-				which is the thing you want the moment the indicator says the network is down.
+				One indicator per thing you would want to fix from here, each opening whatever
+				serves its role. Audio and Display appear only when something serves them: an
+				icon that only says "nothing is set up" is clutter, and Conchix has no audio.
 				-->
 				<Button x:Name="NetworkIndicator"
-						Click="OnNetworkClicked"
+						Click="OnShowNetwork"
 						Theme="{DynamicResource ThemeNakedButton}"
 						ToolTip.Tip="Network"/>
+				<Button x:Name="AudioIndicator"
+						Click="OnShowAudio"
+						IsVisible="False"
+						Theme="{DynamicResource ThemeNakedButton}"
+						ToolTip.Tip="Audio"/>
+				<Button x:Name="DisplayIndicator"
+						Click="OnShowDisplay"
+						IsVisible="False"
+						Theme="{DynamicResource ThemeNakedButton}"
+						ToolTip.Tip="Display"/>
 				<TextBlock x:Name="Clock" VerticalAlignment="Center"/>
 			</StackPanel>
 		</Grid>
@@ -68,5 +123,3 @@
 		<wm:WindowsPanel x:Name="Windows" Background="DarkGray"/>
 	</DockPanel>
 </Window>
-
-

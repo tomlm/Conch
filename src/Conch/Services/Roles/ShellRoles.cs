@@ -13,12 +13,12 @@ namespace Conch.Services.Roles
     /// Some roles have an implementation built into Conch, which is the default. Any of them
     /// can be filled instead by a registration declaring the role in its <c>roles:</c> list.
     /// The two are interchangeable by construction: see <see cref="IRoleProvider"/>.
+    ///
+    /// There is no launcher role. Starting things is the top bar's search box, part of the
+    /// shell itself rather than a slot something else could fill.
     /// </remarks>
     public static class ShellRoles
     {
-        /// <summary>Browse and launch installed apps. Built in: the app launcher.</summary>
-        public const string AppLauncher = "app-launcher";
-
         /// <summary>Browse, install and remove apps. Built in: the app manager.</summary>
         public const string AppManager = "app-manager";
 
@@ -83,7 +83,6 @@ namespace Conch.Services.Roles
         /// <summary>Every role this build knows, in the order Settings should present them.</summary>
         public static readonly IReadOnlyList<string> All =
         [
-            AppLauncher,
             FileExplorer,
             AppManager,
             TextEditor,
@@ -95,7 +94,6 @@ namespace Conch.Services.Roles
 
         private static readonly Dictionary<string, string> Names = new(StringComparer.OrdinalIgnoreCase)
         {
-            [AppLauncher] = "App Launcher",
             [AppManager] = "Software Manager",
             [FileExplorer] = "File Explorer",
             [TextEditor] = "Text Editor",

@@ -179,8 +179,10 @@ namespace Conch.Utilities
 
             if (!OperatingSystem.IsWindows())
             {
-                // Anything not on PATH may still be a shell builtin, alias or pipeline.
-                return resolvedPath != null
+                // Anything not on PATH may still be a shell builtin, alias or pipeline -- and
+                // something that is on PATH may still be followed by a pipe or a ';'. Run
+                // directly, "echo hi; sleep 5" was echo printing "hi; sleep 5".
+                return resolvedPath != null && !HasShellSyntax(commandLine)
                     ? new ResolvedCommand(resolvedPath, rest)
                     : ForScript(commandLine.Trim());
             }
@@ -194,6 +196,13 @@ namespace Conch.Utilities
                 return ForScript(commandLine.Trim(), viaWsl: true, HostOs.Windows);
             }
 
+            // A Windows program followed by a pipe or a redirect: cmd.exe is the shell that
+            // gives those their meaning here.
+            if (HasShellSyntax(commandLine))
+            {
+                return ForScript(commandLine.Trim(), viaWsl: false, HostOs.Windows);
+            }
+
             var extension = Path.GetExtension(resolvedPath);
             if (string.Equals(extension, ".exe", StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(extension, ".cmd", StringComparison.OrdinalIgnoreCase) ||
@@ -204,6 +213,16 @@ namespace Conch.Utilities
 
             return ForScript(commandLine.Trim(), viaWsl: true, HostOs.Windows);
         }
+
+        /// <summary>
+        /// True when <paramref name="commandLine"/> uses something only a shell understands:
+        /// pipes, redirects, ';', '&amp;&amp;', variables, globs, quoting.
+        /// </summary>
+        public static bool HasShellSyntax(string commandLine)
+            => commandLine.IndexOfAny(ShellSyntax) >= 0;
+
+        private static readonly char[] ShellSyntax =
+            ['|', '&', ';', '<', '>', '$', '`', '*', '?', '(', ')', '{', '}', '[', ']', '~', '\'', '"', '\\'];
 
         /// <summary>
         /// The interactive shell to open for a plain terminal window.

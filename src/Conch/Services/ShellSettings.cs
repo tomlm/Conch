@@ -45,6 +45,44 @@ namespace Conch.Services
             }
         }
 
+        /// <summary>
+        /// Show the top bar's icons as words, for fonts without the glyphs.
+        /// </summary>
+        public bool StatusAsText
+        {
+            get => _document.StatusAsText;
+            set
+            {
+                _document.StatusAsText = value;
+                Save();
+            }
+        }
+
+        /// <summary>
+        /// The stored binding for a hotkey action: null when never set (the default applies),
+        /// empty when the user cleared it.
+        /// </summary>
+        public string? GetHotkey(string actionId)
+            => _document.Hotkeys.TryGetValue(actionId, out var gesture) ? gesture : null;
+
+        /// <summary>
+        /// Stores a binding. Empty clears the action; null forgets the choice, so the default
+        /// applies again.
+        /// </summary>
+        public void SetHotkey(string actionId, string? gesture)
+        {
+            if (gesture == null)
+            {
+                _document.Hotkeys.Remove(actionId);
+            }
+            else
+            {
+                _document.Hotkeys[actionId] = gesture;
+            }
+
+            Save();
+        }
+
         /// <summary>The provider id chosen for <paramref name="role"/>, or null when unset.</summary>
         public string? GetRoleChoice(string role)
             => _document.Roles.TryGetValue(role, out var id) ? id : null;
@@ -110,6 +148,9 @@ namespace Conch.Services
             return this;
         }
 
+        /// <summary>Raised after any setting changes, so what shows it can catch up.</summary>
+        public event EventHandler? Changed;
+
         private void Save()
         {
             try
@@ -122,6 +163,8 @@ namespace Conch.Services
                 // Losing a preference is not worth taking the shell down for.
                 Log.Warning(LogCategory, $"Could not save settings: {ex.Message}");
             }
+
+            Changed?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -135,11 +178,18 @@ namespace Conch.Services
         /// </remarks>
         private sealed class SettingsDocument
         {
-            public int Version { get; set; } = 1;
+            // 2 added status-as-text and hotkeys. Both are additions a version 1 file simply
+            // lacks, so it loads with their defaults and nothing needs migrating.
+            public int Version { get; set; } = 2;
 
             public string? Theme { get; set; }
 
             public Dictionary<string, string> Roles { get; set; } =
+                new(StringComparer.OrdinalIgnoreCase);
+
+            public bool StatusAsText { get; set; }
+
+            public Dictionary<string, string> Hotkeys { get; set; } =
                 new(StringComparer.OrdinalIgnoreCase);
         }
     }

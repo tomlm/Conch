@@ -16,6 +16,9 @@ namespace Conch.ViewModel
         /// </summary>
         public ShellSettings Settings { get; init; }
 
+        /// <summary>The shell's key bindings, read from <see cref="Settings"/> as each key is pressed.</summary>
+        public HotkeyMap Hotkeys { get; }
+
         public AppViewModel()
             : this(ShellSettings.Default().Load())
         {
@@ -27,6 +30,7 @@ namespace Conch.ViewModel
         public AppViewModel(ShellSettings settings)
         {
             Settings = settings;
+            Hotkeys = new HotkeyMap(settings.GetHotkey);
             Tools = new ToolsViewModel();
             Theme = settings.Theme ?? DefaultTheme;
         }
