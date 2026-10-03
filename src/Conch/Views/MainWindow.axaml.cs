@@ -168,10 +168,34 @@ namespace Conch.Views
             dialog.Show(Windows);
         }
 
-        private void OnShowSettings(object? sender, RoutedEventArgs e)
+        private async void OnShowSettings(object? sender, RoutedEventArgs e)
         {
+            // Settings shows each role's apps as installed or not, and picks its default from
+            // the installed ones, so they have to have been looked for first.
+            await DetectRoleCandidatesAsync();
             var dialog = new SettingsDialog(App, Roles);
             dialog.Show(Windows);
+        }
+
+        /// <summary>
+        /// Looks for the apps that could serve <paramref name="role"/> (every role when null),
+        /// where nothing has looked for them yet.
+        /// </summary>
+        /// <remarks>
+        /// Detection otherwise runs only when the app launcher or manager opens, so until one of
+        /// them had, every catalog app counted as not installed: Tools &gt; Display said no app
+        /// was set up even with Conchix Display sitting in /usr/bin, and opening a file found no
+        /// text editor. A role's candidates are a handful of probes, not the whole catalog --
+        /// which on Windows means a wsl.exe per Linux app -- and each is looked for once.
+        /// </remarks>
+        private Task DetectRoleCandidatesAsync(string? role = null)
+        {
+            var pending = App.Tools
+                .Where(t => !t.IsDetected && t.IsAvailableHere && t.Roles.Count > 0
+                    && (role == null || t.Roles.Contains(role, StringComparer.OrdinalIgnoreCase)))
+                .ToList();
+
+            return pending.Count == 0 ? Task.CompletedTask : ToolDetector.RefreshAsync(pending);
         }
 
         private void OnNetworkClicked(object? sender, RoutedEventArgs e)
@@ -215,6 +239,10 @@ namespace Conch.Views
         /// </remarks>
         private async void OpenRole(string role, string? argument = null)
         {
+            // Before choosing: an app nobody has looked for yet counts as not installed, and the
+            // role would fall back past it -- or find nothing at all. A no-op once looked for.
+            await DetectRoleCandidatesAsync(role);
+
             if (Roles.TryInvoke(role, argument))
             {
                 return;
@@ -228,6 +256,7 @@ namespace Conch.Views
 
             if (answer == MessageBoxResult.Yes)
             {
+                await DetectRoleCandidatesAsync();
                 new SettingsDialog(App, Roles).Show(Windows);
             }
         }
