@@ -8,6 +8,13 @@ namespace Conch
     {
         private static void Main(string[] args)
         {
+            // Started by our own PATH probe: a ~/.profile that runs conch would otherwise put
+            // a second shell inside the login shell that was only asked for its PATH.
+            if (Environment.GetEnvironmentVariable(LoginEnvironment.ProbeVariable) == "1")
+            {
+                return;
+            }
+
             // Conch draws over stdout, so an unhandled exception trace would be scrambled and
             // then lost with the console. Record it before the process goes down.
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>
@@ -35,6 +42,11 @@ namespace Conch
             {
                 Log.Info("Shell", "Running as the session; shutdown and restart are available.");
             }
+
+            // Before anything is launched or looked for. Where Conch is the login shell nothing
+            // else will ever read /etc/profile.d or ~/.profile, so this is the only way
+            // ~/.dotnet/tools, ~/.local/bin and the like reach anything Conch starts.
+            LoginEnvironment.RefreshPathAsync().GetAwaiter().GetResult();
 
             BuildAvaloniaApp()
                 .StartWithConsoleLifetime(args);

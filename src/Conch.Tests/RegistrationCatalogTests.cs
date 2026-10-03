@@ -220,7 +220,7 @@ public class RegistrationCatalogTests
             .SelectMany(m => m.Groups[1].Value.Split(' ', StringSplitOptions.RemoveEmptyEntries))
             .Where(p => !p.StartsWith('-'));
 
-        Assert.Empty(removed.Where(ProtectedPackages.Contains));
+        Assert.DoesNotContain(removed, ProtectedPackages.Contains);
     }
 
     [Fact]

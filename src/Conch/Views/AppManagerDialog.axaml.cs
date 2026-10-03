@@ -42,8 +42,14 @@ public partial class AppManagerDialog : ManagedWindow
         await RecheckAsync();
     }
 
+    // PATH first: an install done outside Conch -- in a terminal -- may have added a folder
+    // to it, and the probes that follow look commands up on PATH.
     private Task RecheckAsync()
-        => _viewModel.RecheckAsync(tools => ToolDetector.RefreshAsync(tools));
+        => _viewModel.RecheckAsync(async tools =>
+        {
+            await LoginEnvironment.RefreshPathAsync();
+            await ToolDetector.RefreshAsync(tools);
+        });
 
     private async void OnRecheck(object? sender, RoutedEventArgs e) => await RecheckAsync();
 
@@ -165,6 +171,11 @@ public partial class AppManagerDialog : ManagedWindow
             Log.Info(LogCategory, $"{step.Title}: {step.Script}");
 
             var exitCode = await RunStepAsync(apps, step).ConfigureAwait(true);
+
+            // A step can add to PATH -- the .NET SDK brings /etc/profile.d/dotnet.sh, which is
+            // what puts ~/.dotnet/tools there -- and the probe below looks the app up on PATH.
+            // Refreshed first, or a tool that installed cleanly reads as not installed.
+            await LoginEnvironment.RefreshPathAsync().ConfigureAwait(true);
             await ReprobeAsync(step.Tool).ConfigureAwait(true);
 
             if (exitCode != 0)
