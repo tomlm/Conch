@@ -27,15 +27,18 @@ namespace Conch
             // then lost with the console. Record it before the process goes down.
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>
             {
+                // In full -- inner exceptions and stacks. What ends the app is usually a wrapper
+                // ("Exception in input processing loop") around the thing that actually failed,
+                // and its message alone says nothing about where.
                 if (e.ExceptionObject is Exception ex)
                 {
-                    Log.Error("Shell", "Unhandled exception", ex);
+                    Log.Error("Shell", $"Unhandled exception: {ex}");
                 }
             };
 
             TaskScheduler.UnobservedTaskException += (s, e) =>
             {
-                Log.Error("Shell", "Unobserved task exception", e.Exception);
+                Log.Error("Shell", $"Unobserved task exception: {e.Exception}");
                 e.SetObserved();
             };
 

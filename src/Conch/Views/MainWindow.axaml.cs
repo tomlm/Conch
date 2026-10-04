@@ -202,6 +202,7 @@ namespace Conch.Views
                 _returnTo = Windows.ActiveWindow;
             }
 
+            _search.Reload();
             _search.Refresh();
 
             // Consolonia centres a Bottom popup on its target, which would put most of the list
@@ -261,6 +262,7 @@ namespace Conch.Views
 
             if (SearchPopup.IsOpen)
             {
+                _search?.Reload();
                 _search?.Refresh();
             }
 

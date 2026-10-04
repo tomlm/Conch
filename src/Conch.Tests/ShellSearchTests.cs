@@ -138,6 +138,34 @@ public class ShellSearchTests
     }
 
     [Fact]
+    public void TypingDoesNotRereadTheCatalog()
+    {
+        // Building the candidates walks the whole catalog; a keystroke should only compare.
+        var reads = 0;
+        var search = new ShellSearchViewModel(() => Fixed, () => { reads++; return Apps; }, _ => () => { });
+
+        foreach (var query in new[] { "n", "na", "nan", "nano", "" })
+        {
+            search.Query = query;
+        }
+
+        Assert.Equal(1, reads);
+    }
+
+    [Fact]
+    public void ReloadSeesAnAppInstalledSince()
+    {
+        var installed = Apps.ToList();
+        var search = new ShellSearchViewModel(() => Fixed, () => installed, _ => () => { });
+        Assert.DoesNotContain("htop", Titles(search.Search("htop")));
+
+        installed.Add(Item(SearchItemKind.App, "htop", "Process viewer"));
+        search.Reload();
+
+        Assert.Equal("htop", search.Search("htop").First().Title);
+    }
+
+    [Fact]
     public void ResultsStopAtTheLimit()
     {
         var many = Enumerable.Range(0, 200).Select(i => Item(SearchItemKind.App, $"app{i:000}")).ToArray();

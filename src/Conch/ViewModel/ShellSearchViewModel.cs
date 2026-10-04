@@ -33,6 +33,19 @@ namespace Conch.ViewModel
         Action Invoke)
     {
         /// <summary>The short tag shown beside the title.</summary>
+        private string[]? _titleWords;
+        private string[]? _termWords;
+        private string[]? _detailWords;
+
+        /// <summary>The title split into words, worked out once.</summary>
+        internal string[] TitleWords => _titleWords ??= ShellSearchViewModel.Words(Title);
+
+        /// <summary>The id, command and keywords split into words, worked out once.</summary>
+        internal string[] TermWords => _termWords ??= Terms.SelectMany(ShellSearchViewModel.Words).ToArray();
+
+        /// <summary>The description split into words, worked out once.</summary>
+        internal string[] DetailWords => _detailWords ??= ShellSearchViewModel.Words(Detail);
+
         /// <remarks>Only settings are tagged: nearly everything else is an app, and a tag on
         /// every row is a column of noise.</remarks>
         public string KindLabel => Kind == SearchItemKind.Setting ? "settings" : string.Empty;
@@ -59,8 +72,20 @@ namespace Conch.ViewModel
         private readonly Func<IEnumerable<SearchItem>> _apps;
         private readonly Func<string, Action> _run;
 
+        /// <summary>
+        /// What can be found, in A-to-Z order: taken by <see cref="Reload"/>, not on every
+        /// keystroke.
+        /// </summary>
+        /// <remarks>
+        /// Building it walks the whole catalog and makes an item per installed app, and only
+        /// what is installed can change it -- which happens when detection runs, not while
+        /// someone types. Each item also keeps its words once split, so a keystroke is only
+        /// the comparisons.
+        /// </remarks>
+        private List<SearchItem>? _candidates;
+
         /// <param name="fixedItems">The shell's own entries: built-ins, settings, commands.</param>
-        /// <param name="apps">Installed apps, read fresh on every search.</param>
+        /// <param name="apps">Installed apps, read when <see cref="Reload"/> is called.</param>
         /// <param name="run">What running a typed command line does.</param>
         public ShellSearchViewModel(
             Func<IEnumerable<SearchItem>> fixedItems,
@@ -81,6 +106,17 @@ namespace Conch.ViewModel
         private SearchItem? _selectedResult;
 
         partial void OnQueryChanged(string value) => Refresh();
+
+        /// <summary>
+        /// Takes a fresh look at what can be found. Call when search opens and when what is
+        /// installed may have changed.
+        /// </summary>
+        public void Reload()
+        {
+            _candidates = _fixedItems()
+                .Concat(_apps().OrderBy(a => a.Title, StringComparer.CurrentCultureIgnoreCase))
+                .ToList();
+        }
 
         /// <summary>Recomputes the results for the current query.</summary>
         public void Refresh()
@@ -110,17 +146,20 @@ namespace Conch.ViewModel
         public IReadOnlyList<SearchItem> Search(string? query)
         {
             var text = (query ?? string.Empty).Trim();
-            var apps = _apps().OrderBy(a => a.Title, StringComparer.CurrentCultureIgnoreCase);
+            if (_candidates == null)
+            {
+                Reload();
+            }
 
             if (text.Length == 0)
             {
-                return _fixedItems().Where(i => i.Kind == SearchItemKind.Shell)
-                    .Concat(apps)
+                return _candidates!.Where(i => i.Kind is SearchItemKind.Shell or SearchItemKind.App)
+                    .OrderBy(i => i.Kind == SearchItemKind.App)
                     .Take(MaxResults)
                     .ToList();
             }
 
-            var ranked = _fixedItems().Concat(apps)
+            var ranked = _candidates!
                 .Select(item => (item, rank: Rank(item, text)))
                 .Where(x => x.rank >= 0)
                 .OrderBy(x => x.rank)
@@ -156,7 +195,7 @@ namespace Conch.ViewModel
                 return 0;
             }
 
-            if (Words(item.Title).Any(w => w.StartsWith(query, comparison)))
+            if (item.TitleWords.Any(w => w.StartsWith(query, comparison)))
             {
                 return 1;
             }
@@ -166,7 +205,7 @@ namespace Conch.ViewModel
                 return 2;
             }
 
-            if (item.Terms.SelectMany(Words).Any(w => w.StartsWith(query, comparison)))
+            if (item.TermWords.Any(w => w.StartsWith(query, comparison)))
             {
                 return 3;
             }
@@ -174,7 +213,7 @@ namespace Conch.ViewModel
             // Last, below keywords: a description mentions words in passing. "keyb" should find
             // Preferences, whose keyword is keyboard, before a chat client "driven entirely from
             // the keyboard".
-            if (Words(item.Detail).Any(w => w.StartsWith(query, comparison)))
+            if (item.DetailWords.Any(w => w.StartsWith(query, comparison)))
             {
                 return 4;
             }
@@ -182,7 +221,7 @@ namespace Conch.ViewModel
             return -1;
         }
 
-        private static IEnumerable<string> Words(string text)
+        internal static string[] Words(string text)
             => text.Split([' ', '-', '.', '_', '/', '(', ')', ','], StringSplitOptions.RemoveEmptyEntries);
 
         private static int KindOrder(SearchItemKind kind) => kind switch
