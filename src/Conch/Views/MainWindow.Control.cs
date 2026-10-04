@@ -4,6 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Notifications;
 using Avalonia.Threading;
 using Conch.Controls;
+using Conch.Services;
 using Conch.Services.Control;
 using Conch.Services.Roles;
 using Conch.Utilities;
@@ -128,7 +129,7 @@ namespace Conch.Views
             return true;
         }
 
-        string? IControlShell.Open(string path, string? appId)
+        async Task<string?> IControlShell.Open(string path, string? appId)
         {
             if (appId != null)
             {
@@ -142,9 +143,17 @@ namespace Conch.Views
                 return null;
             }
 
-            if (path.Contains("://", StringComparison.Ordinal))
+            if (FileOpeners.IsLink(path))
             {
-                return "Opening links is not supported yet.";
+                var scheme = FileOpeners.Extension(path);
+                await DetectOpenersAsync(scheme);
+                if (Openers.Choose(path) is { Kind: FileOpenKind.App, Tool: { } browser })
+                {
+                    OpenWithApp(browser, path);
+                    return null;
+                }
+
+                return $"Nothing installed opens {scheme} links. Install a browser such as w3m from Software.";
             }
 
             if (Directory.Exists(path))

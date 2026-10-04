@@ -80,6 +80,13 @@ Each terminal Conch opens is given `CONCH_SOCKET` and `CONCH_WINDOW`; outside Co
 ssh session into Conchix, say) `conch` uses the one Conch you have running. The socket
 sits in a directory only you can read, and nothing listens on the network.
 
+`conch open` takes links too, opened by whatever declares their scheme (`opens: ["https:"]`;
+w3m and Browsh do). On Conchix, `xdg-open` and `start` are `conch open`, so programs that
+open a file or link "in the right app" -- `gh browse`, `git help --web` -- open it in a
+Conch window. With Conch running on Windows, a WSL shell inside it uses `conch.exe`: the
+socket reaches WSL through `WSLENV`, and a Linux process cannot dial a Windows socket
+itself.
+
 ## App registrations
 
 An app is a YAML file. The seed catalog ships with the tool (see

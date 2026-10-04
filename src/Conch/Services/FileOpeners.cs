@@ -51,10 +51,30 @@ namespace Conch.Services
         }
 
         /// <summary>
-        /// The extension a file is opened by: the last one, lower-cased, with its dot -- so
-        /// <c>notes.tar.gz</c> is <c>.gz</c>. Empty for a file with none.
+        /// The type a file or link is opened by. For a file, its last extension, lower-cased,
+        /// with its dot -- so <c>notes.tar.gz</c> is <c>.gz</c>; empty for a file with none. For
+        /// a link, its scheme with the colon: <c>https:</c>.
         /// </summary>
-        public static string Extension(string path) => Path.GetExtension(path).ToLowerInvariant();
+        /// <remarks>
+        /// Links ride on the same machinery so a browser is just an app that opens
+        /// <c>https:</c>, chosen the way a JSON viewer is.
+        /// </remarks>
+        public static string Extension(string path)
+        {
+            if (IsLink(path))
+            {
+                return path[..(path.IndexOf("://", StringComparison.Ordinal) + 1)].ToLowerInvariant();
+            }
+
+            return Path.GetExtension(path).ToLowerInvariant();
+        }
+
+        /// <summary>True for <c>scheme://...</c>.</summary>
+        public static bool IsLink(string path)
+        {
+            var separator = path.IndexOf("://", StringComparison.Ordinal);
+            return separator > 1 && path[..separator].All(c => char.IsAsciiLetterOrDigit(c) || c is '+' or '-' or '.');
+        }
 
         /// <summary>The installed apps that open <paramref name="path"/>'s type, by name.</summary>
         public IReadOnlyList<ToolViewModel> CandidatesFor(string path) => CandidatesForExtension(Extension(path));
@@ -83,7 +103,7 @@ namespace Conch.Services
                 .Where(t => t.IsInstalled && t.IsAvailableHere)
                 .SelectMany(t => t.Opens)
                 .Select(o => o.Trim().ToLowerInvariant())
-                .Where(o => o.StartsWith('.') && o.Length > 1)
+                .Where(o => (o.StartsWith('.') && o.Length > 1) || (o.EndsWith(':') && o.Length > 1))
                 .Distinct()
                 .Order(StringComparer.Ordinal)
                 .Select(e => (e, CandidatesForExtension(e)))
@@ -109,7 +129,8 @@ namespace Conch.Services
                 return new FileOpenChoice(FileOpenKind.App, chosen ?? candidates[0]);
             }
 
-            return _looksLikeText(path)
+            // A link nothing opens has no contents here to judge.
+            return !IsLink(path) && _looksLikeText(path)
                 ? new FileOpenChoice(FileOpenKind.TextEditor)
                 : new FileOpenChoice(FileOpenKind.Ask);
         }

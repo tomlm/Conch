@@ -24,3 +24,5 @@ roles: []
 opens:
   - .html
   - .htm
+  - "https:"
+  - "http:"

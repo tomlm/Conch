@@ -45,8 +45,8 @@ namespace Conch.Services.Control
         /// <summary>Retitles a window; false when there is no such window.</summary>
         bool SetTitle(string windowId, string title);
 
-        /// <summary>Opens a file as Files would, or with <paramref name="appId"/>; the reason when it cannot.</summary>
-        string? Open(string path, string? appId);
+        /// <summary>Opens a file or link as Files would, or with <paramref name="appId"/>; the reason when it cannot.</summary>
+        Task<string?> Open(string path, string? appId);
 
         /// <summary>Runs a command in a new window.</summary>
         Opened Run(IReadOnlyList<string> command, RunOptions options);
@@ -150,7 +150,7 @@ namespace Conch.Services.Control
 
                     foreach (var path in request.Args)
                     {
-                        if (_shell.Open(path, request.With) is { } problem)
+                        if (await _shell.Open(path, request.With) is { } problem)
                         {
                             return ControlResponse.Fail(ControlExit.Failed, problem);
                         }

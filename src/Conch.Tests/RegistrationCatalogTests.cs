@@ -122,10 +122,11 @@ public class RegistrationCatalogTests
     [MemberData(nameof(RegistrationFiles))]
     public void OpenedTypesAreExtensionsWithTheirDot(string fileName)
     {
-        // Matched against Path.GetExtension, which keeps the dot; "md" would never match.
+        // Matched against Path.GetExtension, which keeps the dot -- "md" would never match --
+        // or a link's scheme with its colon, "https:".
         var tool = Load(fileName);
 
-        Assert.All(tool.Opens, o => Assert.Matches(@"^\.[a-z0-9]+$", o));
+        Assert.All(tool.Opens, o => Assert.Matches(@"^(\.[a-z0-9]+|[a-z][a-z0-9+.-]*:)$", o));
     }
 
     [Fact]

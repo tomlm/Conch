@@ -70,7 +70,7 @@ namespace Conch.Cli
                     case "--socket":
                         i++;
                         continue;
-                    case "--json":
+                    case "--json" or "--session":
                         continue;
                     case "--help" or "-h":
                         return true;
@@ -101,6 +101,10 @@ namespace Conch.Cli
                 else if (args[i] == "--json")
                 {
                     json = true;
+                }
+                else if (args[i] == "--session")
+                {
+                    // The shell's own flag, which a wrapper may put in front of everything.
                 }
                 else
                 {

@@ -24,6 +24,7 @@ platforms:
     detect: command -v browsh >/dev/null && command -v firefox-esr >/dev/null
 command: browsh
 args: ""
+openArgs: "--startup-url %1"
 source: https://github.com/browsh-org/browsh
 website: https://www.brow.sh/
 documentation: https://www.brow.sh/docs/introduction/
@@ -35,3 +36,7 @@ keywords:
   - tui
 
 roles: []
+
+opens:
+  - "https:"
+  - "http:"

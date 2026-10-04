@@ -20,13 +20,50 @@ namespace Conch.Services.Control
         /// What to add to the environment of a terminal in <paramref name="window"/>, or null
         /// when there is no socket to point it at.
         /// </summary>
+        /// <remarks>
+        /// On Windows the variables are also named in <c>WSLENV</c>, which is what carries them
+        /// into a WSL shell started in that window -- the socket path translated -- and back out
+        /// to <c>conch.exe</c> run from it. A Linux process cannot reach a Windows socket across
+        /// the WSL VM itself, so from WSL it is conch.exe that makes the call.
+        /// </remarks>
         public static IDictionary<string, string>? EnvironmentFor(object window)
-            => SocketPath == null
-                ? null
-                : new Dictionary<string, string>
+        {
+            if (SocketPath == null)
+            {
+                return null;
+            }
+
+            var environment = new Dictionary<string, string>
+            {
+                [ControlEndpoint.SocketVariable] = SocketPath,
+                [ControlEndpoint.WindowVariable] = Ids.IdOf(window),
+            };
+
+            if (OperatingSystem.IsWindows())
+            {
+                environment["WSLENV"] = WithWslEnv(Environment.GetEnvironmentVariable("WSLENV"));
+            }
+
+            return environment;
+        }
+
+        /// <summary>
+        /// <paramref name="existing"/> WSLENV with Conch's variables added, keeping whatever was
+        /// there: the socket as a path (<c>/p</c>), the window id as it is.
+        /// </summary>
+        public static string WithWslEnv(string? existing)
+        {
+            var entries = (existing ?? string.Empty).Split(':', StringSplitOptions.RemoveEmptyEntries).ToList();
+            foreach (var entry in new[] { ControlEndpoint.SocketVariable + "/p", ControlEndpoint.WindowVariable })
+            {
+                var name = entry.Split('/')[0];
+                if (!entries.Any(e => e.Split('/')[0] == name))
                 {
-                    [ControlEndpoint.SocketVariable] = SocketPath,
-                    [ControlEndpoint.WindowVariable] = Ids.IdOf(window),
-                };
+                    entries.Add(entry);
+                }
+            }
+
+            return string.Join(':', entries);
+        }
     }
 }

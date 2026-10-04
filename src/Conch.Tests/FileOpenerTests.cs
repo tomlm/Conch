@@ -92,7 +92,37 @@ public class FileOpenerTests
         Assert.Equal(FileOpenKind.TextEditor, Openers([Tool("glow", opens: ".md")], text: true).Choose("Makefile").Kind);
     }
 
+    [Fact]
+    public void ALinkIsOpenedByWhatOpensItsScheme()
+    {
+        var choice = Openers([Tool("w3m", opens: ["https:", "http:", ".html"])]).Choose("https://example.com/a.html");
+
+        Assert.Equal("w3m", choice.Tool?.Id);
+    }
+
+    [Fact]
+    public void ALinkNothingOpensIsAskedAboutNeverSniffed()
+    {
+        // There is no file to read; "looks like text" must not be consulted.
+        var openers = new FileOpeners(() => [], _ => null, _ => throw new InvalidOperationException("sniffed a link"));
+
+        Assert.Equal(FileOpenKind.Ask, openers.Choose("https://example.com").Kind);
+    }
+
     [Theory]
+    [InlineData("https://example.com/x", true)]
+    [InlineData("git+ssh://host/repo", true)]
+    [InlineData(@"C:
+otes.md", false)]
+    [InlineData("/home/me/a://b", false)]
+    [InlineData("notes.md", false)]
+    public void LinksAreSchemeColonSlashSlash(string path, bool expected)
+    {
+        Assert.Equal(expected, FileOpeners.IsLink(path));
+    }
+
+    [Theory]
+    [InlineData("HTTPS://Example.com", "https:")]
     [InlineData("archive.tar.gz", ".gz")]
     [InlineData("README", "")]
     [InlineData("/a.b/notes.MD", ".md")]

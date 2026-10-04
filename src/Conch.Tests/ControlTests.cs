@@ -24,6 +24,7 @@ public class ConchCliTests
     [InlineData(new[] { "run", "htop" }, true)]
     [InlineData(new[] { "--json", "windows" }, true)]
     [InlineData(new[] { "--help" }, true)]
+    [InlineData(new[] { "--session", "open", "notes.md" }, true)]
     public void OnlyAVerbMakesItACliCall(string[] args, bool expected)
     {
         // Starting the shell takes flags only; a verb means a script is talking to one.
@@ -132,6 +133,13 @@ public class ConchCliTests
     }
 
     [Fact]
+    public void TheSessionFlagAWrapperAddsIsIgnored()
+    {
+        // Conchix's /usr/bin/conch put CONCH_ARGS (--session) in front of every call.
+        Assert.Equal("open", ConchCli.Parse(["--session", "open", "a.md"], null, Cwd).Request!.Verb);
+    }
+
+    [Fact]
     public void NoVerbIsHelp()
     {
         Assert.True(ConchCli.Parse(["--json"], null, Cwd).Help);
@@ -202,11 +210,11 @@ public class ControlDispatcherTests
 
         public bool SetTitle(string windowId, string title) => List.Any(w => w.Id == windowId);
 
-        public string? Open(string path, string? appId)
+        public Task<string?> Open(string path, string? appId)
         {
-            if (path.EndsWith("missing")) return "No such file";
+            if (path.EndsWith("missing")) return Task.FromResult<string?>("No such file");
             Opened.Add(path);
-            return null;
+            return Task.FromResult<string?>(null);
         }
 
         public Opened Run(IReadOnlyList<string> command, RunOptions options)
@@ -481,6 +489,16 @@ public class ControlDispatcherTests
     public void SizesAreColumnsByRows(string text, bool valid)
     {
         Assert.Equal(valid, ControlDispatcher.TryParseSize(text, out _, out _));
+    }
+
+    [Theory]
+    [InlineData(null, "CONCH_SOCKET/p:CONCH_WINDOW")]
+    [InlineData("", "CONCH_SOCKET/p:CONCH_WINDOW")]
+    [InlineData("USERPROFILE/p", "USERPROFILE/p:CONCH_SOCKET/p:CONCH_WINDOW")]
+    [InlineData("CONCH_SOCKET/up:WT_SESSION", "CONCH_SOCKET/up:WT_SESSION:CONCH_WINDOW")]
+    public void WslenvCarriesConchsVariablesAndKeepsTheRest(string? existing, string expected)
+    {
+        Assert.Equal(expected, ShellControl.WithWslEnv(existing));
     }
 
     [Fact]
