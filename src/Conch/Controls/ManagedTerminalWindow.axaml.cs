@@ -254,6 +254,8 @@ namespace Conch.Controls
                 FontSize = this.FontSize,
                 Foreground = this.Foreground,
                 Background = this.Background,
+                EnvironmentVariables = this.EnvironmentVariables,
+                StartingDirectory = this.StartingDirectory,
             };
 
             // Subscribe to TerminalView attached events bubbling from the inner TerminalView.
@@ -411,12 +413,25 @@ namespace Conch.Controls
         }
 
         /// <summary>
+        /// Variables added to the environment the process inherits, such as where the shell's
+        /// control socket is. Set before the window is shown.
+        /// </summary>
+        public IDictionary<string, string>? EnvironmentVariables { get; set; }
+
+        /// <summary>The directory the process starts in, or null for Conch's own. Set before the window is shown.</summary>
+        public string? StartingDirectory { get; set; }
+
+        /// <summary>
         /// Raised when the hosted process exits, before <see cref="CloseOnProcessExit"/> is honoured.
         /// </summary>
         public event EventHandler<ProcessExitedEventArgs>? ProcessExited;
 
+        /// <summary>The process's exit code once it has ended: -1 when it could not be read.</summary>
+        public int? ExitCode { get; private set; }
+
         private void OnTerminalControlProcessExited(object? sender, ProcessExitedEventArgs e)
         {
+            ExitCode = e.ExitCodeKnown ? e.ExitCode : -1;
             ProcessExited?.Invoke(this, e);
 
             if (CloseOnProcessExit)

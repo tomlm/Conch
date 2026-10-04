@@ -1,5 +1,6 @@
 using Avalonia.Threading;
 using Conch.Controls;
+using Conch.Services.Control;
 using Conch.Utilities;
 using Conch.ViewModel;
 using Iciclecreek.Avalonia.WindowManager;
@@ -155,7 +156,28 @@ namespace Conch.Services
             return window;
         }
 
-        private ManagedTerminalWindow Open(ResolvedCommand command, string? title, bool closeOnExit, int cols = 80, int rows = 25)
+        /// <summary>
+        /// Runs <paramref name="command"/> in a new window, for <c>conch run</c>.
+        /// </summary>
+        /// <param name="keep">Keep the window when the command ends, so its output stays.</param>
+        /// <param name="startIn">The directory to start in: where the script calling it is.</param>
+        public ManagedTerminalWindow Run(ResolvedCommand command, string title, int? cols, int? rows, bool keep, string? startIn)
+        {
+            Log.Info(LogCategory, $"Running for a script: {command}");
+            var window = Open(command, title, closeOnExit: !keep, cols ?? 80, rows ?? 25, startIn);
+            if (keep)
+            {
+                window.ProcessExited += (s, e) =>
+                {
+                    var code = e.ExitCodeKnown ? e.ExitCode : -1;
+                    window.Title = code == 0 ? $"{title} - finished" : $"{title} - exited ({code})";
+                };
+            }
+
+            return window;
+        }
+
+        private ManagedTerminalWindow Open(ResolvedCommand command, string? title, bool closeOnExit, int cols = 80, int rows = 25, string? startIn = null)
         {
             var window = new ManagedTerminalWindow(cols, rows)
             {
@@ -163,7 +185,11 @@ namespace Conch.Services
                 ProcessArgs = command.Args,
                 FontFamily = DefaultFontFamily,
                 CloseOnProcessExit = closeOnExit,
+                StartingDirectory = startIn,
             };
+
+            // So what runs inside can reach this Conch with `conch`, and knows which window it is.
+            window.EnvironmentVariables = ShellControl.EnvironmentFor(window);
 
             if (!string.IsNullOrWhiteSpace(title))
             {

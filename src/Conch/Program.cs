@@ -15,6 +15,14 @@ namespace Conch
                 return;
             }
 
+            // `conch open ...`, `conch run ...`: a script talking to the running shell. Before
+            // logging or Avalonia, so it costs little more than .NET starting up.
+            if (Cli.ConchCli.IsCommand(args))
+            {
+                Environment.ExitCode = Cli.ConchCli.Run(args);
+                return;
+            }
+
             // Conch draws over stdout, so an unhandled exception trace would be scrambled and
             // then lost with the console. Record it before the process goes down.
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>

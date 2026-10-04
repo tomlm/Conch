@@ -80,6 +80,7 @@ namespace Conch.Views
             App.Settings.Changed += (_, _) => ApplySettings();
             ApplySettings();
             CheckRoleIndicatorsAsync();
+            StartControl();
         }
 
         /// <summary>Brings the bar up to date with Preferences: icons or words, which indicators.</summary>

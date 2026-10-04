@@ -51,6 +51,27 @@ more than one binding; the last two belong to the window manager. The defaults a
 desktop environments keep for themselves, and Alt+F4, which closes the terminal itself
 on Windows. Super combinations can still be bound where the terminal passes them through.
 
+## Scripting Conch
+
+The `conch` command, run in a Conch terminal or a script started from one, talks to the
+running shell:
+
+```sh
+conch open report.csv                 # with the app for its type, as Files would
+id=$(conch run --title Logs -- journalctl -f)
+conch run --wait -- make test         # a new window; exits with make's exit code
+conch launch btop                     # a catalog app by id
+conch windows                         # w1  * normal  Logs ...
+conch focus w3; conch title "Build"; conch close   # close: this window
+```
+
+Windows are named by id, `self` (the window you are in, the default) or `active`. Add
+`--json` for output a script can parse. `conch help` lists everything.
+
+Each terminal Conch opens is given `CONCH_SOCKET` and `CONCH_WINDOW`; outside Conch (an
+ssh session into Conchix, say) `conch` uses the one Conch you have running. The socket
+sits in a directory only you can read, and nothing listens on the network.
+
 ## App registrations
 
 An app is a YAML file. The seed catalog ships with the tool (see
