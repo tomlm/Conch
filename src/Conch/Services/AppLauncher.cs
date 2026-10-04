@@ -58,10 +58,11 @@ namespace Conch.Services
         /// <summary>
         /// Launches a registered app, filling its argument template with <paramref name="values"/>.
         /// </summary>
+        /// <param name="template">The argument template to fill instead of the app's own <c>args</c>.</param>
         /// <returns>The new window, or null when the arguments could not be built.</returns>
-        public ManagedTerminalWindow? LaunchTool(ToolViewModel tool, IReadOnlyList<string>? values = null)
+        public ManagedTerminalWindow? LaunchTool(ToolViewModel tool, IReadOnlyList<string>? values = null, string? template = null)
         {
-            if (!ArgumentTemplate.TryBuild(tool.Args, values ?? Array.Empty<string>(), out var args, out var error))
+            if (!ArgumentTemplate.TryBuild(template ?? tool.Args, values ?? Array.Empty<string>(), out var args, out var error))
             {
                 Log.Warning(LogCategory, $"Cannot launch {tool.Id}: {error}");
                 return null;

@@ -108,6 +108,17 @@ namespace Conch.ViewModel
         private ObservableCollection<string> _roles = new ObservableCollection<string>();
 
         /// <summary>
+        /// File extensions this app opens, with the dot: <c>.md</c>, <c>.json</c>.
+        /// </summary>
+        /// <remarks>
+        /// What lets Files open a file with something better than the text editor. Kept as
+        /// written, like <see cref="Roles"/>: matching is case-insensitive and an entry that
+        /// matches nothing simply never applies, so a newer catalog cannot break an older build.
+        /// </remarks>
+        [ObservableProperty]
+        private ObservableCollection<string> _opens = new ObservableCollection<string>();
+
+        /// <summary>
         /// Ids of other registrations that must be installed before this one can be.
         /// </summary>
         /// <remarks>
@@ -255,6 +266,17 @@ namespace Conch.ViewModel
         /// </summary>
         [ObservableProperty]
         private string _args = string.Empty;
+
+        /// <summary>
+        /// The argument template for opening a file, when it differs from <see cref="Args"/>.
+        /// </summary>
+        /// <remarks>
+        /// For an app that does something else with a file than it does on its own: glow,
+        /// given a path, prints the rendered page and exits, closing the window with it, so it
+        /// opens files with <c>-p %1</c> to page them instead.
+        /// </remarks>
+        [ObservableProperty]
+        private string? _openArgs;
 
         /// <summary>
         /// Columns of terminal grid the app wants. 80 unless the registration says otherwise.

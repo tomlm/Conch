@@ -40,6 +40,12 @@
 					 SelectedItem="{Binding Selected}"
 					 DoubleTapped="OnEntryActivated"
 					 KeyDown="OnListKeyDown">
+				<ListBox.ContextMenu>
+					<ContextMenu>
+						<MenuItem Header="_Open" Click="OnOpen"/>
+						<MenuItem Header="Open _with..." Click="OnOpenWith"/>
+					</ContextMenu>
+				</ListBox.ContextMenu>
 				<ListBox.ItemTemplate>
 					<DataTemplate x:DataType="vm:FileEntryViewModel">
 						<!--
@@ -75,6 +81,7 @@
 		<StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center"
 					Spacing="{console:OnPlatform Default='8',Console='1'}">
 			<Button Content="OPEN" Click="OnOpen" IsDefault="True"/>
+			<Button Content="OPEN WITH" Click="OnOpenWith"/>
 			<Button Content="UP" Click="OnUp"/>
 			<Button Content="CLOSE" Click="OnClose" IsCancel="True"/>
 		</StackPanel>

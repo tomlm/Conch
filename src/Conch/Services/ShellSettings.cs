@@ -83,6 +83,30 @@ namespace Conch.Services
             Save();
         }
 
+        /// <summary>The app id chosen to open files with <paramref name="extension"/>, or null.</summary>
+        public string? GetFileTypeChoice(string extension)
+            => _document.FileTypes.TryGetValue(extension.ToLowerInvariant(), out var id) ? id : null;
+
+        /// <summary>Records the app that opens <paramref name="extension"/>; null clears it.</summary>
+        /// <remarks>
+        /// Keys are lower-cased here rather than trusted to the dictionary's comparer, which
+        /// does not survive being read back from JSON.
+        /// </remarks>
+        public void SetFileTypeChoice(string extension, string? appId)
+        {
+            extension = extension.ToLowerInvariant();
+            if (string.IsNullOrEmpty(appId))
+            {
+                _document.FileTypes.Remove(extension);
+            }
+            else
+            {
+                _document.FileTypes[extension] = appId;
+            }
+
+            Save();
+        }
+
         /// <summary>The provider id chosen for <paramref name="role"/>, or null when unset.</summary>
         public string? GetRoleChoice(string role)
             => _document.Roles.TryGetValue(role, out var id) ? id : null;
@@ -178,9 +202,9 @@ namespace Conch.Services
         /// </remarks>
         private sealed class SettingsDocument
         {
-            // 2 added status-as-text and hotkeys. Both are additions a version 1 file simply
-            // lacks, so it loads with their defaults and nothing needs migrating.
-            public int Version { get; set; } = 2;
+            // 2 added status-as-text and hotkeys, 3 file-types. Each is an addition an older
+            // file simply lacks, so it loads with the defaults and nothing needs migrating.
+            public int Version { get; set; } = 3;
 
             public string? Theme { get; set; }
 
@@ -190,6 +214,10 @@ namespace Conch.Services
             public bool StatusAsText { get; set; }
 
             public Dictionary<string, string> Hotkeys { get; set; } =
+                new(StringComparer.OrdinalIgnoreCase);
+
+            /// <summary>Extension, with its dot, to the id of the app that opens it.</summary>
+            public Dictionary<string, string> FileTypes { get; set; } =
                 new(StringComparer.OrdinalIgnoreCase);
         }
     }

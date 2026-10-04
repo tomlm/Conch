@@ -33,3 +33,6 @@ keywords:
   - tui
 
 roles: []
+
+opens:
+  - .json

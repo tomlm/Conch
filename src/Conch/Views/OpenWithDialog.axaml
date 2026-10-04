@@ -1,0 +1,34 @@
+<wm:ManagedWindow xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:console="https://github.com/consolonia"
+        xmlns:wm="using:Iciclecreek.Avalonia.WindowManager"
+        xmlns:vm="clr-namespace:Conch.ViewModel"
+        mc:Ignorable="d" d:DesignWidth="50" d:DesignHeight="16"
+        x:Class="Conch.Views.OpenWithDialog"
+        Title="Open with"
+        Width="50" Height="16"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False">
+	<Grid Margin="{console:OnPlatform Default='16', Console='1'}" RowDefinitions="Auto,*,Auto,Auto">
+		<TextBlock Grid.Row="0" x:Name="PromptText" TextTrimming="CharacterEllipsis"/>
+
+		<ListBox Grid.Row="1" x:Name="ChoicesBox" DoubleTapped="OnChoiceDoubleTapped">
+			<ListBox.ItemTemplate>
+				<DataTemplate x:DataType="vm:OpenWithChoice">
+					<TextBlock Text="{Binding Label}" TextTrimming="CharacterEllipsis"/>
+				</DataTemplate>
+			</ListBox.ItemTemplate>
+		</ListBox>
+
+		<!-- Only for an app that opens the type; the editor and Software are one-offs. -->
+		<CheckBox Grid.Row="2" x:Name="AlwaysBox"/>
+
+		<StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right"
+					Spacing="{console:OnPlatform Default='8',Console='1'}">
+			<Button Content="OPEN" Click="OnOpenClicked" IsDefault="True"/>
+			<Button Content="CANCEL" Click="OnCancelClicked" IsCancel="True"/>
+		</StackPanel>
+	</Grid>
+</wm:ManagedWindow>

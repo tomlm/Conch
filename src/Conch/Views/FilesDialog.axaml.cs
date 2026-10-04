@@ -23,19 +23,21 @@ namespace Conch.Views
     public partial class FilesDialog : ManagedWindow
     {
         private readonly FilesViewModel _viewModel;
-        private readonly Func<string, bool>? _openFile;
+        private readonly Action<string>? _openFile;
+        private readonly Action<string>? _openWith;
 
         /// <param name="startAt">Where to open, or null for the first root.</param>
         /// <param name="openFile">
-        /// Hands a chosen file to whatever serves the text-editor role, returning false when
-        /// nothing does. Injected rather than resolved here so this window does not need to
-        /// know about the registry.
+        /// Opens a chosen file with whatever opens its type. Injected rather than resolved here
+        /// so this window does not need to know about the catalog or the registry.
         /// </param>
-        public FilesDialog(string? startAt = null, Func<string, bool>? openFile = null)
+        /// <param name="openWith">Asks which app to open a file with.</param>
+        public FilesDialog(string? startAt = null, Action<string>? openFile = null, Action<string>? openWith = null)
         {
             InitializeComponent();
 
             _openFile = openFile;
+            _openWith = openWith;
             _viewModel = new FilesViewModel(startAt);
             DataContext = _viewModel;
 
@@ -53,6 +55,14 @@ namespace Conch.Views
         private void OnEntryActivated(object? sender, TappedEventArgs e) => Activate(_viewModel.Selected);
 
         private void OnOpen(object? sender, RoutedEventArgs e) => Activate(_viewModel.Selected);
+
+        private void OnOpenWith(object? sender, RoutedEventArgs e)
+        {
+            if (_viewModel.Selected is { IsDirectory: false } entry)
+            {
+                _openWith?.Invoke(entry.Path);
+            }
+        }
 
         private void OnUp(object? sender, RoutedEventArgs e) => _viewModel.GoUp();
 

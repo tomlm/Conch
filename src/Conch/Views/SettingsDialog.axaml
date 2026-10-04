@@ -21,6 +21,7 @@
 			-->
 			<TabItem Header="Default Apps">
 				<ScrollViewer>
+					<StackPanel>
 					<ItemsControl ItemsSource="{Binding Roles}">
 						<ItemsControl.ItemTemplate>
 							<DataTemplate x:DataType="vm:RoleSettingViewModel">
@@ -50,6 +51,29 @@
 							</DataTemplate>
 						</ItemsControl.ItemTemplate>
 					</ItemsControl>
+
+					<!--
+					File types more than one installed app opens. Open with in Files sets these
+					too, with "Always open ... with this".
+					-->
+					<StackPanel IsVisible="{Binding HasFileTypes}">
+						<TextBlock Text="File types" FontWeight="Bold" Margin="0 0 0 1"/>
+						<ItemsControl ItemsSource="{Binding FileTypes}">
+							<ItemsControl.ItemTemplate>
+								<DataTemplate x:DataType="vm:RoleSettingViewModel">
+									<Grid ColumnDefinitions="22,*" Margin="0 0 0 1">
+										<TextBlock Grid.Column="0" Text="{Binding DisplayName}" VerticalAlignment="Center"/>
+										<ComboBox Grid.Column="1"
+												  ItemsSource="{Binding Choices}"
+												  SelectedItem="{Binding Selected}"
+												  DisplayMemberBinding="{Binding Label}"
+												  HorizontalAlignment="Stretch"/>
+									</Grid>
+								</DataTemplate>
+							</ItemsControl.ItemTemplate>
+						</ItemsControl>
+					</StackPanel>
+					</StackPanel>
 				</ScrollViewer>
 			</TabItem>
 

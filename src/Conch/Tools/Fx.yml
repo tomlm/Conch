@@ -31,3 +31,6 @@ keywords:
   - terminal
 
 roles: []
+
+opens:
+  - .json

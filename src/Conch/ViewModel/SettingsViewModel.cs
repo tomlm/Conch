@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Reflection;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Conch.Services;
 using Conch.Services.Roles;
 using Conch.Utilities;
 
@@ -50,6 +51,18 @@ namespace Conch.ViewModel
                     (r, id) => app.Settings.SetRoleChoice(r, id))));
 
             Themes = new ObservableCollection<string>(ThemeNames);
+
+            // Only where there is a choice to make: a type one app opens has nothing to pick.
+            var openers = new FileOpeners(() => app.Tools, app.Settings.GetFileTypeChoice);
+            FileTypes = new ObservableCollection<RoleSettingViewModel>(
+                openers.KnownExtensions()
+                    .Where(k => k.Candidates.Count > 1)
+                    .Select(k => new RoleSettingViewModel(
+                        k.Extension,
+                        k.Candidates.Select(t => new ToolRoleProvider(t, (_, _) => { })),
+                        app.Settings.GetFileTypeChoice(k.Extension),
+                        (extension, id) => app.Settings.SetFileTypeChoice(extension, id),
+                        displayName: k.Extension)));
 
             Hotkeys = new ObservableCollection<HotkeyBindingViewModel>(
                 Services.Hotkeys.Actions.Select(a => new HotkeyBindingViewModel(a, StartRecording, ClearBinding, ResetBinding)));
@@ -217,6 +230,11 @@ namespace Conch.ViewModel
         public ObservableCollection<RoleSettingViewModel> Roles { get; }
 
         public ObservableCollection<string> Themes { get; }
+
+        /// <summary>File types more than one installed app opens, and which of them does.</summary>
+        public ObservableCollection<RoleSettingViewModel> FileTypes { get; }
+
+        public bool HasFileTypes => FileTypes.Count > 0;
 
         [ObservableProperty]
         private string? _selectedTheme;

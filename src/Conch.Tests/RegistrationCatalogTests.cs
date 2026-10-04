@@ -102,6 +102,32 @@ public class RegistrationCatalogTests
         Assert.DoesNotContain(args, a => a.Contains('%'));
     }
 
+    [Theory]
+    [MemberData(nameof(RegistrationFiles))]
+    public void AnAppThatOpensFilesTakesAPath(string fileName)
+    {
+        // Files hands it one path; a template that cannot take one would open the app
+        // without the file, or fail.
+        var tool = Load(fileName);
+        if (tool.Opens.Count == 0)
+        {
+            return;
+        }
+
+        Assert.True(ArgumentTemplate.TryBuild(tool.OpenArgs ?? tool.Args, new[] { "/tmp/x" }, out var args, out var error), error);
+        Assert.Contains("/tmp/x", args);
+    }
+
+    [Theory]
+    [MemberData(nameof(RegistrationFiles))]
+    public void OpenedTypesAreExtensionsWithTheirDot(string fileName)
+    {
+        // Matched against Path.GetExtension, which keeps the dot; "md" would never match.
+        var tool = Load(fileName);
+
+        Assert.All(tool.Opens, o => Assert.Matches(@"^\.[a-z0-9]+$", o));
+    }
+
     [Fact]
     public void RegistrationIdsAreUnique()
     {

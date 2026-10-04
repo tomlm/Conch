@@ -29,6 +29,7 @@ namespace Conch.Views
 
         private AppLauncher? _launcher;
         private RoleRegistry? _roles;
+        private FileOpeners? _openers;
         private ShellSearchViewModel? _search;
         private ManagedWindow? _returnTo;
         private DateTime _appsCheckedAt = DateTime.MinValue;
@@ -117,7 +118,7 @@ namespace Conch.Views
 
             registry.RegisterBuiltIn(ShellRoles.FileExplorer, new BuiltInRoleProvider(
                 "builtin.files", "Files",
-                path => new FilesDialog(path, OpenInEditor).Show(Windows)));
+                path => new FilesDialog(path, OpenFile, OpenFileWith).Show(Windows)));
 
             // Unavailable where NetworkManager is not, which is everywhere but Linux. The role
             // then falls back to whatever the catalog offers, exactly as it did before there was
@@ -631,9 +632,12 @@ namespace Conch.Views
         /// </remarks>
         private Task DetectRoleCandidatesAsync(string? role = null)
         {
+            // With no role named -- for Preferences -- the apps behind File types too.
             var pending = App.Tools
-                .Where(t => !t.IsDetected && t.IsAvailableHere && t.Roles.Count > 0
-                    && (role == null || t.Roles.Contains(role, StringComparer.OrdinalIgnoreCase)))
+                .Where(t => !t.IsDetected && t.IsAvailableHere
+                    && (role == null
+                        ? t.Roles.Count > 0 || t.Opens.Count > 0
+                        : t.Roles.Contains(role, StringComparer.OrdinalIgnoreCase)))
                 .ToList();
 
             return pending.Count == 0 ? Task.CompletedTask : ToolDetector.RefreshAsync(pending);
@@ -687,6 +691,86 @@ namespace Conch.Views
             {
                 ShowPreferences();
             }
+        }
+
+        #endregion
+
+        #region Files
+
+        /// <summary>What opens each type of file, from the catalog's <c>opens:</c> lists.</summary>
+        private FileOpeners Openers => _openers ??= new FileOpeners(
+            () => App.Tools, extension => App.Settings.GetFileTypeChoice(extension));
+
+        /// <summary>
+        /// Opens a file from Files with whatever opens its type, asking when nothing fits.
+        /// </summary>
+        private async void OpenFile(string path)
+        {
+            await DetectOpenersAsync(FileOpeners.Extension(path));
+
+            var choice = Openers.Choose(path);
+            switch (choice.Kind)
+            {
+                case FileOpenKind.App:
+                    OpenWithApp(choice.Tool!, path);
+                    break;
+
+                case FileOpenKind.TextEditor:
+                    OpenInEditor(path);
+                    break;
+
+                default:
+                    OpenFileWith(path);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Offers every app that opens the file's type, the text editor, and Software for when
+        /// nothing here does.
+        /// </summary>
+        private async void OpenFileWith(string path)
+        {
+            var extension = FileOpeners.Extension(path);
+            await DetectOpenersAsync(extension);
+
+            var choices = Openers.CandidatesFor(path)
+                .Select(tool => new OpenWithChoice(tool.Name, always =>
+                {
+                    if (always)
+                    {
+                        App.Settings.SetFileTypeChoice(extension, tool.Id);
+                    }
+
+                    OpenWithApp(tool, path);
+                }, CanRemember: extension.Length > 0))
+                .Append(new OpenWithChoice("Text editor", _ => OpenInEditor(path), CanRemember: false))
+                .Append(new OpenWithChoice("Find an app in Software...", _ => OpenRole(ShellRoles.AppManager), CanRemember: false))
+                .ToList();
+
+            var dialog = new OpenWithDialog(path, choices);
+            if (await dialog.ShowDialog<bool?>(this) == true && dialog.Chosen is { } chosen)
+            {
+                chosen.Open(dialog.Always);
+            }
+        }
+
+        /// <summary>
+        /// Starts <paramref name="tool"/> on a file, with its <c>openArgs</c> when it has them,
+        /// and the path a WSL app can see.
+        /// </summary>
+        private void OpenWithApp(ToolViewModel tool, string path)
+            => Apps.LaunchTool(tool, [tool.RunsUnderWsl ? WslPath.FromWindows(path) : path], tool.OpenArgs);
+
+        /// <summary>Looks for the apps that open <paramref name="extension"/>, where nothing has yet.</summary>
+        private Task DetectOpenersAsync(string extension)
+        {
+            var pending = App.Tools
+                .Where(t => !t.IsDetected && t.IsAvailableHere
+                    && t.Opens.Any(o => string.Equals(o.Trim(), extension, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
+
+            return pending.Count == 0 ? Task.CompletedTask : ToolDetector.RefreshAsync(pending);
         }
 
         #endregion

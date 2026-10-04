@@ -12,9 +12,11 @@ platforms:
     install: winget install -e --id charmbracelet.glow
     uninstall: winget uninstall -e --id charmbracelet.glow
 # With no argument glow opens its file browser on the current folder; given a file it only
-# prints the rendered text and exits, so no path is passed.
+# prints the rendered text and exits, so no path is passed -- and opening a file from Files
+# pages it with -p instead, which keeps the window until you quit.
 command: glow
 args: ""
+openArgs: "-p %1"
 source: https://github.com/charmbracelet/glow
 website: https://github.com/charmbracelet/glow
 documentation: https://github.com/charmbracelet/glow#readme
@@ -27,3 +29,7 @@ keywords:
   - charm
 
 roles: []
+
+opens:
+  - .md
+  - .markdown

@@ -20,3 +20,9 @@ keywords:
   - csv
   - spreadsheet
   - json
+
+opens:
+  - .csv
+  - .tsv
+  - .xlsx
+  - .sqlite

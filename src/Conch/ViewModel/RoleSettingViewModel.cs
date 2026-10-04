@@ -5,7 +5,9 @@ using Conch.Services.Roles;
 namespace Conch.ViewModel
 {
     /// <summary>
-    /// One row of the Default Apps list: a role, and what the user has chosen to serve it.
+    /// One row of the Default Apps list: a role, and what the user has chosen to serve it. Also
+    /// a file type's row, where the "role" is the extension and the candidates the apps that
+    /// open it.
     /// </summary>
     public partial class RoleSettingViewModel : ObservableObject
     {
@@ -16,10 +18,11 @@ namespace Conch.ViewModel
             string role,
             IEnumerable<IRoleProvider> candidates,
             string? chosenId,
-            Action<string, string?> saveChoice)
+            Action<string, string?> saveChoice,
+            string? displayName = null)
         {
             Role = role;
-            DisplayName = ShellRoles.DisplayName(role);
+            DisplayName = displayName ?? ShellRoles.DisplayName(role);
             _saveChoice = saveChoice;
 
             Choices = new ObservableCollection<RoleChoiceViewModel>(
