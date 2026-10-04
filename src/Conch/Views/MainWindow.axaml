@@ -43,7 +43,6 @@
 					<MenuItem Header="A_udio..." Click="OnShowAudio"/>
 					<MenuItem Header="_Preferences..." Click="OnShowSettings"/>
 					<Separator/>
-					<MenuItem Header="Lo_g" Click="OnShowLog"/>
 					<MenuItem Header="_About Conch" Click="OnShowAbout"/>
 					<Separator/>
 					<!--

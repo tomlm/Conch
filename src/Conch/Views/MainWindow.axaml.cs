@@ -573,8 +573,6 @@ namespace Conch.Views
 
         #region Menu
 
-        private void OnShowLog(object? sender, RoutedEventArgs e) => ShowLog();
-
         private void ShowLog() => new LogDialog().Show(Windows);
 
         private void OnManageApps(object? sender, RoutedEventArgs e)

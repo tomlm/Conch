@@ -24,7 +24,7 @@ Linux build is launched and installed through WSL.
 ```
 
 - **🐚** opens the one menu: Software; Network, Display, Audio and
-  Preferences; the log and About; Logout.
+  Preferences; About; Logout, with Restart and Shut Down when Conch is the session.
 - **The search box** is where everything starts. Empty, it lists the installed apps;
   typed into, it finds apps, settings and commands, and offers to run anything else as a
   command line in a terminal window that stays open once it finishes.
