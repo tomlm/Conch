@@ -23,7 +23,7 @@ Linux build is launched and installed through WSL.
  🐚  [ Search or run a command ]   nano  [btop]                  ⇅  ♪  ▭  14:32
 ```
 
-- **🐚** opens the one menu: Software Manager; Network, Display, Audio and Conch
+- **🐚** opens the one menu: Software; Network, Display, Audio and
   Preferences; the log and About; Logout.
 - **The search box** is where everything starts. Empty, it lists the installed apps;
   typed into, it finds apps, settings and commands, and offers to run anything else as a

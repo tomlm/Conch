@@ -8,7 +8,7 @@
 				  xmlns:controls="clr-namespace:Conch.Controls"
 				  mc:Ignorable="d" d:DesignWidth="120" d:DesignHeight="40"
 				  x:Class="Conch.Views.AppManagerDialog"
-				  Title="Manage Apps"
+				  Title="Software"
 				  Width="110" Height="34"
 				  x:DataType="vm:AppManagerViewModel">
 	<Grid Margin="{console:OnPlatform Default='16', Console='1'}" RowDefinitions="Auto,*,Auto,Auto,Auto">

@@ -7,7 +7,7 @@ using Iciclecreek.Avalonia.WindowManager;
 namespace Conch.Views
 {
     /// <summary>
-    /// Conch Preferences: which app serves each role, the shell's hotkeys, how Conch looks, and
+    /// Preferences: which app serves each role, the shell's hotkeys, how Conch looks, and
     /// what it is running on.
     /// </summary>
     public partial class SettingsDialog : ManagedWindow

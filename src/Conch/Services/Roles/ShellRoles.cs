@@ -94,7 +94,7 @@ namespace Conch.Services.Roles
 
         private static readonly Dictionary<string, string> Names = new(StringComparer.OrdinalIgnoreCase)
         {
-            [AppManager] = "Software Manager",
+            [AppManager] = "Software",
             [FileExplorer] = "File Explorer",
             [TextEditor] = "Text Editor",
             [SystemMonitor] = "System Monitor",

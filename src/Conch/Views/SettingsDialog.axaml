@@ -7,7 +7,7 @@
 				  xmlns:vm="clr-namespace:Conch.ViewModel"
 				  mc:Ignorable="d" d:DesignWidth="76" d:DesignHeight="26"
 				  x:Class="Conch.Views.SettingsDialog"
-				  Title="Conch Preferences"
+				  Title="Preferences"
 				  Width="76" Height="26"
 				  x:DataType="vm:SettingsViewModel">
 

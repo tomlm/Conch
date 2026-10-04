@@ -12,7 +12,7 @@ namespace Conch.ViewModel
         /// <summary>An installed app from the catalog.</summary>
         App,
 
-        /// <summary>A settings page: Network, Display, Conch Preferences.</summary>
+        /// <summary>A settings page: Network, Display, Preferences.</summary>
         Setting,
 
         /// <summary>Something the shell does: Logout, Restart.</summary>

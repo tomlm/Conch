@@ -8,7 +8,7 @@ using Conch.Utilities;
 namespace Conch.ViewModel
 {
     /// <summary>
-    /// Backs Conch Preferences: which app serves each role, the shell's hotkeys, how Conch
+    /// Backs Preferences: which app serves each role, the shell's hotkeys, how Conch
     /// looks, and what it is running on.
     /// </summary>
     public partial class SettingsViewModel : ObservableObject

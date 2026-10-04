@@ -118,7 +118,7 @@ namespace Conch.Views
                 role => ShellRoles.PreferredDefault(role, Host.Current));
 
             registry.RegisterBuiltIn(ShellRoles.AppManager, new BuiltInRoleProvider(
-                "builtin.manager", "Software Manager",
+                "builtin.manager", "Software",
                 _ => new AppManagerDialog(App).Show(Windows)));
 
             registry.RegisterBuiltIn(ShellRoles.FileExplorer, new BuiltInRoleProvider(
@@ -150,7 +150,7 @@ namespace Conch.Views
             yield return new(SearchItemKind.Shell, "Terminal", "A new shell",
                 ["shell", "console", "command prompt", "bash"], () => Apps.LaunchShell());
             yield return new(SearchItemKind.Shell, ShellRoles.DisplayName(ShellRoles.AppManager),
-                "Find, install and remove apps", ["install", "apps", "store", "catalog"],
+                "Find, install and remove apps", ["install", "apps", "store", "catalog", "manager", "app center"],
                 () => OpenRole(ShellRoles.AppManager));
 
             yield return new(SearchItemKind.Setting, "Network settings", "Wi-Fi and connections",
@@ -159,8 +159,8 @@ namespace Conch.Views
                 ["screen", "font", "resolution", "monitor"], () => OpenRole(ShellRoles.DisplayConfig));
             yield return new(SearchItemKind.Setting, "Audio settings", "Volume and devices",
                 ["sound", "volume", "speaker"], () => OpenRole(ShellRoles.AudioConfig));
-            yield return new(SearchItemKind.Setting, "Conch Preferences", "Default apps, keyboard and appearance",
-                ["settings", "hotkeys", "keyboard", "shortcuts", "theme", "default apps"], () => ShowPreferences());
+            yield return new(SearchItemKind.Setting, "Preferences", "Default apps, keyboard and appearance",
+                ["conch", "settings", "hotkeys", "keyboard", "shortcuts", "theme", "default apps"], () => ShowPreferences());
 
             yield return new(SearchItemKind.Command, "Conch log", "What Conch has been doing",
                 ["log", "errors"], ShowLog);
