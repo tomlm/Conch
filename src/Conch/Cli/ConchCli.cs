@@ -24,9 +24,10 @@ namespace Conch.Cli
         {
             "status", "windows", "open", "run", "launch", "wait", "title",
             "focus", "close", "minimize", "maximize", "restore", "help",
+            "move", "tile", "notify", "attention",
         };
 
-        private static readonly string[] WindowVerbs = ["focus", "close", "minimize", "maximize", "restore", "wait"];
+        private static readonly string[] WindowVerbs = ["focus", "close", "minimize", "maximize", "restore", "wait", "move", "attention"];
 
         public const string Usage = """
             Usage: conch [--socket PATH] [--json] <command> [options]
@@ -44,6 +45,10 @@ namespace Conch.Cli
               focus|close|minimize|maximize|restore [WINDOW]
               title [WINDOW] TEXT                rename a window
               wait [WINDOW]                      wait for a window to close; exit with its code
+              move [WINDOW] [--x N] [--y N] [--size 80x24]   place a window, in screen cells
+              tile [WINDOW...] [--grid|--columns|--rows]     arrange windows (default: all shown)
+              notify [--title T] [--type info|success|warning|error] [--seconds N] MESSAGE
+              attention [WINDOW]                 mark a window in the window list until focused
               status                             version, session and socket
 
             Exit codes: 0 ok, 1 failed, 2 usage, 3 Conch not running, 4 no such window.
@@ -111,7 +116,8 @@ namespace Conch.Cli
                 return Fail($"Unknown command {verb}.");
             }
 
-            string? title = null, size = null, with = null;
+            string? title = null, size = null, with = null, layout = null, kind = null;
+            int? x = null, y = null, seconds = null;
             bool wait = false, keep = false, maximize = false;
             var positional = new List<string>();
 
@@ -141,6 +147,38 @@ namespace Conch.Cli
                     case "--wait" when verb is "run" or "launch": wait = true; continue;
                     case "--keep" when verb == "run": keep = true; continue;
                     case "--maximize" when verb == "run": maximize = true; continue;
+                    case "--grid" or "--columns" or "--rows" when verb == "tile":
+                        layout = arg[2..];
+                        continue;
+                    case "--x" or "--y" or "--seconds" when verb is "move" or "notify":
+                    {
+                        if (++i >= args.Count || !int.TryParse(args[i], out var number))
+                        {
+                            return Fail($"{arg} needs a number.");
+                        }
+
+                        switch (arg)
+                        {
+                            case "--x" when verb == "move": x = number; break;
+                            case "--y" when verb == "move": y = number; break;
+                            case "--seconds" when verb == "notify": seconds = number; break;
+                            default: return Fail($"{verb} has no option {arg}.");
+                        }
+
+                        continue;
+                    }
+                    case "--type" when verb == "notify":
+                        if (++i >= args.Count) return Fail("--type needs a value.");
+                        kind = args[i];
+                        continue;
+                    case "--size" when verb == "move":
+                        if (++i >= args.Count) return Fail("--size needs a value, as 80x24.");
+                        size = args[i];
+                        continue;
+                    case "--title" when verb == "notify":
+                        if (++i >= args.Count) return Fail("--title needs a value.");
+                        title = args[i];
+                        continue;
                     case "--title" when verb == "run":
                         if (++i >= args.Count) return Fail("--title needs a value.");
                         title = args[i];
@@ -191,6 +229,10 @@ namespace Conch.Cli
             {
                 return Fail($"{verb} takes no arguments.");
             }
+            else if (verb == "notify" && positional.Count != 1)
+            {
+                return Fail("Usage: conch notify [options] MESSAGE (quote a message with spaces)");
+            }
 
             if (verb == "open")
             {
@@ -213,6 +255,11 @@ namespace Conch.Cli
                 Wait = wait,
                 Keep = keep,
                 Maximize = maximize,
+                X = x,
+                Y = y,
+                Layout = layout,
+                Kind = kind,
+                Seconds = seconds,
             };
 
             return new CliParse(request, socket, json, Help: false, null);

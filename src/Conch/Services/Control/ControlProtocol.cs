@@ -45,6 +45,20 @@ namespace Conch.Services.Control
         public bool Keep { get; init; }
 
         public bool Maximize { get; init; }
+
+        /// <summary>Where to move a window to, in screen cells.</summary>
+        public int? X { get; init; }
+
+        public int? Y { get; init; }
+
+        /// <summary>grid, columns or rows, for <c>tile</c>.</summary>
+        public string? Layout { get; init; }
+
+        /// <summary>info, success, warning or error, for <c>notify</c>.</summary>
+        public string? Kind { get; init; }
+
+        /// <summary>How long a notification stays, for <c>notify</c>.</summary>
+        public int? Seconds { get; init; }
     }
 
     /// <summary>The shell's answer, one line of JSON.</summary>

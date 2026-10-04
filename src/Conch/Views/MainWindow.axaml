@@ -11,6 +11,9 @@
 		RequestedThemeVariant="Dark"
 		Title="Conch">
 	<Window.Styles>
+		<Style Selector="Button.window.attention">
+			<Setter Property="Foreground" Value="{DynamicResource ThemeErrorBrush}"/>
+		</Style>
 		<Style Selector="Button.window.active">
 			<Setter Property="Background" Value="{DynamicResource ThemeSelectionBackgroundBrush}"/>
 			<Setter Property="Foreground" Value="{DynamicResource ThemeSelectionForegroundBrush}"/>

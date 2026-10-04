@@ -1,5 +1,7 @@
 using System.Reflection;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Notifications;
 using Avalonia.Threading;
 using Conch.Controls;
 using Conch.Services.Control;
@@ -15,6 +17,7 @@ namespace Conch.Views
     public partial class MainWindow : IControlShell
     {
         private ControlServer? _control;
+        private WindowNotificationManager? _notifications;
 
         /// <summary>
         /// Starts listening for <c>conch</c> calls, and tells every terminal opened from now on
@@ -26,6 +29,17 @@ namespace Conch.Views
         /// </remarks>
         private void StartControl()
         {
+            // Made now, not on the first notification: the manager joins the window's adorner
+            // layer when its template is applied, and a notification shown before that is lost.
+            _notifications = new WindowNotificationManager(this)
+            {
+                Position = NotificationPosition.TopRight,
+                MaxItems = 3,
+
+                // Below the top bar, not over its clock and indicators.
+                Margin = new Thickness(0, 1, 0, 0),
+            };
+
             var path = ControlEndpoint.PathFor(Environment.ProcessId);
             var dispatcher = new ControlDispatcher(this);
 
@@ -195,6 +209,116 @@ namespace Conch.Views
             window.Closed += (_, _) => closed.TrySetResult(
                 window is ManagedTerminalWindow { ExitCode: { } code } ? Normalise(code) : 0);
             return closed.Task;
+        }
+
+        bool IControlShell.Move(string windowId, int? x, int? y, int? width, int? height)
+        {
+            if (FindWindow(windowId) is not { } window)
+            {
+                return false;
+            }
+
+            Place(window, x, y, width, height);
+            return true;
+        }
+
+        string? IControlShell.Tile(IReadOnlyList<string>? windowIds, TileLayout layout)
+        {
+            List<ManagedWindow> windows;
+            if (windowIds == null)
+            {
+                windows = OpenWindows.Where(w => w.WindowState != WindowState.Minimized).ToList();
+            }
+            else
+            {
+                windows = [];
+                foreach (var id in windowIds)
+                {
+                    if (FindWindow(id) is not { } window)
+                    {
+                        return $"No window {id}.";
+                    }
+
+                    windows.Add(window);
+                }
+            }
+
+            var cells = Tiling.Layout(windows.Count, (int)Windows.Bounds.Width, (int)Windows.Bounds.Height, layout);
+            for (var i = 0; i < cells.Count; i++)
+            {
+                Place(windows[i], cells[i].X, cells[i].Y, cells[i].Width, cells[i].Height);
+            }
+
+            return null;
+        }
+
+        void IControlShell.Notify(string? title, string message, NotifyKind kind, TimeSpan duration, string? fromWindow)
+        {
+            _notifications?.Show(new Notification(
+                title ?? "Conch",
+                message,
+                kind switch
+                {
+                    NotifyKind.Success => NotificationType.Success,
+                    NotifyKind.Warning => NotificationType.Warning,
+                    NotifyKind.Error => NotificationType.Error,
+                    _ => NotificationType.Information,
+                },
+                duration,
+                // Clicking a notification goes to whatever sent it: the build that finished.
+                onClick: () =>
+                {
+                    if (fromWindow != null && FindWindow(fromWindow) is { } window)
+                    {
+                        window.WindowState = window.WindowState == WindowState.Minimized ? WindowState.Normal : window.WindowState;
+                        window.Activate();
+                    }
+                }));
+        }
+
+        bool IControlShell.Attention(string windowId)
+        {
+            if (FindWindow(windowId) is not { } window)
+            {
+                return false;
+            }
+
+            WindowList.SetAttention(window);
+            return true;
+        }
+
+        /// <summary>
+        /// Puts a window at a place and size in screen cells, leaving out what is not given.
+        /// </summary>
+        /// <remarks>
+        /// Restored first, since a maximized window ignores where it is put; and a terminal sizes
+        /// itself to its grid until told otherwise, which would undo a size given here.
+        /// </remarks>
+        private static void Place(ManagedWindow window, int? x, int? y, int? width, int? height)
+        {
+            if (window.WindowState != WindowState.Normal)
+            {
+                window.WindowState = WindowState.Normal;
+            }
+
+            if (width != null || height != null)
+            {
+                window.SizeToContent = SizeToContent.Manual;
+                if (width != null)
+                {
+                    window.Width = width.Value;
+                }
+
+                if (height != null)
+                {
+                    window.Height = height.Value;
+                }
+            }
+
+            if (x != null || y != null)
+            {
+                window.Position = new PixelPoint(x ?? window.Position.X, y ?? window.Position.Y);
+            }
         }
 
         /// <summary>

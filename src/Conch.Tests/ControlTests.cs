@@ -93,6 +93,28 @@ public class ConchCliTests
     }
 
     [Fact]
+    public void TheLayoutAndPlacementVerbsReadTheirOptions()
+    {
+        var move = Request("move", "w3", "--x", "4", "--y", "2", "--size", "80x24");
+        Assert.Equal(("w3", (int?)4, (int?)2, "80x24"), (move.Window, move.X, move.Y, move.Size));
+
+        var tile = Request("tile", "w1", "w2", "--rows");
+        Assert.Equal(new[] { "w1", "w2" }, tile.Args);
+        Assert.Equal("rows", tile.Layout);
+
+        var notify = Request("notify", "--title", "CI", "--type", "error", "--seconds", "10", "Tests failed");
+        Assert.Equal(("CI", "error", (int?)10, "Tests failed"), (notify.Title, notify.Kind, notify.Seconds, notify.Args[0]));
+    }
+
+    [Fact]
+    public void NumbersAreNumbersAndOptionsBelongToTheirVerb()
+    {
+        Assert.Contains("needs a number", Error("move", "--x", "left"));
+        Assert.Contains("no option", Error("notify", "--x", "3", "hi"));
+        Assert.Contains("quote a message", Error("notify", "Build", "done"));
+    }
+
+    [Fact]
     public void NoVerbIsHelp()
     {
         Assert.True(ConchCli.Parse(["--json"], null, Cwd).Help);
@@ -180,6 +202,36 @@ public class ControlDispatcherTests
             => appId == "nano" ? (new Opened("w8", Exit.Task), null) : (null, "No app");
 
         public Task<int>? WhenClosed(string windowId) => List.Any(w => w.Id == windowId) ? Exit.Task : null;
+
+        public (string Id, int? X, int? Y, int? W, int? H)? Moved;
+        public (IReadOnlyList<string>? Ids, TileLayout Layout)? Tiled;
+        public (string? Title, string Message, NotifyKind Kind, TimeSpan Duration, string? From)? Notified;
+        public string? Marked;
+
+        public bool Move(string windowId, int? x, int? y, int? width, int? height)
+        {
+            if (List.All(w => w.Id != windowId)) return false;
+            Moved = (windowId, x, y, width, height);
+            return true;
+        }
+
+        public string? Tile(IReadOnlyList<string>? windowIds, TileLayout layout)
+        {
+            var missing = windowIds?.FirstOrDefault(id => List.All(w => w.Id != id));
+            if (missing != null) return $"No window {missing}.";
+            Tiled = (windowIds, layout);
+            return null;
+        }
+
+        public void Notify(string? title, string message, NotifyKind kind, TimeSpan duration, string? fromWindow)
+            => Notified = (title, message, kind, duration, fromWindow);
+
+        public bool Attention(string windowId)
+        {
+            if (List.All(w => w.Id != windowId)) return false;
+            Marked = windowId;
+            return true;
+        }
     }
 
     private readonly FakeShell _shell = new();
@@ -270,6 +322,68 @@ public class ControlDispatcherTests
         Assert.Equal(ControlExit.Ok, (await pending).Code);
     }
 
+    [Fact]
+    public async Task MoveTakesAPlaceOrASize()
+    {
+        var response = await Handle(new ControlRequest { Verb = "move", Window = "w1", X = 5, Size = "60x20" });
+
+        Assert.Equal(ControlExit.Ok, response.Code);
+        Assert.Equal(("w1", (int?)5, (int?)null, (int?)60, (int?)20), _shell.Moved);
+    }
+
+    [Fact]
+    public async Task MoveWithNothingToDoIsAUsageError()
+    {
+        Assert.Equal(ControlExit.Usage, (await Handle(new ControlRequest { Verb = "move", Window = "w1" })).Code);
+    }
+
+    [Fact]
+    public async Task TileArrangesEverythingByDefaultAsAGrid()
+    {
+        await Handle(new ControlRequest { Verb = "tile" });
+
+        Assert.Null(_shell.Tiled!.Value.Ids);
+        Assert.Equal(TileLayout.Grid, _shell.Tiled.Value.Layout);
+    }
+
+    [Fact]
+    public async Task TileNamesItsWindowsWithSelfAndActiveResolved()
+    {
+        await Handle(new ControlRequest { Verb = "tile", Args = ["self", "active"], Caller = "w1", Layout = "columns" });
+
+        Assert.Equal(new[] { "w1", "w2" }, _shell.Tiled!.Value.Ids);
+        Assert.Equal(TileLayout.Columns, _shell.Tiled.Value.Layout);
+    }
+
+    [Fact]
+    public async Task TilingAWindowThatIsGoneIsSaid()
+    {
+        Assert.Equal(ControlExit.NoSuchWindow, (await Handle(new ControlRequest { Verb = "tile", Args = ["w7"] })).Code);
+    }
+
+    [Fact]
+    public async Task NotifyComesFromTheCallersWindow()
+    {
+        await Handle(new ControlRequest { Verb = "notify", Args = ["Build done"], Kind = "success", Seconds = 9, Caller = "w1" });
+
+        Assert.Equal((null, "Build done", NotifyKind.Success, TimeSpan.FromSeconds(9), "w1"), _shell.Notified);
+    }
+
+    [Fact]
+    public async Task NotifyRefusesAnUnknownTypeAndSilliness()
+    {
+        Assert.Equal(ControlExit.Usage, (await Handle(new ControlRequest { Verb = "notify", Args = ["x"], Kind = "loud" })).Code);
+        Assert.Equal(ControlExit.Usage, (await Handle(new ControlRequest { Verb = "notify", Args = ["x"], Seconds = 0 })).Code);
+    }
+
+    [Fact]
+    public async Task AttentionMarksTheCallersWindowByDefault()
+    {
+        await Handle(new ControlRequest { Verb = "attention", Caller = "w2" });
+
+        Assert.Equal("w2", _shell.Marked);
+    }
+
     [Theory]
     [InlineData("100x30", true)]
     [InlineData("100X30", true)]
@@ -337,5 +451,61 @@ public class ControlSocketTests : IDisposable
         server.Dispose();
 
         Assert.False(File.Exists(path));
+    }
+}
+
+/// <summary>How conch tile divides the desktop.</summary>
+public class TilingTests
+{
+    [Fact]
+    public void TwoWindowsInAGridSitSideBySide()
+    {
+        Assert.Equal(new[] { new Cell(0, 0, 50, 30), new Cell(50, 0, 50, 30) }, Tiling.Layout(2, 100, 30, TileLayout.Grid));
+    }
+
+    [Fact]
+    public void AShortLastRowIsStretchedToFill()
+    {
+        var cells = Tiling.Layout(3, 100, 30, TileLayout.Grid);
+
+        Assert.Equal(new Cell(0, 15, 100, 15), cells[2]);
+    }
+
+    [Fact]
+    public void SpareCellsGoToTheFirstWindowsSoNothingIsUncovered()
+    {
+        var cells = Tiling.Layout(3, 100, 30, TileLayout.Columns);
+
+        Assert.Equal(new[] { 34, 33, 33 }, cells.Select(c => c.Width));
+        Assert.Equal(100, cells[^1].X + cells[^1].Width);
+    }
+
+    [Fact]
+    public void RowsStack()
+    {
+        Assert.Equal(new[] { 0, 10, 20 }, Tiling.Layout(3, 80, 30, TileLayout.Rows).Select(c => c.Y));
+    }
+
+    [Theory]
+    [InlineData(0, 80, 24)]
+    [InlineData(2, 0, 24)]
+    public void NothingToPlaceOrNowhereToPlaceItGivesNothing(int count, int width, int height)
+    {
+        Assert.Empty(Tiling.Layout(count, width, height, TileLayout.Grid));
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(4)]
+    [InlineData(5)]
+    [InlineData(7)]
+    public void EveryLayoutCoversTheDesktopExactly(int count)
+    {
+        foreach (var layout in Enum.GetValues<TileLayout>())
+        {
+            var cells = Tiling.Layout(count, 97, 31, layout);
+            Assert.Equal(count, cells.Count);
+            Assert.Equal(97 * 31, cells.Sum(c => c.Width * c.Height));
+        }
     }
 }

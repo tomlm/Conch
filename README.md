@@ -63,6 +63,10 @@ conch run --wait -- make test         # a new window; exits with make's exit cod
 conch launch btop                     # a catalog app by id
 conch windows                         # w1  * normal  Logs ...
 conch focus w3; conch title "Build"; conch close   # close: this window
+conch tile --columns                  # arrange the windows; or name them: conch tile w1 w3
+conch move --x 0 --y 0 --size 80x24   # place a window, in screen cells
+make; conch notify --type success "Build finished"  # click it to come back here
+conch attention                       # mark this window in the window list until looked at
 ```
 
 Windows are named by id, `self` (the window you are in, the default) or `active`. Add

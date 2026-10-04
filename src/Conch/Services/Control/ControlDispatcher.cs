@@ -10,6 +10,15 @@ namespace Conch.Services.Control
         Restore,
     }
 
+    /// <summary>How a notification looks.</summary>
+    public enum NotifyKind
+    {
+        Info,
+        Success,
+        Warning,
+        Error,
+    }
+
     /// <summary>Options for <c>conch run</c>.</summary>
     public sealed record RunOptions(string? Title, int? Cols, int? Rows, bool Keep, bool Maximize, string? Cwd);
 
@@ -47,6 +56,21 @@ namespace Conch.Services.Control
 
         /// <summary>Completes with the window's exit code when it goes; null when there is no such window.</summary>
         Task<int>? WhenClosed(string windowId);
+
+        /// <summary>Moves and sizes a window, in screen cells; false when there is no such window.</summary>
+        bool Move(string windowId, int? x, int? y, int? width, int? height);
+
+        /// <summary>
+        /// Arranges windows over the desktop: those named, or every one not minimized. The
+        /// reason when one of the named windows does not exist.
+        /// </summary>
+        string? Tile(IReadOnlyList<string>? windowIds, TileLayout layout);
+
+        /// <summary>Shows a notification; clicking it brings <paramref name="fromWindow"/> forward.</summary>
+        void Notify(string? title, string message, NotifyKind kind, TimeSpan duration, string? fromWindow);
+
+        /// <summary>Marks a window as wanting attention until it is focused; false when there is no such window.</summary>
+        bool Attention(string windowId);
     }
 
     /// <summary>
@@ -160,6 +184,85 @@ namespace Conch.Services.Control
                     return opened == null
                         ? ControlResponse.Fail(ControlExit.Failed, problem ?? $"Cannot launch {request.Args[0]}.")
                         : await Finish(opened, request.Wait);
+                }
+
+                case "move":
+                {
+                    var (id, problem) = Target(request);
+                    if (id == null)
+                    {
+                        return ControlResponse.Fail(ControlExit.NoSuchWindow, problem!);
+                    }
+
+                    int? width = null, height = null;
+                    if (request.Size != null)
+                    {
+                        if (!TryParseSize(request.Size, out var w, out var h))
+                        {
+                            return ControlResponse.Fail(ControlExit.Usage, $"Size is width x height, as 80x24, not {request.Size}.");
+                        }
+
+                        (width, height) = (w, h);
+                    }
+
+                    if (request.X == null && request.Y == null && width == null)
+                    {
+                        return ControlResponse.Fail(ControlExit.Usage, "Give --x, --y or --size.");
+                    }
+
+                    return _shell.Move(id, request.X, request.Y, width, height)
+                        ? ControlResponse.Success(id)
+                        : ControlResponse.Fail(ControlExit.NoSuchWindow, $"No window {id}.");
+                }
+
+                case "tile":
+                {
+                    if (!Enum.TryParse<TileLayout>(request.Layout ?? "grid", ignoreCase: true, out var layout))
+                    {
+                        return ControlResponse.Fail(ControlExit.Usage, $"Layout is grid, columns or rows, not {request.Layout}.");
+                    }
+
+                    var ids = request.Args.Count == 0
+                        ? null
+                        : request.Args.Select(a => Target(request with { Window = a }).Id ?? a).ToList();
+                    return _shell.Tile(ids, layout) is { } problem
+                        ? ControlResponse.Fail(ControlExit.NoSuchWindow, problem)
+                        : ControlResponse.Success();
+                }
+
+                case "notify":
+                {
+                    if (request.Args.Count != 1)
+                    {
+                        return ControlResponse.Fail(ControlExit.Usage, "Give the message, quoted.");
+                    }
+
+                    if (!Enum.TryParse<NotifyKind>(request.Kind ?? "info", ignoreCase: true, out var kind))
+                    {
+                        return ControlResponse.Fail(ControlExit.Usage, $"Type is info, success, warning or error, not {request.Kind}.");
+                    }
+
+                    if (request.Seconds is <= 0 or > 3600)
+                    {
+                        return ControlResponse.Fail(ControlExit.Usage, "Seconds is between 1 and 3600.");
+                    }
+
+                    _shell.Notify(request.Title, request.Args[0], kind,
+                        TimeSpan.FromSeconds(request.Seconds ?? 5), request.Caller);
+                    return ControlResponse.Success();
+                }
+
+                case "attention":
+                {
+                    var (id, problem) = Target(request);
+                    if (id == null)
+                    {
+                        return ControlResponse.Fail(ControlExit.NoSuchWindow, problem!);
+                    }
+
+                    return _shell.Attention(id)
+                        ? ControlResponse.Success(id)
+                        : ControlResponse.Fail(ControlExit.NoSuchWindow, $"No window {id}.");
                 }
 
                 case "wait":

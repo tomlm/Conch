@@ -29,6 +29,7 @@ namespace Conch.Controls
 
         private readonly StackPanel _row = new() { Orientation = Orientation.Horizontal, Spacing = Spacing };
         private readonly HashSet<ManagedWindow> _watched = new();
+        private readonly HashSet<ManagedWindow> _attention = new();
         private WindowsPanel? _panel;
         private bool _rebuildPending;
 
@@ -50,6 +51,25 @@ namespace Conch.Controls
             _panel = panel;
             _panel.Windows.CollectionChanged += (_, _) => QueueRebuild();
             Rebuild();
+        }
+
+        /// <summary>
+        /// Marks <paramref name="window"/> as wanting attention -- a long build finished, a
+        /// script needs an answer -- until it is next focused.
+        /// </summary>
+        /// <remarks>
+        /// The taskbar's flashing button. Not for the window already in front, which the user
+        /// is looking at.
+        /// </remarks>
+        public void SetAttention(ManagedWindow window)
+        {
+            if (window.IsActive && window.WindowState != WindowState.Minimized)
+            {
+                return;
+            }
+
+            _attention.Add(window);
+            QueueRebuild();
         }
 
         /// <summary>A window's label: its title, cut to <see cref="MaxTitle"/>.</summary>
@@ -124,7 +144,10 @@ namespace Conch.Controls
             var windows = _panel.Windows.OfType<ManagedWindow>().ToList();
             Watch(windows);
 
-            var labels = windows.Select(w => Label(w.Title)).ToList();
+            // Looked at, or gone: either way no longer waiting.
+            _attention.RemoveWhere(w => !windows.Contains(w) || (w.IsActive && w.WindowState != WindowState.Minimized));
+
+            var labels = windows.Select(w => (_attention.Contains(w) ? "!" : string.Empty) + Label(w.Title)).ToList();
             var overflow = $"+{windows.Count} ▾";
             var shown = Fit(labels.Select(l => l.Length + 2).ToList(), (int)Bounds.Width, overflow.Length);
 
@@ -182,6 +205,11 @@ namespace Conch.Controls
             if (active)
             {
                 button.Classes.Add("active");
+            }
+
+            if (_attention.Contains(window))
+            {
+                button.Classes.Add("attention");
             }
 
             button.Click += (_, _) => Toggle(window);
