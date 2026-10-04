@@ -1,0 +1,23 @@
+<wm:ManagedWindow xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:console="https://github.com/consolonia"
+        xmlns:wm="using:Iciclecreek.Avalonia.WindowManager"
+        mc:Ignorable="d" d:DesignWidth="50" d:DesignHeight="8"
+        x:Class="Conch.Views.ConfirmDialog"
+        Title="Confirm"
+        MaxWidth="70"
+        SizeToContent="WidthAndHeight"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False">
+	<Grid Margin="{console:OnPlatform Default='16', Console='1'}" RowDefinitions="Auto,Auto">
+		<TextBlock Grid.Row="0" x:Name="QuestionText" TextWrapping="Wrap" MinWidth="20" Margin="0 0 0 1"/>
+		<!-- Enter is Yes and Esc is No: the window manager presses the default and cancel buttons. -->
+		<StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right"
+					Spacing="{console:OnPlatform Default='8',Console='1'}">
+			<Button x:Name="YesButton" Content="YES" Click="OnYes" IsDefault="True"/>
+			<Button x:Name="NoButton" Content="NO" Click="OnNo" IsCancel="True"/>
+		</StackPanel>
+	</Grid>
+</wm:ManagedWindow>

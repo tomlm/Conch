@@ -67,6 +67,10 @@ conch tile --columns                  # arrange the windows; or name them: conch
 conch move --x 0 --y 0 --size 80x24   # place a window, in screen cells
 make; conch notify --type success "Build finished"  # click it to come back here
 conch attention                       # mark this window in the window list until looked at
+
+if conch confirm "Deploy to production?"; then ./deploy; fi   # Enter yes, Esc no
+branch=$(conch input --default main "Branch?")                 # exits 1 if cancelled
+file=$(conch pick --start ~/projects)                          # Files as a chooser; --folder
 ```
 
 Windows are named by id, `self` (the window you are in, the default) or `active`. Add

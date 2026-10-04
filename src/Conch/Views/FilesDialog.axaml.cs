@@ -1,3 +1,4 @@
+using Avalonia.Threading;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -26,6 +27,9 @@ namespace Conch.Views
         private readonly Action<string>? _openFile;
         private readonly Action<string>? _openWith;
 
+        /// <summary>Choosing rather than opening: a file, or a folder when true; null when browsing.</summary>
+        private bool? _pickFolder;
+
         /// <param name="startAt">Where to open, or null for the first root.</param>
         /// <param name="openFile">
         /// Opens a chosen file with whatever opens its type. Injected rather than resolved here
@@ -41,7 +45,28 @@ namespace Conch.Views
             _viewModel = new FilesViewModel(startAt);
             DataContext = _viewModel;
 
-            Opened += (_, _) => EntriesBox.Focus();
+            // Posted: the window manager focuses a window's first control as it opens -- here
+            // the drive list, where Down switches drives instead of moving through files.
+            Opened += (_, _) => Dispatcher.UIThread.Post(() =>
+            {
+                EntriesBox.Focus();
+                if (_viewModel.Selected == null && _viewModel.Entries.Count > 0)
+                {
+                    _viewModel.Selected = _viewModel.Entries[0];
+                }
+            }, DispatcherPriority.Background);
+        }
+
+        /// <remarks>
+        /// The drive list starts unfocusable and is made focusable here, after the window
+        /// manager has chosen what to focus. It picks the first focusable control when a window
+        /// loads and goes back to it on every activation -- and first in the layout is the drive
+        /// list, where Down switches drives instead of moving through the files.
+        /// </remarks>
+        protected override void OnLoaded(Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            base.OnLoaded(e);
+            RootsBox.Focusable = true;
         }
 
         private void OnRootChanged(object? sender, SelectionChangedEventArgs e)
@@ -54,7 +79,35 @@ namespace Conch.Views
 
         private void OnEntryActivated(object? sender, TappedEventArgs e) => Activate(_viewModel.Selected);
 
-        private void OnOpen(object? sender, RoutedEventArgs e) => Activate(_viewModel.Selected);
+        /// <summary>
+        /// Files as a chooser, for <c>conch pick</c>: shown as a dialog, it closes with the
+        /// path chosen, or null.
+        /// </summary>
+        public static FilesDialog ForPicking(string? startAt, bool folder)
+        {
+            var dialog = new FilesDialog(startAt)
+            {
+                _pickFolder = folder,
+                Title = folder ? "Choose a folder" : "Choose a file",
+            };
+
+            dialog.OpenButton.Content = "SELECT";
+            dialog.OpenWithButton.IsVisible = false;
+            return dialog;
+        }
+
+        private void OnOpen(object? sender, RoutedEventArgs e)
+        {
+            // Choosing a folder: the one selected, or else the one being looked at.
+            if (_pickFolder == true)
+            {
+                var selected = _viewModel.Selected;
+                Close(selected is { IsDirectory: true, IsParent: false } ? selected.Path : _viewModel.CurrentPath);
+                return;
+            }
+
+            Activate(_viewModel.Selected);
+        }
 
         private void OnOpenWith(object? sender, RoutedEventArgs e)
         {
@@ -98,6 +151,17 @@ namespace Conch.Views
             if (entry.IsDirectory)
             {
                 _viewModel.Navigate(entry.Path);
+                return;
+            }
+
+            if (_pickFolder == false)
+            {
+                Close(entry.Path);
+                return;
+            }
+
+            if (_pickFolder == true)
+            {
                 return;
             }
 

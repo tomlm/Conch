@@ -287,6 +287,40 @@ namespace Conch.Views
             return true;
         }
 
+        Task<bool> IControlShell.Confirm(string title, string question)
+            => ReturningFocus(() => Confirm(title, question));
+
+        Task<string?> IControlShell.Input(string title, string prompt, string? initial)
+            => ReturningFocus(() => new InputDialog(title, prompt, initial).ShowDialog<string?>(this));
+
+        Task<string?> IControlShell.Pick(bool folder, string? startAt)
+            => ReturningFocus(() => FilesDialog.ForPicking(startAt, folder).ShowDialog<string?>(this));
+
+        /// <summary>
+        /// Shows a dialog, then gives the keyboard back to the window that was in use.
+        /// </summary>
+        /// <remarks>
+        /// A dialog a script opens is a step in that script, and the terminal it runs in is
+        /// where typing goes next. Left alone, focus went nowhere when the dialog closed, and
+        /// the next keys were lost.
+        /// </remarks>
+        private async Task<T> ReturningFocus<T>(Func<Task<T>> show)
+        {
+            var before = Windows.ActiveWindow;
+            try
+            {
+                return await show();
+            }
+            finally
+            {
+                if (before != null && Windows.Windows.Contains(before))
+                {
+                    before.Activate();
+                    before.FocusContent();
+                }
+            }
+        }
+
         /// <summary>
         /// Puts a window at a place and size in screen cells, leaving out what is not given.
         /// </summary>

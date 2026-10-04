@@ -1,0 +1,23 @@
+<wm:ManagedWindow xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:console="https://github.com/consolonia"
+        xmlns:wm="using:Iciclecreek.Avalonia.WindowManager"
+        mc:Ignorable="d" d:DesignWidth="50" d:DesignHeight="9"
+        x:Class="Conch.Views.InputDialog"
+        Title="Input"
+        Width="50"
+        SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False">
+	<Grid Margin="{console:OnPlatform Default='16', Console='1'}" RowDefinitions="Auto,Auto,Auto">
+		<TextBlock Grid.Row="0" x:Name="PromptText" TextWrapping="Wrap"/>
+		<TextBox Grid.Row="1" x:Name="AnswerBox"/>
+		<StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right"
+					Spacing="{console:OnPlatform Default='8',Console='1'}">
+			<Button Content="OK" Click="OnOk" IsDefault="True"/>
+			<Button Content="CANCEL" Click="OnCancel" IsCancel="True"/>
+		</StackPanel>
+	</Grid>
+</wm:ManagedWindow>

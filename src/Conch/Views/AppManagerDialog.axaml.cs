@@ -92,10 +92,10 @@ public partial class AppManagerDialog : ManagedWindow
             // Almost always a registration naming a prerequisite this build's catalog has not
             // caught up with. Say which, rather than failing partway through an install with a
             // package manager error that names nothing recognisable.
-            await MessageBox.ShowDialog(
+            await ConfirmDialog.Inform(
                 $"Install {tool.Name}",
-                $"{tool.Name} needs {string.Join(", ", plan.Missing)}, which is not in the catalog.",
-                MessageBoxStyle.Ok);
+                $"{tool.Name} needs {string.Join(", ", plan.Missing)}, which is not in the catalog.")
+                .ShowDialog<bool?>(this);
             return;
         }
 
@@ -105,12 +105,12 @@ public partial class AppManagerDialog : ManagedWindow
             // Worth asking. A prerequisite can be far larger than the app -- the .NET SDK is
             // 610 MB against a tool of a few -- and having that start unannounced because
             // someone clicked Install on something small is a bad surprise.
-            var answer = await MessageBox.ShowDialog(
+            var answer = await new ConfirmDialog(
                 $"Install {tool.Name}",
-                $"{tool.Name} needs {string.Join(", ", prerequisites.Select(p => p.Name))}. Install {(prerequisites.Count == 1 ? "it" : "them")} too?",
-                MessageBoxStyle.YesNo);
+                $"{tool.Name} needs {string.Join(", ", prerequisites.Select(p => p.Name))}. Install {(prerequisites.Count == 1 ? "it" : "them")} too?")
+                .ShowDialog<bool?>(this);
 
-            if (answer != MessageBoxResult.Yes)
+            if (answer != true)
             {
                 return;
             }

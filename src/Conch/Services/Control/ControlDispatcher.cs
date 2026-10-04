@@ -71,6 +71,15 @@ namespace Conch.Services.Control
 
         /// <summary>Marks a window as wanting attention until it is focused; false when there is no such window.</summary>
         bool Attention(string windowId);
+
+        /// <summary>Asks yes or no; completes with the answer.</summary>
+        Task<bool> Confirm(string title, string question);
+
+        /// <summary>Asks for a line of text; completes with it, or null when cancelled.</summary>
+        Task<string?> Input(string title, string prompt, string? initial);
+
+        /// <summary>Lets the user choose a file or folder; completes with its path, or null when cancelled.</summary>
+        Task<string?> Pick(bool folder, string? startAt);
     }
 
     /// <summary>
@@ -263,6 +272,41 @@ namespace Conch.Services.Control
                     return _shell.Attention(id)
                         ? ControlResponse.Success(id)
                         : ControlResponse.Fail(ControlExit.NoSuchWindow, $"No window {id}.");
+                }
+
+                case "confirm":
+                {
+                    if (request.Args.Count != 1)
+                    {
+                        return ControlResponse.Fail(ControlExit.Usage, "Give the question, quoted.");
+                    }
+
+                    // No is not a failure of the command, but a script needs it as an exit code:
+                    // `if conch confirm "Deploy?"; then ...`.
+                    return await _shell.Confirm(request.Title ?? "Confirm", request.Args[0])
+                        ? ControlResponse.Success()
+                        : new ControlResponse { Code = ControlExit.Failed };
+                }
+
+                case "input":
+                {
+                    if (request.Args.Count != 1)
+                    {
+                        return ControlResponse.Fail(ControlExit.Usage, "Give the prompt, quoted.");
+                    }
+
+                    var answer = await _shell.Input(request.Title ?? "Input", request.Args[0], request.Default);
+                    return answer == null
+                        ? new ControlResponse { Code = ControlExit.Failed }
+                        : new ControlResponse { Text = answer };
+                }
+
+                case "pick":
+                {
+                    var path = await _shell.Pick(request.Folder, request.Start ?? request.Cwd);
+                    return path == null
+                        ? new ControlResponse { Code = ControlExit.Failed }
+                        : new ControlResponse { Text = path };
                 }
 
                 case "wait":

@@ -59,6 +59,15 @@ namespace Conch.Services.Control
 
         /// <summary>How long a notification stays, for <c>notify</c>.</summary>
         public int? Seconds { get; init; }
+
+        /// <summary>The answer already filled in, for <c>input</c>.</summary>
+        public string? Default { get; init; }
+
+        /// <summary>Choose a folder rather than a file, for <c>pick</c>.</summary>
+        public bool Folder { get; init; }
+
+        /// <summary>Where to start choosing, for <c>pick</c>; the caller's directory otherwise.</summary>
+        public string? Start { get; init; }
     }
 
     /// <summary>The shell's answer, one line of JSON.</summary>
@@ -75,6 +84,9 @@ namespace Conch.Services.Control
         public IReadOnlyList<WindowInfo>? Windows { get; init; }
 
         public ControlStatus? Status { get; init; }
+
+        /// <summary>What the user answered: the text typed, the path chosen.</summary>
+        public string? Text { get; init; }
 
         public static ControlResponse Success(string? windowId = null) => new() { Code = ControlExit.Ok, WindowId = windowId };
 

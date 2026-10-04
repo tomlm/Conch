@@ -23,6 +23,7 @@
 
 			<ComboBox Grid.Column="1"
 					  x:Name="RootsBox"
+					  Focusable="False"
 					  ItemsSource="{Binding Roots}"
 					  SelectionChanged="OnRootChanged"
 					  MinWidth="18">
@@ -80,8 +81,8 @@
 
 		<StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center"
 					Spacing="{console:OnPlatform Default='8',Console='1'}">
-			<Button Content="OPEN" Click="OnOpen" IsDefault="True"/>
-			<Button Content="OPEN WITH" Click="OnOpenWith"/>
+			<Button x:Name="OpenButton" Content="OPEN" Click="OnOpen" IsDefault="True"/>
+			<Button x:Name="OpenWithButton" Content="OPEN WITH" Click="OnOpenWith"/>
 			<Button Content="UP" Click="OnUp"/>
 			<Button Content="CLOSE" Click="OnClose" IsCancel="True"/>
 		</StackPanel>

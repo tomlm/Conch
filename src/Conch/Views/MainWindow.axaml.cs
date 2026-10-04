@@ -683,12 +683,7 @@ namespace Conch.Views
             }
 
             var name = ShellRoles.DisplayName(role);
-            var answer = await MessageBox.ShowDialog(
-                name,
-                $"No app is set up for {name.ToLowerInvariant()}. Choose one in Preferences?",
-                MessageBoxStyle.YesNo);
-
-            if (answer == MessageBoxResult.Yes)
+            if (await Confirm(name, $"No app is set up for {name.ToLowerInvariant()}. Choose one in Preferences?"))
             {
                 ShowPreferences();
             }
@@ -822,8 +817,8 @@ namespace Conch.Views
             Apps.RunScript(title, command, viaWsl: false);
         }
 
-        private static async Task<bool> Confirm(string title, string question)
-            => await MessageBox.ShowDialog(title, question, MessageBoxStyle.YesNo) == MessageBoxResult.Yes;
+        private async Task<bool> Confirm(string title, string question)
+            => await new ConfirmDialog(title, question).ShowDialog<bool?>(this) == true;
 
         #endregion
     }

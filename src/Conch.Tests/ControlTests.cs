@@ -111,7 +111,24 @@ public class ConchCliTests
     {
         Assert.Contains("needs a number", Error("move", "--x", "left"));
         Assert.Contains("no option", Error("notify", "--x", "3", "hi"));
-        Assert.Contains("quote a message", Error("notify", "Build", "done"));
+        Assert.Contains("quote text", Error("notify", "Build", "done"));
+    }
+
+    [Fact]
+    public void TheDialogVerbsReadTheirOptions()
+    {
+        var confirm = Request("confirm", "--title", "Release", "Ship it?");
+        Assert.Equal(("Release", "Ship it?"), (confirm.Title, confirm.Args[0]));
+
+        var input = Request("input", "--default", "main", "Branch?");
+        Assert.Equal(("main", "Branch?"), (input.Default, input.Args[0]));
+
+        var pick = Request("pick", "--folder", "--start", "sub");
+        Assert.True(pick.Folder);
+        Assert.Equal(Path.Combine(Cwd, "sub"), pick.Start);
+
+        Assert.Contains("quote text", Error("confirm", "Ship", "it?"));
+        Assert.Contains("--start DIR", Error("pick", "somewhere"));
     }
 
     [Fact]
@@ -231,6 +248,29 @@ public class ControlDispatcherTests
             if (List.All(w => w.Id != windowId)) return false;
             Marked = windowId;
             return true;
+        }
+
+        public bool ConfirmAnswer { get; set; }
+        public string? InputAnswer { get; set; }
+        public string? Asked;
+        public (bool Folder, string? Start)? Picking;
+
+        public Task<bool> Confirm(string title, string question)
+        {
+            Asked = $"{title}: {question}";
+            return Task.FromResult(ConfirmAnswer);
+        }
+
+        public Task<string?> Input(string title, string prompt, string? initial)
+        {
+            Asked = $"{title}: {prompt} [{initial}]";
+            return Task.FromResult(InputAnswer);
+        }
+
+        public Task<string?> Pick(bool folder, string? startAt)
+        {
+            Picking = (folder, startAt);
+            return Task.FromResult(InputAnswer);
         }
     }
 
@@ -382,6 +422,54 @@ public class ControlDispatcherTests
         await Handle(new ControlRequest { Verb = "attention", Caller = "w2" });
 
         Assert.Equal("w2", _shell.Marked);
+    }
+
+    [Fact]
+    public async Task ConfirmIsAnExitCodeAScriptCanTest()
+    {
+        _shell.ConfirmAnswer = true;
+        Assert.Equal(ControlExit.Ok, (await Handle(new ControlRequest { Verb = "confirm", Args = ["Deploy?"] })).Code);
+        Assert.Equal("Confirm: Deploy?", _shell.Asked);
+
+        _shell.ConfirmAnswer = false;
+        var no = await Handle(new ControlRequest { Verb = "confirm", Args = ["Deploy?"] });
+        Assert.Equal(ControlExit.Failed, no.Code);
+        Assert.Null(no.Error);
+    }
+
+    [Fact]
+    public async Task InputReturnsWhatWasTypedEvenWhenEmpty()
+    {
+        _shell.InputAnswer = "";
+        var response = await Handle(new ControlRequest { Verb = "input", Args = ["Name?"], Title = "Setup", Default = "me" });
+
+        Assert.Equal((ControlExit.Ok, ""), (response.Code, response.Text));
+        Assert.Equal("Setup: Name? [me]", _shell.Asked);
+    }
+
+    [Fact]
+    public async Task CancellingInputOrPickExitsOneSilently()
+    {
+        _shell.InputAnswer = null;
+
+        var input = await Handle(new ControlRequest { Verb = "input", Args = ["Name?"] });
+        var pick = await Handle(new ControlRequest { Verb = "pick" });
+
+        Assert.Equal((ControlExit.Failed, (string?)null), (input.Code, input.Error));
+        Assert.Equal((ControlExit.Failed, (string?)null), (pick.Code, pick.Error));
+    }
+
+    [Fact]
+    public async Task PickStartsWhereTheCallerIsUnlessToldOtherwise()
+    {
+        _shell.InputAnswer = "/home/me/a.txt";
+
+        var response = await Handle(new ControlRequest { Verb = "pick", Cwd = "/home/me" });
+        Assert.Equal("/home/me/a.txt", response.Text);
+        Assert.Equal((false, "/home/me"), _shell.Picking);
+
+        await Handle(new ControlRequest { Verb = "pick", Folder = true, Start = "/srv", Cwd = "/home/me" });
+        Assert.Equal((true, "/srv"), _shell.Picking);
     }
 
     [Theory]

@@ -24,7 +24,7 @@ namespace Conch.Cli
         {
             "status", "windows", "open", "run", "launch", "wait", "title",
             "focus", "close", "minimize", "maximize", "restore", "help",
-            "move", "tile", "notify", "attention",
+            "move", "tile", "notify", "attention", "confirm", "input", "pick",
         };
 
         private static readonly string[] WindowVerbs = ["focus", "close", "minimize", "maximize", "restore", "wait", "move", "attention"];
@@ -49,6 +49,9 @@ namespace Conch.Cli
               tile [WINDOW...] [--grid|--columns|--rows]     arrange windows (default: all shown)
               notify [--title T] [--type info|success|warning|error] [--seconds N] MESSAGE
               attention [WINDOW]                 mark a window in the window list until focused
+              confirm [--title T] QUESTION       ask yes or no; exit 0 for yes, 1 for no
+              input [--title T] [--default V] PROMPT   ask for text; prints it, exit 1 if cancelled
+              pick [--folder] [--start DIR]      choose a file or folder; prints its path
               status                             version, session and socket
 
             Exit codes: 0 ok, 1 failed, 2 usage, 3 Conch not running, 4 no such window.
@@ -118,6 +121,8 @@ namespace Conch.Cli
 
             string? title = null, size = null, with = null, layout = null, kind = null;
             int? x = null, y = null, seconds = null;
+            string? initial = null, start = null;
+            var folder = false;
             bool wait = false, keep = false, maximize = false;
             var positional = new List<string>();
 
@@ -175,7 +180,18 @@ namespace Conch.Cli
                         if (++i >= args.Count) return Fail("--size needs a value, as 80x24.");
                         size = args[i];
                         continue;
-                    case "--title" when verb == "notify":
+                    case "--folder" when verb == "pick":
+                        folder = true;
+                        continue;
+                    case "--start" when verb == "pick":
+                        if (++i >= args.Count) return Fail("--start needs a folder.");
+                        start = Path.GetFullPath(args[i], cwd);
+                        continue;
+                    case "--default" when verb == "input":
+                        if (++i >= args.Count) return Fail("--default needs a value.");
+                        initial = args[i];
+                        continue;
+                    case "--title" when verb is "notify" or "confirm" or "input":
                         if (++i >= args.Count) return Fail("--title needs a value.");
                         title = args[i];
                         continue;
@@ -229,9 +245,13 @@ namespace Conch.Cli
             {
                 return Fail($"{verb} takes no arguments.");
             }
-            else if (verb == "notify" && positional.Count != 1)
+            else if (verb is "notify" or "confirm" or "input" && positional.Count != 1)
             {
-                return Fail("Usage: conch notify [options] MESSAGE (quote a message with spaces)");
+                return Fail($"Usage: conch {verb} [options] TEXT (quote text with spaces)");
+            }
+            else if (verb == "pick" && positional.Count > 0)
+            {
+                return Fail("pick takes no arguments; use --start DIR.");
             }
 
             if (verb == "open")
@@ -260,6 +280,9 @@ namespace Conch.Cli
                 Layout = layout,
                 Kind = kind,
                 Seconds = seconds,
+                Default = initial,
+                Folder = folder,
+                Start = start,
             };
 
             return new CliParse(request, socket, json, Help: false, null);
@@ -348,6 +371,7 @@ namespace Conch.Cli
                 {
                     "windows" => response.Windows,
                     "status" => response.Status,
+                    "input" or "pick" => response.Text == null ? null : new { text = response.Text },
                     _ => response.WindowId == null || request.Wait ? null : new { window = response.WindowId },
                 };
 
@@ -371,6 +395,10 @@ namespace Conch.Cli
                 case "status" when response.Status is { } s:
                     Console.WriteLine($"Conch {s.Version}, {(s.Session ? "the session" : "an application")}, {s.Windows} window(s)");
                     Console.WriteLine($"socket {s.Socket}");
+                    break;
+
+                case "input" or "pick" when response.Text != null:
+                    Console.WriteLine(response.Text);
                     break;
 
                 // The new window's id, so a script can act on it: id=$(conch run -- htop)
