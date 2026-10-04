@@ -24,6 +24,9 @@ namespace Conch.Views
         /// </summary>
         private static readonly TimeSpan AppRecheckInterval = TimeSpan.FromMinutes(1);
 
+        /// <summary>The search popup's width: its 48-column panel and the border round it.</summary>
+        private const double SearchPopupWidth = 50;
+
         private AppLauncher? _launcher;
         private RoleRegistry? _roles;
         private ShellSearchViewModel? _search;
@@ -49,9 +52,9 @@ namespace Conch.Views
             // window has focus, so a hotkey is the shell's before the app underneath sees it.
             AddHandler(KeyDownEvent, OnShellKeyDown, RoutingStrategies.Tunnel);
 
-            SearchPopup.PlacementTarget = SearchBox;
+            SearchPopup.PlacementTarget = SearchButton;
+            SearchPopup.Closed += (_, _) => OnSearchClosed();
             SearchBox.AddHandler(KeyDownEvent, OnSearchKeyDown, RoutingStrategies.Tunnel);
-            SearchBox.GotFocus += (_, _) => OpenSearch();
             SearchBox.LostFocus += (_, _) => Dispatcher.UIThread.Post(CloseSearchIfFocusLeft);
             SearchResults.AddHandler(KeyDownEvent, OnSearchKeyDown, RoutingStrategies.Tunnel);
             SearchResults.Tapped += OnSearchResultTapped;
@@ -69,16 +72,6 @@ namespace Conch.Views
             SearchArea.DataContext = _search = new ShellSearchViewModel(
                 ShellItems, InstalledApps, text => () => Apps.LaunchCommandLine(text));
 
-            // Typing brings the list back after a click elsewhere dismissed it.
-            _search.PropertyChanged += (_, args) =>
-            {
-                if (args.PropertyName == nameof(ShellSearchViewModel.Query)
-                    && SearchBox.IsKeyboardFocusWithin && !SearchPopup.IsOpen)
-                {
-                    OpenSearch();
-                }
-            };
-
             // Here rather than in the constructor: the panel's windows live in its template,
             // which exists only once it has been laid out.
             WindowList.Attach(Windows);
@@ -92,6 +85,7 @@ namespace Conch.Views
         private void ApplySettings()
         {
             ConchMenu.Header = App.Settings.StatusAsText ? "Conch" : "🐚";
+            SearchButton.Content = App.Settings.StatusAsText ? "search" : "🔍";
             ShowNetwork();
             UpdateRoleIndicators();
         }
@@ -180,19 +174,19 @@ namespace Conch.Views
             => App.Tools.Where(t => t.IsInstalled)
                 .Select(t => ShellSearchViewModel.ForApp(t, () => LaunchApp(t)));
 
-        /// <remarks>
-        /// Opens the results itself rather than leaving it to GotFocus: when the cursor is
-        /// already in the box -- put there before the bar was ready, or left there after a click
-        /// elsewhere dismissed the list -- focusing it again raises nothing, and the hotkey
-        /// would do nothing visible.
-        /// </remarks>
-        private void FocusSearch()
+        private void OnSearchClicked(object? sender, RoutedEventArgs e)
         {
-            SearchBox.Focus();
-            SearchBox.SelectAll();
-            OpenSearch();
+            if (SearchPopup.IsOpen)
+            {
+                CloseSearch(returnFocus: true);
+            }
+            else
+            {
+                OpenSearch();
+            }
         }
 
+        /// <summary>Opens the search box and its results, with the cursor in the box.</summary>
         private void OpenSearch()
         {
             if (_search == null)
@@ -200,22 +194,41 @@ namespace Conch.Views
                 return;
             }
 
-            // Where Esc goes back to: the window the user was in. Only when arriving from
-            // elsewhere -- reopening the list while already searching must not forget it.
-            if (!SearchPopup.IsOpen && Windows.ActiveWindow is { } active)
+            // Where Esc goes back to: the window the user was in.
+            if (!SearchPopup.IsOpen)
             {
-                _returnTo = active;
+                _returnTo = Windows.ActiveWindow;
             }
 
             _search.Refresh();
 
-            // Consolonia centres a Bottom popup on its target, which pushed the wider list off
-            // to the left edge of the screen; shifting it by half the difference lines the left
-            // edges up, under the box being typed into. (BottomEdgeAlignedLeft would say this
-            // directly, and does not draw at all.)
-            SearchPopup.HorizontalOffset = Math.Max(0, (SearchResults.Width + 2 - SearchBox.Bounds.Width) / 2);
+            // Consolonia centres a Bottom popup on its target, which would put most of the list
+            // to the left of a two-column icon; shifting it by half the difference starts it
+            // under the icon instead. (BottomEdgeAlignedLeft would say this directly, and does
+            // not draw at all.)
+            SearchPopup.HorizontalOffset = Math.Max(0, (SearchPopupWidth - SearchButton.Bounds.Width) / 2);
             SearchPopup.IsOpen = true;
+
+            // The box lives in the popup, which has only just been put on screen.
+            Dispatcher.UIThread.Post(() =>
+            {
+                SearchBox.Focus();
+                SearchBox.SelectAll();
+            }, DispatcherPriority.Input);
+
             CheckAppsAsync();
+        }
+
+        /// <summary>
+        /// A fresh search next time, however this one ended: Esc, a result chosen, or a click
+        /// elsewhere dismissing it.
+        /// </summary>
+        private void OnSearchClosed()
+        {
+            if (_search != null)
+            {
+                _search.Query = string.Empty;
+            }
         }
 
         /// <summary>
@@ -322,10 +335,6 @@ namespace Conch.Views
         private void CloseSearch(bool returnFocus)
         {
             SearchPopup.IsOpen = false;
-            if (_search != null)
-            {
-                _search.Query = string.Empty;
-            }
 
             if (returnFocus)
             {
@@ -421,7 +430,7 @@ namespace Conch.Views
             switch (action)
             {
                 case Hotkeys.FocusSearch:
-                    FocusSearch();
+                    OpenSearch();
                     break;
 
                 case Hotkeys.OpenMenu:

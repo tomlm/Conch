@@ -43,17 +43,47 @@ public class HotkeyPreferencesTests : IDisposable
     }
 
     [Fact]
-    public void RecordingTakesTheNextCombinationAndSavesIt()
+    public void RecordingAddsTheNextCombinationAndSavesIt()
     {
-        var search = Row(Hotkeys.FocusSearch);
+        var files = Row(Hotkeys.Files);
 
-        search.RecordCommand.Execute(null);
-        Press(Key.Space, KeyModifiers.Control);
+        files.RecordCommand.Execute(null);
+        Press(Key.F3, KeyModifiers.Alt);
 
-        Assert.Equal("Ctrl+Space", search.Keys);
-        Assert.Equal("Ctrl+Space", _app.Settings.GetHotkey(Hotkeys.FocusSearch));
+        Assert.Equal("Ctrl+Alt+E, Alt+F3", files.Keys);
+        Assert.Equal("Ctrl+Alt+E, Alt+F3", _app.Settings.GetHotkey(Hotkeys.Files));
         Assert.Null(_app.Hotkeys.Capture);
-        Assert.Equal(Hotkeys.FocusSearch, _app.Hotkeys.ActionFor(Key.Space, KeyModifiers.Control));
+        Assert.Equal(Hotkeys.Files, _app.Hotkeys.ActionFor(Key.F3, KeyModifiers.Alt));
+        Assert.Equal(Hotkeys.Files, _app.Hotkeys.ActionFor(Key.E, KeyModifiers.Control | KeyModifiers.Alt));
+    }
+
+    [Fact]
+    public void ClearingThenRecordingReplaces()
+    {
+        var files = Row(Hotkeys.Files);
+
+        files.ClearCommand.Execute(null);
+        files.RecordCommand.Execute(null);
+        Press(Key.F3, KeyModifiers.Alt);
+
+        Assert.Equal("Alt+F3", files.Keys);
+    }
+
+    [Fact]
+    public void PressingABindingTheActionHasAlreadyChangesNothing()
+    {
+        var files = Row(Hotkeys.Files);
+
+        files.RecordCommand.Execute(null);
+        Press(Key.E, KeyModifiers.Control | KeyModifiers.Alt);
+
+        Assert.Equal("Ctrl+Alt+E", files.Keys);
+    }
+
+    [Fact]
+    public void SearchHasBothItsDefaults()
+    {
+        Assert.Equal("Alt+F2, Ctrl+Space", Row(Hotkeys.FocusSearch).Keys);
     }
 
     [Fact]
@@ -118,10 +148,11 @@ public class HotkeyPreferencesTests : IDisposable
     [Fact]
     public void AFunctionKeyOnItsOwnCanBeBound()
     {
-        Row(Hotkeys.FocusSearch).RecordCommand.Execute(null);
+        Row(Hotkeys.Files).ClearCommand.Execute(null);
+        Row(Hotkeys.Files).RecordCommand.Execute(null);
         Press(Key.F12);
 
-        Assert.Equal("F12", Row(Hotkeys.FocusSearch).Keys);
+        Assert.Equal("F12", Row(Hotkeys.Files).Keys);
     }
 
     [Fact]

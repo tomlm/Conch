@@ -25,10 +25,11 @@ public class HotkeyTests : IDisposable
     {
         // A default that will not parse is an action with no key; two equal defaults leave one
         // of them unreachable.
-        var gestures = Hotkeys.Actions.Select(a => Hotkeys.Parse(a.Default)).ToList();
+        var gestures = Hotkeys.Actions.SelectMany(a => Hotkeys.ParseList(a.Default)).ToList();
+        var written = Hotkeys.Actions.Sum(a => a.Default.Split(',').Length);
 
-        Assert.All(gestures, Assert.NotNull);
-        Assert.Equal(gestures.Count, gestures.Select(g => (g!.Key, g.KeyModifiers)).Distinct().Count());
+        Assert.Equal(written, gestures.Count);
+        Assert.Equal(gestures.Count, gestures.Select(g => (g.Key, g.KeyModifiers)).Distinct().Count());
     }
 
     [Fact]
@@ -36,8 +37,8 @@ public class HotkeyTests : IDisposable
     {
         // Windows Terminal and desktops keep Super for themselves, so a Super default would be
         // a hotkey that never arrives.
-        Assert.All(Hotkeys.Actions, a =>
-            Assert.False(Hotkeys.Parse(a.Default)!.KeyModifiers.HasFlag(KeyModifiers.Meta), a.Id));
+        Assert.All(Hotkeys.Actions.SelectMany(a => Hotkeys.ParseList(a.Default)), g =>
+            Assert.False(g.KeyModifiers.HasFlag(KeyModifiers.Meta)));
     }
 
     [Fact]
@@ -51,6 +52,7 @@ public class HotkeyTests : IDisposable
     public void APressTriggersItsAction()
     {
         Assert.Equal(Hotkeys.FocusSearch, Map().ActionFor(Key.F2, KeyModifiers.Alt));
+        Assert.Equal(Hotkeys.FocusSearch, Map().ActionFor(Key.Space, KeyModifiers.Control));
         Assert.Equal(Hotkeys.NewTerminal, Map().ActionFor(Key.T, KeyModifiers.Control | KeyModifiers.Alt));
     }
 
@@ -64,10 +66,11 @@ public class HotkeyTests : IDisposable
     [Fact]
     public void AStoredBindingReplacesTheDefault()
     {
-        var map = Map(new() { [Hotkeys.FocusSearch] = "Ctrl+Space" });
+        var map = Map(new() { [Hotkeys.FocusSearch] = "Ctrl+F12" });
 
-        Assert.Equal(Hotkeys.FocusSearch, map.ActionFor(Key.Space, KeyModifiers.Control));
+        Assert.Equal(Hotkeys.FocusSearch, map.ActionFor(Key.F12, KeyModifiers.Control));
         Assert.Null(map.ActionFor(Key.F2, KeyModifiers.Alt));
+        Assert.Null(map.ActionFor(Key.Space, KeyModifiers.Control));
     }
 
     [Fact]
@@ -76,7 +79,7 @@ public class HotkeyTests : IDisposable
         // Empty is "the user cleared it", which must not fall back to the default.
         var map = Map(new() { [Hotkeys.MaximizeWindow] = "" });
 
-        Assert.Null(map.GestureFor(Hotkeys.MaximizeWindow));
+        Assert.Empty(map.GesturesFor(Hotkeys.MaximizeWindow));
         Assert.Null(map.ActionFor(Key.F10, KeyModifiers.Control));
     }
 
@@ -109,7 +112,23 @@ public class HotkeyTests : IDisposable
     [Fact]
     public void NoDefaultIsAWindowManagerKey()
     {
-        Assert.All(Hotkeys.Actions, a => Assert.Null(Hotkeys.ReservedFor(Hotkeys.Parse(a.Default)!)));
+        Assert.All(Hotkeys.Actions.SelectMany(a => Hotkeys.ParseList(a.Default)), g => Assert.Null(Hotkeys.ReservedFor(g)));
+    }
+
+    [Fact]
+    public void AStoredListBindsEveryCombinationInIt()
+    {
+        var map = Map(new() { [Hotkeys.Files] = "Ctrl+Alt+E, Alt+F3" });
+
+        Assert.Equal(Hotkeys.Files, map.ActionFor(Key.E, KeyModifiers.Control | KeyModifiers.Alt));
+        Assert.Equal(Hotkeys.Files, map.ActionFor(Key.F3, KeyModifiers.Alt));
+    }
+
+    [Fact]
+    public void ListsRoundTrip()
+    {
+        Assert.Equal("Alt+F2, Ctrl+Space", Hotkeys.FormatList(Hotkeys.ParseList("Alt+F2,Ctrl+Space")));
+        Assert.Empty(Hotkeys.ParseList(""));
     }
 
     [Fact]
@@ -137,7 +156,7 @@ public class HotkeyTests : IDisposable
     [Fact]
     public void EveryDefaultIsStoredInItsCanonicalForm()
     {
-        Assert.All(Hotkeys.Actions, a => Assert.Equal(a.Default, Hotkeys.Format(Hotkeys.Parse(a.Default))));
+        Assert.All(Hotkeys.Actions, a => Assert.Equal(a.Default, Hotkeys.FormatList(Hotkeys.ParseList(a.Default))));
     }
 
     [Theory]

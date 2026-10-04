@@ -63,7 +63,7 @@
 						<ItemsControl ItemsSource="{Binding Hotkeys}">
 							<ItemsControl.ItemTemplate>
 								<DataTemplate x:DataType="vm:HotkeyBindingViewModel">
-									<Grid ColumnDefinitions="30,18,Auto,Auto" Margin="0 0 0 1">
+									<Grid ColumnDefinitions="26,22,Auto,Auto" Margin="0 0 0 1">
 										<TextBlock Grid.Column="0"
 												   Text="{Binding Name}"
 												   VerticalAlignment="Center"
@@ -72,7 +72,7 @@
 												Content="{Binding Keys}"
 												Command="{Binding RecordCommand}"
 												HorizontalAlignment="Stretch"
-												ToolTip.Tip="Click, then press the new keys"/>
+												ToolTip.Tip="Click, then press keys to add them"/>
 										<Button Grid.Column="2" Content="CLEAR" Margin="1 0 0 0"
 												Command="{Binding ClearCommand}"/>
 										<Button Grid.Column="3" Content="DEFAULT" Margin="1 0 0 0"

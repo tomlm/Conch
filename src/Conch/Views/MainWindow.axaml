@@ -57,37 +57,44 @@
 			</Menu>
 
 			<!--
-			The search box: Start-menu search, Spotlight. Empty, it lists the installed apps;
-			typed into, it finds apps, settings and commands, and offers to run anything else
-			as a command line.
+			Search: Start-menu search, Spotlight. An icon that opens the box and its results,
+			rather than a box always on screen: on an 80-column console a visible box took a
+			third of the row the window list needs. Empty, it lists the installed apps; typed
+			into, it finds apps, settings and commands, and offers to run anything else as a
+			command line.
 			-->
 			<Panel x:Name="SearchArea" Grid.Column="1" Margin="1 0 1 0" x:DataType="vm:ShellSearchViewModel">
-				<TextBox x:Name="SearchBox"
-						 Width="28"
-						 PlaceholderText="Search or run a command"
-						 Text="{Binding Query, Mode=TwoWay}"/>
+				<Button x:Name="SearchButton"
+						Click="OnSearchClicked"
+						Theme="{DynamicResource ThemeNakedButton}"
+						ToolTip.Tip="Search apps and settings"/>
 				<Popup x:Name="SearchPopup"
 					   Placement="Bottom"
 					   IsLightDismissEnabled="True"
-					   MaxHeight="16">
+					   MaxHeight="18">
 					<console:BorderPanel>
-						<ListBox x:Name="SearchResults"
-								 ItemsSource="{Binding Results}"
-								 SelectedItem="{Binding SelectedResult, Mode=TwoWay}"
-								 Width="48"
-								 Background="{DynamicResource ThemeAlternativeBackgroundBrush}"
-								 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-							<ListBox.ItemTemplate>
-								<DataTemplate x:DataType="vm:SearchItem">
-									<Grid ColumnDefinitions="*,Auto">
-										<TextBlock Grid.Column="0" Text="{Binding Title}"
-												   TextTrimming="CharacterEllipsis"/>
-										<TextBlock Grid.Column="1" Text="{Binding KindLabel}"
-												   Margin="1 0 0 0" Opacity="0.6"/>
-									</Grid>
-								</DataTemplate>
-							</ListBox.ItemTemplate>
-						</ListBox>
+						<DockPanel Width="48" Background="{DynamicResource ThemeAlternativeBackgroundBrush}">
+							<TextBox x:Name="SearchBox"
+									 DockPanel.Dock="Top"
+									 PlaceholderText="Search or run a command"
+									 Text="{Binding Query, Mode=TwoWay}"/>
+							<ListBox x:Name="SearchResults"
+									 ItemsSource="{Binding Results}"
+									 SelectedItem="{Binding SelectedResult, Mode=TwoWay}"
+									 Background="{DynamicResource ThemeAlternativeBackgroundBrush}"
+									 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+								<ListBox.ItemTemplate>
+									<DataTemplate x:DataType="vm:SearchItem">
+										<Grid ColumnDefinitions="*,Auto">
+											<TextBlock Grid.Column="0" Text="{Binding Title}"
+													   TextTrimming="CharacterEllipsis"/>
+											<TextBlock Grid.Column="1" Text="{Binding KindLabel}"
+													   Margin="1 0 0 0" Opacity="0.6"/>
+										</Grid>
+									</DataTemplate>
+								</ListBox.ItemTemplate>
+							</ListBox>
+						</DockPanel>
 					</console:BorderPanel>
 				</Popup>
 			</Panel>

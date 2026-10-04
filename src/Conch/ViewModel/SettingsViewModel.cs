@@ -72,7 +72,7 @@ namespace Conch.ViewModel
         [ObservableProperty]
         private string _keyboardMessage = DefaultKeyboardMessage;
 
-        private const string DefaultKeyboardMessage = "Click a binding, then press the new keys.";
+        private const string DefaultKeyboardMessage = "Click a binding and press keys to add them. CLEAR removes them all.";
 
         private HotkeyBindingViewModel? _recording;
 
@@ -91,7 +91,7 @@ namespace Conch.ViewModel
             _recording = row;
             row.IsRecording = true;
             row.Keys = "press keys...";
-            KeyboardMessage = $"Press the new keys for {row.Name}. Esc cancels.";
+            KeyboardMessage = $"Press the keys to add to {row.Name}. Esc cancels.";
             _app.Hotkeys.Capture = (key, modifiers) => OnKeyCaptured(row, key, modifiers);
         }
 
@@ -153,7 +153,15 @@ namespace Conch.ViewModel
                 return;
             }
 
-            _app.Settings.SetHotkey(row.Action.Id, text);
+            // Added to what is there: a second binding, not a replacement. Pressing one the
+            // action already has changes nothing.
+            var gestures = _app.Hotkeys.GesturesFor(row.Action.Id).ToList();
+            if (!gestures.Any(g => Services.Hotkeys.Same(g, gesture)))
+            {
+                gestures.Add(gesture);
+            }
+
+            _app.Settings.SetHotkey(row.Action.Id, Services.Hotkeys.FormatList(gestures));
             ShowBinding(row);
             KeyboardMessage = DefaultKeyboardMessage;
         }
@@ -172,11 +180,13 @@ namespace Conch.ViewModel
         {
             StopRecording();
 
-            if (Services.Hotkeys.Parse(row.Action.Default) is { } gesture
-                && _app.Hotkeys.ConflictFor(row.Action.Id, gesture) is { } clash)
+            foreach (var gesture in Services.Hotkeys.ParseList(row.Action.Default))
             {
-                KeyboardMessage = $"{row.Action.Default} is now {clash.Name}. Change that first.";
-                return;
+                if (_app.Hotkeys.ConflictFor(row.Action.Id, gesture) is { } clash)
+                {
+                    KeyboardMessage = $"{Services.Hotkeys.Format(gesture)} is now {clash.Name}. Change that first.";
+                    return;
+                }
             }
 
             _app.Settings.SetHotkey(row.Action.Id, null);
@@ -186,8 +196,8 @@ namespace Conch.ViewModel
 
         private void ShowBinding(HotkeyBindingViewModel row)
         {
-            var gesture = _app.Hotkeys.GestureFor(row.Action.Id);
-            row.Keys = gesture == null ? "(none)" : Services.Hotkeys.Format(gesture);
+            var gestures = _app.Hotkeys.GesturesFor(row.Action.Id);
+            row.Keys = gestures.Count == 0 ? "(none)" : Services.Hotkeys.FormatList(gestures);
         }
 
         #endregion

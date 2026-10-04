@@ -20,12 +20,12 @@ Linux build is launched and installed through WSL.
 ## The top bar
 
 ```
- 🐚  [ Search or run a command ]   nano  [btop]                  ⇅  ♪  ▭  14:32
+ 🐚  🔍   nano  [btop]                                          ⇅  ♪  ▭  14:32
 ```
 
 - **🐚** opens the one menu: Software; Network, Display, Audio and
   Preferences; About; Logout, with Restart and Shut Down when Conch is the session.
-- **The search box** is where everything starts. Empty, it lists the installed apps;
+- **🔍** opens search, where everything starts. Empty, it lists the installed apps;
   typed into, it finds apps, settings and commands, and offers to run anything else as a
   command line in a terminal window that stays open once it finishes.
 - **The window list** has a button per open window. Clicking one brings it forward, or
@@ -38,7 +38,7 @@ Linux build is launched and installed through WSL.
 
 | Keys | Does |
 |---|---|
-| Alt+F2 | Search apps and settings |
+| Alt+F2, Ctrl+Space | Search apps and settings |
 | Alt+F1 | Open the Conch menu |
 | Ctrl+Alt+T | New terminal |
 | Ctrl+Alt+E | Files |
@@ -46,8 +46,8 @@ Linux build is launched and installed through WSL.
 | Ctrl+F4 | Close the window |
 | Ctrl+F6, Ctrl+Shift+F6 | Next, previous window |
 
-All but the last two can be changed in *Preferences → Keyboard*; those belong to the
-window manager. The defaults avoid the Windows/Super key, which Windows Terminal and
+All but the last two can be changed in *Preferences → Keyboard*, and an action can have
+more than one binding; the last two belong to the window manager. The defaults avoid the Windows/Super key, which Windows Terminal and
 desktop environments keep for themselves, and Alt+F4, which closes the terminal itself
 on Windows. Super combinations can still be bound where the terminal passes them through.
 

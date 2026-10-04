@@ -5,7 +5,9 @@ namespace Conch.Services
     /// <summary>A shell action a key combination can be bound to.</summary>
     /// <param name="Id">Stable id, as stored in settings.</param>
     /// <param name="Name">What Preferences calls it.</param>
-    /// <param name="Default">The binding out of the box, or empty for none.</param>
+    /// <param name="Default">
+    /// The bindings out of the box, comma-separated as settings stores them, or empty for none.
+    /// </param>
     public sealed record HotkeyAction(string Id, string Name, string Default);
 
     /// <summary>
@@ -27,6 +29,12 @@ namespace Conch.Services
     /// obvious close key, and is the one that cannot work: on Windows the OS takes it and closes
     /// the whole terminal.) Files avoids Alt+E because Microsoft Edit opens its Edit menu with
     /// it, and a shell hotkey is taken from every app underneath.
+    ///
+    /// Search also answers Ctrl+Space. The keys people reach for to search -- Super alone,
+    /// Cmd+Space, Alt+Space -- are all kept by the OS or the desktop before a terminal app
+    /// sees them; Ctrl+Space is the nearest that gets through Windows Terminal, kmscon and
+    /// ssh. An action can have several bindings for exactly this: the familiar Linux key and
+    /// the one under the thumb.
     /// </remarks>
     public static class Hotkeys
     {
@@ -39,7 +47,7 @@ namespace Conch.Services
         /// <summary>Every bindable action, in the order Preferences lists them.</summary>
         public static readonly IReadOnlyList<HotkeyAction> Actions =
         [
-            new(FocusSearch, "Search apps and settings", "Alt+F2"),
+            new(FocusSearch, "Search apps and settings", "Alt+F2, Ctrl+Space"),
             new(OpenMenu, "Open the Conch menu", "Alt+F1"),
             new(NewTerminal, "New terminal", "Ctrl+Alt+T"),
             new(Files, "Files", "Ctrl+Alt+E"),
@@ -92,6 +100,27 @@ namespace Conch.Services
                 return null;
             }
         }
+
+        /// <summary>
+        /// The combinations in a stored list ("Alt+F2, Ctrl+Space"), skipping any that will not
+        /// parse.
+        /// </summary>
+        /// <remarks>
+        /// A comma cannot be part of a combination's own text: the comma key formats as OemComma.
+        /// </remarks>
+        public static IReadOnlyList<KeyGesture> ParseList(string? text)
+            => (text ?? string.Empty).Split(',')
+                .Select(Parse)
+                .OfType<KeyGesture>()
+                .ToList();
+
+        /// <summary>A list of combinations as stored and shown: "Alt+F2, Ctrl+Space".</summary>
+        public static string FormatList(IEnumerable<KeyGesture> gestures)
+            => string.Join(", ", gestures.Select(Format));
+
+        /// <summary>True when two combinations are the same keys.</summary>
+        public static bool Same(KeyGesture a, KeyGesture b)
+            => a.Key == b.Key && a.KeyModifiers == b.KeyModifiers;
 
         /// <summary>A key combination's canonical text, as stored and shown: "Ctrl+Alt+T".</summary>
         /// <remarks>
@@ -172,26 +201,20 @@ namespace Conch.Services
         /// </remarks>
         public Action<Key, KeyModifiers>? Capture { get; set; }
 
-        /// <summary>The combination bound to <paramref name="actionId"/>, or null for none.</summary>
-        public KeyGesture? GestureFor(string actionId)
+        /// <summary>The combinations bound to <paramref name="actionId"/>, empty for none.</summary>
+        public IReadOnlyList<KeyGesture> GesturesFor(string actionId)
         {
             var stored = _readBinding(actionId);
-            return Hotkeys.Parse(stored ?? Hotkeys.Find(actionId)?.Default);
+            return Hotkeys.ParseList(stored ?? Hotkeys.Find(actionId)?.Default);
         }
 
         /// <summary>The action a key press triggers, or null.</summary>
         public string? ActionFor(Key key, KeyModifiers modifiers)
         {
-            foreach (var action in Hotkeys.Actions)
-            {
-                var gesture = GestureFor(action.Id);
-                if (gesture != null && gesture.Key == key && gesture.KeyModifiers == modifiers)
-                {
-                    return action.Id;
-                }
-            }
-
-            return null;
+            var pressed = new KeyGesture(key, modifiers);
+            return Hotkeys.Actions
+                .FirstOrDefault(a => GesturesFor(a.Id).Any(g => Hotkeys.Same(g, pressed)))
+                ?.Id;
         }
 
         /// <summary>
@@ -204,7 +227,6 @@ namespace Conch.Services
         public HotkeyAction? ConflictFor(string actionId, KeyGesture gesture)
             => Hotkeys.Actions.FirstOrDefault(a =>
                 !string.Equals(a.Id, actionId, StringComparison.OrdinalIgnoreCase)
-                && GestureFor(a.Id) is { } other
-                && other.Key == gesture.Key && other.KeyModifiers == gesture.KeyModifiers);
+                && GesturesFor(a.Id).Any(other => Hotkeys.Same(other, gesture)));
     }
 }
