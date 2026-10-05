@@ -41,19 +41,25 @@
 					 SelectedItem="{Binding Selected}"
 					 DoubleTapped="OnEntryActivated"
 					 KeyDown="OnListKeyDown">
-				<ListBox.ContextMenu>
-					<ContextMenu>
-						<MenuItem Header="_Open" Click="OnOpen"/>
-						<MenuItem Header="Open _with..." Click="OnOpenWith"/>
-					</ContextMenu>
-				</ListBox.ContextMenu>
 				<ListBox.ItemTemplate>
 					<DataTemplate x:DataType="vm:FileEntryViewModel">
 						<!--
 						Name takes what is left, so a long filename trims rather than pushing
 						the size and date off the right edge where they cannot be read.
 						-->
-						<Grid ColumnDefinitions="*,8,16">
+						<Grid ColumnDefinitions="*,8,16" Background="Transparent">
+							<!--
+							On the row, so its items act on the row right-clicked rather than
+							on whatever is selected. A ContextFlyout, not a ContextMenu:
+							Consolonia's theme has no template for ContextMenu, so one opens and
+							draws nothing.
+							-->
+							<Grid.ContextFlyout>
+								<MenuFlyout>
+									<MenuItem Header="_Open" Click="OnOpenRow"/>
+									<MenuItem Header="Open _with..." Click="OnOpenWithRow" IsVisible="{Binding !IsDirectory}"/>
+								</MenuFlyout>
+							</Grid.ContextFlyout>
 							<TextBlock Grid.Column="0"
 									   Text="{Binding DisplayName}"
 									   TextTrimming="CharacterEllipsis"/>

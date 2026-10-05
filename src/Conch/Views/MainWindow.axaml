@@ -88,7 +88,13 @@
 									 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 								<ListBox.ItemTemplate>
 									<DataTemplate x:DataType="vm:SearchItem">
-										<Grid ColumnDefinitions="*,Auto">
+										<Grid ColumnDefinitions="*,Auto" Background="Transparent">
+											<!-- A ContextFlyout: Consolonia's theme has no template for ContextMenu. -->
+											<Grid.ContextFlyout>
+												<MenuFlyout>
+													<MenuItem Header="{Binding PinLabel}" IsEnabled="{Binding CanPin}" Click="OnPinClicked"/>
+												</MenuFlyout>
+											</Grid.ContextFlyout>
 											<TextBlock Grid.Column="0" Text="{Binding Title}"
 													   TextTrimming="CharacterEllipsis"/>
 											<TextBlock Grid.Column="1" Text="{Binding KindLabel}"

@@ -29,7 +29,6 @@ namespace Conch.Views
         private ShellSearchViewModel? _search;
         private ManagedWindow? _returnTo;
         private bool _detectionQueued;
-        private bool _searchMenuOpen;
         private DispatcherTimer? _catalogTimer;
         private DispatcherTimer? _statusTimer;
         private bool? _networkUp;
@@ -56,7 +55,6 @@ namespace Conch.Views
             SearchBox.LostFocus += (_, _) => Dispatcher.UIThread.Post(CloseSearchIfFocusLeft);
             SearchResults.AddHandler(KeyDownEvent, OnSearchKeyDown, RoutingStrategies.Tunnel);
             SearchResults.Tapped += OnSearchResultTapped;
-            RightClick.Attach(SearchResults, SearchResultMenu);
 
             Loaded += OnLoaded;
             StartStatusArea();
@@ -348,30 +346,10 @@ namespace Conch.Views
             }
         }
 
-        /// <summary>The right-click menu for a search result: pin or unpin it.</summary>
-        private ContextMenu? SearchResultMenu(object item)
+        private void OnPinClicked(object? sender, RoutedEventArgs e)
         {
-            if (item is not SearchItem { CanPin: true } result)
-            {
-                return null;
-            }
-
-            var pin = new MenuItem { Header = result.PinLabel };
-            pin.Click += (_, _) => TogglePin(result);
-            var menu = new ContextMenu { Items = { pin } };
-
-            // The menu takes the keyboard from the search box, and search closes when the
-            // keyboard leaves it -- taking the row, and the menu with it, before it was drawn.
-            menu.Opened += (_, _) => _searchMenuOpen = true;
-            menu.Closed += (_, _) =>
-            {
-                _searchMenuOpen = false;
-                if (SearchPopup.IsOpen)
-                {
-                    SearchBox.Focus();
-                }
-            };
-            return menu;
+            TogglePin((sender as Control)?.DataContext as SearchItem);
+            SearchBox.Focus();
         }
 
         private void MoveSelection(int step)
@@ -453,7 +431,8 @@ namespace Conch.Views
         /// <summary>Closes the results once focus has gone somewhere other than the search.</summary>
         private void CloseSearchIfFocusLeft()
         {
-            if (_searchMenuOpen)
+            // A result's right-click menu has the keyboard: search is still in use.
+            if (FocusManager?.GetFocusedElement() is Avalonia.Controls.MenuItem or Avalonia.Controls.MenuFlyoutPresenter)
             {
                 return;
             }
