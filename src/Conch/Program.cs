@@ -59,9 +59,45 @@ namespace Conch
             // ~/.dotnet/tools, ~/.local/bin and the like reach anything Conch starts.
             LoginEnvironment.RefreshPathAsync().GetAwaiter().GetResult();
 
+            ShortenEscapeDelay();
+
             BuildAvaloniaApp()
                 .StartWithConsoleLifetime(args);
         }
+
+        /// <summary>
+        /// Makes Esc take effect at once rather than a second later.
+        /// </summary>
+        /// <remarks>
+        /// On Linux Consolonia reads the keyboard through ncurses, which cannot tell the Esc
+        /// key from the first byte of an arrow key's or F-key's sequence until more bytes do
+        /// or do not arrive -- and waits ESCDELAY for them, 1000 ms unless told otherwise.
+        /// Every Esc -- closing search, cancelling a dialog -- paid that second. 50 ms is what
+        /// terminal editors use: long enough for a sequence to arrive whole over ssh, too short
+        /// to notice. A value someone has set is left alone.
+        ///
+        /// Through libc's setenv: on Unix .NET keeps its own copy of the environment, so
+        /// Environment.SetEnvironmentVariable never reaches ncurses' getenv.
+        /// </remarks>
+        private static void ShortenEscapeDelay()
+        {
+            if (OperatingSystem.IsWindows() || Environment.GetEnvironmentVariable("ESCDELAY") != null)
+            {
+                return;
+            }
+
+            try
+            {
+                setenv("ESCDELAY", "50", 0);
+            }
+            catch (Exception ex)
+            {
+                Log.Warning("Shell", $"Could not shorten the Esc delay: {ex.Message}");
+            }
+        }
+
+        [System.Runtime.InteropServices.DllImport("libc", SetLastError = true)]
+        private static extern int setenv(string name, string value, int overwrite);
 
         public static AppBuilder BuildAvaloniaApp()
         {

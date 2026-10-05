@@ -97,6 +97,19 @@ namespace Conch.ViewModel
                 return;
             }
 
+            // What was found about the old definition holds for the new one when nothing that
+            // finding an app depends on has changed -- which, for a definition re-downloaded
+            // because its description or keywords moved, is the usual case. Otherwise every
+            // refresh threw away detection for each file it touched and probed it again.
+            if (existing.IsDetected
+                && string.Equals(existing.Command, tool.Command, StringComparison.Ordinal)
+                && string.Equals(existing.Detect, tool.Detect, StringComparison.Ordinal)
+                && existing.ResolvedPlatform == tool.ResolvedPlatform)
+            {
+                tool.IsInstalled = existing.IsInstalled;
+                tool.IsDetected = true;
+            }
+
             var index = IndexOf(existing);
             if (index >= 0)
             {
@@ -138,13 +151,47 @@ namespace Conch.ViewModel
             }
         }
 
-        private async Task RefreshFromGitHubAsync(CancellationToken cancellationToken = default)
+        /// <summary>The listing's ETag from the last refresh, so an unchanged catalog costs one 304.</summary>
+        private static string ListingEtagPath => Path.Combine(ToolsCacheDirectory, "catalog.etag");
+
+        private readonly SemaphoreSlim _refreshing = new(1, 1);
+
+        /// <summary>
+        /// Brings the catalog up to date with the repo: at startup, and hourly while Conch runs.
+        /// </summary>
+        /// <remarks>
+        /// Cheap when nothing has changed, which is nearly always. The folder listing is asked
+        /// for with the ETag it last came with, and GitHub answers an unchanged one with 304 --
+        /// which does not count against the 60-an-hour limit for unauthenticated calls. When it
+        /// has changed, each entry carries its git blob sha, so only files whose sha differs from
+        /// the one stored beside the cached copy are downloaded: no request per file at all.
+        /// </remarks>
+        public async Task RefreshFromGitHubAsync(CancellationToken cancellationToken = default)
         {
+            // A refresh still going when the next is due is not doubled up.
+            if (!await _refreshing.WaitAsync(0, cancellationToken).ConfigureAwait(false))
+            {
+                return;
+            }
+
             try
             {
                 using var http = CreateGitHubHttpClient();
 
-                using var listResponse = await http.GetAsync(ToolsFolderApiUri, cancellationToken).ConfigureAwait(false);
+                using var listRequest = new HttpRequestMessage(HttpMethod.Get, ToolsFolderApiUri);
+                if (File.Exists(ListingEtagPath)
+                    && EntityTagHeaderValue.TryParse((await File.ReadAllTextAsync(ListingEtagPath, cancellationToken).ConfigureAwait(false)).Trim(), out var listingEtag))
+                {
+                    listRequest.Headers.IfNoneMatch.Add(listingEtag);
+                }
+
+                using var listResponse = await http.SendAsync(listRequest, cancellationToken).ConfigureAwait(false);
+                if (listResponse.StatusCode == System.Net.HttpStatusCode.NotModified)
+                {
+                    Log.Info(LogCategory, "Catalog is up to date.");
+                    return;
+                }
+
                 if (!listResponse.IsSuccessStatusCode)
                 {
                     if ((int)listResponse.StatusCode == 403 && listResponse.Headers.TryGetValues("X-RateLimit-Remaining", out var remaining) && remaining.FirstOrDefault() == "0")
@@ -173,6 +220,7 @@ namespace Conch.ViewModel
                     .ToList();
 
                 var updated = 0;
+                var complete = true;
 
                 foreach (var item in yamlItems)
                 {
@@ -180,30 +228,21 @@ namespace Conch.ViewModel
 
                     var downloadUrl = item.DownloadUrl!;
                     var localPath = Path.Combine(ToolsCacheDirectory, Path.GetFileName(downloadUrl.LocalPath));
+                    var shaPath = localPath + ".sha";
 
-                    // Avoid re-downloading if unchanged (best-effort via ETag)
-                    var request = new HttpRequestMessage(HttpMethod.Get, downloadUrl);
-                    if (File.Exists(localPath))
-                    {
-                        var etagPath = localPath + ".etag";
-                        if (File.Exists(etagPath))
-                        {
-                            var etag = await File.ReadAllTextAsync(etagPath, cancellationToken).ConfigureAwait(false);
-                            if (!string.IsNullOrWhiteSpace(etag) && EntityTagHeaderValue.TryParse(etag.Trim(), out var parsed))
-                            {
-                                request.Headers.IfNoneMatch.Add(parsed);
-                            }
-                        }
-                    }
-
-                    using var fileResponse = await http.SendAsync(request, cancellationToken).ConfigureAwait(false);
-                    if (fileResponse.StatusCode == System.Net.HttpStatusCode.NotModified)
+                    // The listing already says whether this file changed.
+                    if (item.Sha != null && File.Exists(localPath) && File.Exists(shaPath)
+                        && (await File.ReadAllTextAsync(shaPath, cancellationToken).ConfigureAwait(false)).Trim() == item.Sha)
                     {
                         continue;
                     }
 
+                    using var request = new HttpRequestMessage(HttpMethod.Get, downloadUrl);
+                    using var fileResponse = await http.SendAsync(request, cancellationToken).ConfigureAwait(false);
+
                     if (!fileResponse.IsSuccessStatusCode)
                     {
+                        complete = false;
                         if ((int)fileResponse.StatusCode == 403 && fileResponse.Headers.TryGetValues("X-RateLimit-Remaining", out var dlRemaining) && dlRemaining.FirstOrDefault() == "0")
                         {
                             Log.Warning(LogCategory, "GitHub API rate limit exceeded while downloading tools.");
@@ -214,13 +253,15 @@ namespace Conch.ViewModel
                         continue;
                     }
 
-                    var newEtag = fileResponse.Headers.ETag?.ToString();
                     var yaml = await fileResponse.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
                     await File.WriteAllTextAsync(localPath, yaml, cancellationToken).ConfigureAwait(false);
-                    if (!string.IsNullOrWhiteSpace(newEtag))
+                    if (item.Sha != null)
                     {
-                        await File.WriteAllTextAsync(localPath + ".etag", newEtag, cancellationToken).ConfigureAwait(false);
+                        await File.WriteAllTextAsync(shaPath, item.Sha, cancellationToken).ConfigureAwait(false);
                     }
+
+                    // Superseded by the sha; left from builds that asked per file.
+                    try { File.Delete(localPath + ".etag"); } catch (IOException) { }
 
                     var tool = TryLoadToolFromFile(localPath);
                     if (tool == null)
@@ -236,6 +277,13 @@ namespace Conch.ViewModel
                 Log.Info(LogCategory, updated == 0
                     ? "Catalog is up to date."
                     : $"Refreshed {updated} tool definition(s) from the remote catalog.");
+
+                // Only once every changed file is in hand: a listing ETag saved after a partial
+                // refresh would answer 304 next time and leave the missing files missing.
+                if (complete && listResponse.Headers.ETag is { } newListingEtag)
+                {
+                    await File.WriteAllTextAsync(ListingEtagPath, newListingEtag.ToString(), cancellationToken).ConfigureAwait(false);
+                }
             }
             catch (OperationCanceledException)
             {
@@ -244,6 +292,10 @@ namespace Conch.ViewModel
             catch (Exception ex)
             {
                 Log.Error(LogCategory, "Error refreshing tools from the remote catalog", ex);
+            }
+            finally
+            {
+                _refreshing.Release();
             }
         }
 
@@ -266,6 +318,10 @@ namespace Conch.ViewModel
 
             [JsonPropertyName("download_url")]
             public Uri? DownloadUrl { get; set; }
+
+            /// <summary>The file's git blob sha: changes exactly when its contents do.</summary>
+            [JsonPropertyName("sha")]
+            public string? Sha { get; set; }
         }
     }
 }

@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using Avalonia.Threading;
 using Conch.Utilities;
@@ -24,42 +25,72 @@ namespace Conch.Services
         private static readonly TimeSpan ProbeTimeout = TimeSpan.FromSeconds(20);
 
         /// <summary>
+        /// Probes that spawn a process are slow; a few at a time, across every caller, keeps a
+        /// large catalog responsive without forking dozens of shells at once.
+        /// </summary>
+        /// <remarks>
+        /// Shared rather than one per call. Each call used to bring its own four, so the
+        /// startup pass, Software opening and a catalog refresh landing together ran twelve.
+        /// </remarks>
+        private static readonly SemaphoreSlim Throttle = new(4);
+
+        /// <summary>The probe under way for each app, which a second asker waits for rather than repeats.</summary>
+        private static readonly ConcurrentDictionary<ToolViewModel, Lazy<Task>> InFlight =
+            new(ReferenceEqualityComparer.Instance);
+
+        /// <summary>
         /// Probes every tool and updates its <see cref="ToolViewModel.IsInstalled"/>.
         /// </summary>
+        /// <remarks>
+        /// An app already being probed is not probed again: the caller waits for the probe
+        /// already running. Several things ask at once -- the startup pass, Software opening, a
+        /// catalog refresh -- each for "whatever is not detected yet", which while the first
+        /// pass runs is everything; without this they each probed the whole catalog, hundreds
+        /// of processes in all, and Software took twenty seconds to say what was installed.
+        /// </remarks>
         public static async Task RefreshAsync(IEnumerable<ToolViewModel> tools, CancellationToken cancellationToken = default)
         {
-            var list = tools.ToList();
+            var list = tools.Distinct().ToList();
             if (list.Count == 0)
             {
                 return;
             }
 
-            // Probes that spawn a process are slow; a few at a time keeps a large catalog
-            // responsive without forking dozens of shells at once.
-            using var throttle = new SemaphoreSlim(4);
-
-            var probes = list.Select(async tool =>
+            var probes = list.Select(tool =>
             {
-                await throttle.WaitAsync(cancellationToken).ConfigureAwait(false);
-                try
-                {
-                    var installed = await ProbeAsync(tool, cancellationToken).ConfigureAwait(false);
-                    await Dispatcher.UIThread.InvokeAsync(() =>
-                    {
-                        tool.IsInstalled = installed;
-                        tool.IsDetected = true;
-                    });
-                }
-                finally
-                {
-                    throttle.Release();
-                }
+                var probe = InFlight.GetOrAdd(tool, t => new Lazy<Task>(() => ProbeAndRecordAsync(t, cancellationToken)));
+                var task = probe.Value;
+
+                // Gone once finished -- by value, so a later probe of the same app that has
+                // already taken its place is not removed, and a finished one never lingers to
+                // answer a RECHECK with an old result.
+                _ = task.ContinueWith(_ => InFlight.TryRemove(new KeyValuePair<ToolViewModel, Lazy<Task>>(tool, probe)),
+                    TaskScheduler.Default);
+                return task;
             });
 
             await Task.WhenAll(probes).ConfigureAwait(false);
 
             var count = list.Count(t => t.IsInstalled);
             Log.Info(LogCategory, $"{count} of {list.Count} registered app(s) present.");
+        }
+
+        private static async Task ProbeAndRecordAsync(ToolViewModel tool, CancellationToken cancellationToken)
+        {
+            await Throttle.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                var installed = await ProbeAsync(tool, cancellationToken).ConfigureAwait(false);
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    tool.IsInstalled = installed;
+                    tool.IsDetected = true;
+                });
+            }
+            finally
+            {
+                Throttle.Release();
+            }
         }
 
         /// <summary>

@@ -36,10 +36,26 @@ public partial class AppManagerDialog : ManagedWindow
     /// </summary>
     private AppLauncher Apps => _launcher ??= new AppLauncher(WindowsPanel);
 
+    /// <remarks>
+    /// Not a recheck: Conch looked for every app at startup, and this window keeps the list up
+    /// to date as it installs and removes. Only apps nothing has looked for yet -- the startup
+    /// pass still running, a definition the catalog just added -- are probed. RECHECK is there
+    /// for an app installed from a terminal.
+    /// </remarks>
     private async void OnOpened(object? sender, EventArgs e)
     {
         SearchBox.Focus();
-        await RecheckAsync();
+
+        var pending = _appViewModel.Tools.Where(t => !t.IsDetected && t.IsAvailableHere).ToList();
+        if (pending.Count > 0)
+        {
+            // Mostly the startup pass still running, which this waits on rather than repeats.
+            _viewModel.CheckStatus = $"Checking {pending.Count} apps...";
+            await ToolDetector.RefreshAsync(pending);
+        }
+
+        var here = _appViewModel.Tools.Where(t => t.IsAvailableHere).ToList();
+        _viewModel.CheckStatus = $"{here.Count(t => t.IsInstalled)} of {here.Count} apps installed.";
     }
 
     // PATH first: an install done outside Conch -- in a terminal -- may have added a folder

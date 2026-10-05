@@ -1,3 +1,4 @@
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Iciclecreek.Avalonia.WindowManager;
 
@@ -24,13 +25,37 @@ public partial class ConfirmDialog : ManagedWindow
         Title = title;
         QuestionText.Text = question;
         Opened += (_, _) => YesButton.Focus();
+
+        // Avalonia fires access keys only with Alt held; a yes/no question should take the
+        // bare letter, as every dialog of this kind does.
+        AddHandler(KeyDownEvent, OnKeyDown, RoutingStrategies.Tunnel);
+    }
+
+    private void OnKeyDown(object? sender, KeyEventArgs e)
+    {
+        if ((e.KeyModifiers & ~KeyModifiers.Alt) != KeyModifiers.None || !NoButton.IsVisible)
+        {
+            return;
+        }
+
+        switch (e.Key)
+        {
+            case Key.Y:
+                e.Handled = true;
+                Answer(true);
+                break;
+            case Key.N:
+                e.Handled = true;
+                Answer(false);
+                break;
+        }
     }
 
     /// <summary>A message with only OK, which Enter and Esc both press.</summary>
     public static ConfirmDialog Inform(string title, string message)
     {
         var dialog = new ConfirmDialog(title, message);
-        dialog.YesButton.Content = "OK";
+        dialog.YesButton.Content = "_OK";
         dialog.YesButton.IsCancel = true;
         dialog.NoButton.IsVisible = false;
         return dialog;

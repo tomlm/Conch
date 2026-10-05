@@ -165,6 +165,116 @@ public class ShellSearchTests
         Assert.Equal("htop", search.Search("htop").First().Title);
     }
 
+    private static SearchItem App(string title, string id) => Item(SearchItemKind.App, title) with { Id = id };
+
+    [Fact]
+    public void PinsComeFirstInTheOrderTheyWerePinnedAndOnlyOnce()
+    {
+        var apps = new[] { App("btop", "btop"), App("lazygit", "lazygit"), App("nano", "gnu.nano") };
+        var search = new ShellSearchViewModel(() => Fixed, () => apps, _ => () => { }, () => ["gnu.nano", "btop"]);
+
+        var titles = Titles(search.Search("")).ToList();
+
+        Assert.Equal(new[] { "nano", "btop", "Files", "Terminal", "lazygit" }, titles);
+    }
+
+    [Fact]
+    public void APinnedResultWinsATie()
+    {
+        var apps = new[] { App("nano", "gnu.nano"), App("neovim", "neovim") };
+        var search = new ShellSearchViewModel(() => [], () => apps, _ => () => { }, () => ["neovim"]);
+
+        Assert.Equal("neovim", search.Search("n").First().Title);
+    }
+
+    [Fact]
+    public void PinsAreTaggedAndOfferUnpin()
+    {
+        var search = new ShellSearchViewModel(() => [], () => [App("btop", "btop")], _ => () => { }, () => ["btop"]);
+
+        var btop = search.Search("").Single();
+
+        Assert.Equal(("pinned", "Unpin"), (btop.KindLabel, btop.PinLabel));
+    }
+
+    [Fact]
+    public void AnItemWithNoIdCannotBePinned()
+    {
+        Assert.False(Item(SearchItemKind.Command, "Logout").CanPin);
+    }
+
+    [Fact]
+    public void APinForSomethingNotInstalledIsSimplyNotShown()
+    {
+        var search = new ShellSearchViewModel(() => [], () => [App("btop", "btop")], _ => () => { }, () => ["gone.app", "btop"]);
+
+        Assert.Equal(new[] { "btop" }, Titles(search.Search("")));
+    }
+
+    [Fact]
+    public void PinsSurviveARestartInOrder()
+    {
+        var directory = Path.Combine(Path.GetTempPath(), "conch-pins-" + Guid.NewGuid().ToString("n"));
+        Directory.CreateDirectory(directory);
+        try
+        {
+            var settings = new Conch.Services.ShellSettings(directory).Load();
+            settings.SetPinned("btop", true);
+            settings.SetPinned("gnu.nano", true);
+            settings.SetPinned("btop", false);
+            settings.SetPinned("btop", true);
+
+            Assert.Equal(new[] { "gnu.nano", "btop" }, new Conch.Services.ShellSettings(directory).Load().Pinned);
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void ARefreshThatChangesNothingLeavesTheSelectionAlone()
+    {
+        // Detection reports in every second or so during a catalog refresh; the arrow keys
+        // must not be undone by it.
+        var search = Search();
+        search.Refresh();
+        search.SelectedResult = search.Results[3];
+
+        search.Reload();
+        search.Refresh();
+
+        Assert.Same(search.Results[3], search.SelectedResult);
+    }
+
+    [Fact]
+    public void AnAppArrivingKeepsTheSelectionOnTheSameItem()
+    {
+        var installed = Apps.ToList();
+        var search = new ShellSearchViewModel(() => Fixed, () => installed, _ => () => { });
+        search.Refresh();
+        search.SelectedResult = search.Results.Single(r => r.Title == "nano");
+
+        installed.Add(Item(SearchItemKind.App, "aaa-first", "Sorts to the top"));
+        search.Reload();
+        search.Refresh();
+
+        Assert.Equal("nano", search.SelectedResult?.Title);
+        Assert.Contains("aaa-first", Titles(search.Results));
+    }
+
+    [Fact]
+    public void ANewQueryStartsAtItsBestMatch()
+    {
+        var search = Search();
+        search.Refresh();
+        search.SelectedResult = search.Results.Last();
+
+        search.Query = "laz";
+
+        Assert.Equal("lazygit", search.SelectedResult?.Title);
+    }
+
     [Fact]
     public void ResultsStopAtTheLimit()
     {

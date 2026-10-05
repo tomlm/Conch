@@ -32,7 +32,17 @@ namespace Conch.ViewModel
         IReadOnlyList<string> Terms,
         Action Invoke)
     {
-        /// <summary>The short tag shown beside the title.</summary>
+        /// <summary>What it is pinned by: a catalog id, or conch:... for the shell's own. Null: cannot be pinned.</summary>
+        public string? Id { get; init; }
+
+        /// <summary>Pinned to the top of search.</summary>
+        public bool IsPinned { get; init; }
+
+        /// <summary>What the right-click menu offers.</summary>
+        public string PinLabel => IsPinned ? "Unpin" : "Pin to top";
+
+        public bool CanPin => Id != null;
+
         private string[]? _titleWords;
         private string[]? _termWords;
         private string[]? _detailWords;
@@ -46,9 +56,10 @@ namespace Conch.ViewModel
         /// <summary>The description split into words, worked out once.</summary>
         internal string[] DetailWords => _detailWords ??= ShellSearchViewModel.Words(Detail);
 
-        /// <remarks>Only settings are tagged: nearly everything else is an app, and a tag on
-        /// every row is a column of noise.</remarks>
-        public string KindLabel => Kind == SearchItemKind.Setting ? "settings" : string.Empty;
+        /// <summary>The short tag shown beside the title.</summary>
+        /// <remarks>Only pins and settings are tagged: nearly everything else is an app, and a
+        /// tag on every row is a column of noise.</remarks>
+        public string KindLabel => IsPinned ? "pinned" : Kind == SearchItemKind.Setting ? "settings" : string.Empty;
     }
 
     /// <summary>
@@ -71,6 +82,7 @@ namespace Conch.ViewModel
         private readonly Func<IEnumerable<SearchItem>> _fixedItems;
         private readonly Func<IEnumerable<SearchItem>> _apps;
         private readonly Func<string, Action> _run;
+        private readonly Func<IReadOnlyList<string>> _pinned;
 
         /// <summary>
         /// What can be found, in A-to-Z order: taken by <see cref="Reload"/>, not on every
@@ -87,14 +99,17 @@ namespace Conch.ViewModel
         /// <param name="fixedItems">The shell's own entries: built-ins, settings, commands.</param>
         /// <param name="apps">Installed apps, read when <see cref="Reload"/> is called.</param>
         /// <param name="run">What running a typed command line does.</param>
+        /// <param name="pinned">Ids pinned to the top, in order; none when null.</param>
         public ShellSearchViewModel(
             Func<IEnumerable<SearchItem>> fixedItems,
             Func<IEnumerable<SearchItem>> apps,
-            Func<string, Action> run)
+            Func<string, Action> run,
+            Func<IReadOnlyList<string>>? pinned = null)
         {
             _fixedItems = fixedItems;
             _apps = apps;
             _run = run;
+            _pinned = pinned ?? (() => []);
         }
 
         public ObservableCollection<SearchItem> Results { get; } = new();
@@ -105,7 +120,17 @@ namespace Conch.ViewModel
         [ObservableProperty]
         private SearchItem? _selectedResult;
 
-        partial void OnQueryChanged(string value) => Refresh();
+        partial void OnQueryChanged(string value)
+        {
+            // A new query starts at its best match.
+            SelectedResult = null;
+            Refresh();
+            SelectedResult ??= Results.FirstOrDefault();
+            if (!Results.Contains(SelectedResult!))
+            {
+                SelectedResult = Results.FirstOrDefault();
+            }
+        }
 
         /// <summary>
         /// Takes a fresh look at what can be found. Call when search opens and when what is
@@ -113,22 +138,50 @@ namespace Conch.ViewModel
         /// </summary>
         public void Reload()
         {
+            var pinned = _pinned();
+            _pinOrder = pinned
+                .Select((id, i) => (id, i))
+                .ToDictionary(p => p.id, p => p.i, StringComparer.OrdinalIgnoreCase);
+
             _candidates = _fixedItems()
                 .Concat(_apps().OrderBy(a => a.Title, StringComparer.CurrentCultureIgnoreCase))
+                .Select(i => i.Id != null && _pinOrder.ContainsKey(i.Id) ? i with { IsPinned = true } : i)
                 .ToList();
         }
 
+        private Dictionary<string, int> _pinOrder = new(StringComparer.OrdinalIgnoreCase);
+
         /// <summary>Recomputes the results for the current query.</summary>
+        /// <remarks>
+        /// Called when what is installed changes as well as when the query does, and a catalog
+        /// refresh can change it every second or so -- each change used to rebuild the list and
+        /// put the selection back at the top, under the arrow keys of whoever was choosing. Now
+        /// the list is left alone unless the results differ, and the selection stays on the
+        /// item it was on when they do.
+        /// </remarks>
         public void Refresh()
         {
+            var results = Search(Query);
+            if (results.Select(Key).SequenceEqual(Results.Select(Key)))
+            {
+                return;
+            }
+
+            var selected = SelectedResult == null ? null : Key(SelectedResult);
             Results.Clear();
-            foreach (var item in Search(Query))
+            foreach (var item in results)
             {
                 Results.Add(item);
             }
 
-            SelectedResult = Results.FirstOrDefault();
+            SelectedResult = Results.FirstOrDefault(r => Key(r) == selected) ?? Results.FirstOrDefault();
         }
+
+        /// <summary>
+        /// What identifies a result across refreshes: items are rebuilt, so not the object.
+        /// The pin state is part of it, so pinning shows.
+        /// </summary>
+        private static string Key(SearchItem item) => $"{item.Kind}|{item.Id ?? item.Title}|{item.IsPinned}";
 
         /// <summary>
         /// The results for <paramref name="query"/>, best first.
@@ -151,10 +204,14 @@ namespace Conch.ViewModel
                 Reload();
             }
 
+            // Empty: pins first, in the order they were pinned -- the Start menu's Pinned -- then
+            // the shell's apps and every installed app, A to Z.
             if (text.Length == 0)
             {
-                return _candidates!.Where(i => i.Kind is SearchItemKind.Shell or SearchItemKind.App)
-                    .OrderBy(i => i.Kind == SearchItemKind.App)
+                return _candidates!.Where(i => i.IsPinned)
+                    .OrderBy(i => _pinOrder[i.Id!])
+                    .Concat(_candidates!.Where(i => !i.IsPinned && i.Kind is SearchItemKind.Shell or SearchItemKind.App)
+                        .OrderBy(i => i.Kind == SearchItemKind.App))
                     .Take(MaxResults)
                     .ToList();
             }
@@ -163,6 +220,7 @@ namespace Conch.ViewModel
                 .Select(item => (item, rank: Rank(item, text)))
                 .Where(x => x.rank >= 0)
                 .OrderBy(x => x.rank)
+                .ThenBy(x => !x.item.IsPinned)
                 .ThenBy(x => KindOrder(x.item.Kind))
                 .ThenBy(x => x.item.Title, StringComparer.CurrentCultureIgnoreCase)
                 .Select(x => x.item)
@@ -236,6 +294,6 @@ namespace Conch.ViewModel
         /// <summary>The search item for an installed app.</summary>
         public static SearchItem ForApp(ToolViewModel tool, Action launch)
             => new(SearchItemKind.App, tool.Name, tool.Description,
-                [tool.Id, tool.Command, .. tool.Keywords], launch);
+                [tool.Id, tool.Command, .. tool.Keywords], launch) { Id = tool.Id };
     }
 }

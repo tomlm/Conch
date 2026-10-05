@@ -42,6 +42,10 @@ namespace Conch.Views
 
             _openFile = openFile;
             _openWith = openWith;
+
+            // Its ContextMenu, which a right-click never reached inside a managed window.
+            Controls.RightClick.Attach(EntriesBox, item =>
+                item is FileEntryViewModel { IsDirectory: false } && _pickFolder == null ? EntriesBox.ContextMenu : null);
             _viewModel = new FilesViewModel(startAt);
             DataContext = _viewModel;
 

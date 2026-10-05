@@ -83,6 +83,21 @@ namespace Conch.Services
             Save();
         }
 
+        /// <summary>What is pinned to the top of search, in the order it was pinned.</summary>
+        public IReadOnlyList<string> Pinned => _document.Pinned;
+
+        /// <summary>Pins <paramref name="id"/> to the top of search, or unpins it.</summary>
+        public void SetPinned(string id, bool pinned)
+        {
+            _document.Pinned.RemoveAll(p => string.Equals(p, id, StringComparison.OrdinalIgnoreCase));
+            if (pinned)
+            {
+                _document.Pinned.Add(id);
+            }
+
+            Save();
+        }
+
         /// <summary>The app id chosen to open files with <paramref name="extension"/>, or null.</summary>
         public string? GetFileTypeChoice(string extension)
             => _document.FileTypes.TryGetValue(extension.ToLowerInvariant(), out var id) ? id : null;
@@ -215,6 +230,9 @@ namespace Conch.Services
 
             public Dictionary<string, string> Hotkeys { get; set; } =
                 new(StringComparer.OrdinalIgnoreCase);
+
+            /// <summary>Ids pinned to the top of search: catalog ids, or conch:... for the shell's own.</summary>
+            public List<string> Pinned { get; set; } = [];
 
             /// <summary>Extension, with its dot, to the id of the app that opens it.</summary>
             public Dictionary<string, string> FileTypes { get; set; } =

@@ -4,6 +4,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
+using Conch.Controls;
 using Conch.Services;
 using Conch.Services.Roles;
 using Conch.Utilities;
@@ -18,11 +19,6 @@ namespace Conch.Views
         /// <summary>How often the network is actually sampled, in timer ticks of one second.</summary>
         private const int NetworkSampleSeconds = 5;
 
-        /// <summary>
-        /// How long the search box trusts what detection last found before looking again, so
-        /// an app installed from a terminal shows up without a probe on every keystroke.
-        /// </summary>
-        private static readonly TimeSpan AppRecheckInterval = TimeSpan.FromMinutes(1);
 
         /// <summary>The search popup's width: its 48-column panel and the border round it.</summary>
         private const double SearchPopupWidth = 50;
@@ -32,8 +28,9 @@ namespace Conch.Views
         private FileOpeners? _openers;
         private ShellSearchViewModel? _search;
         private ManagedWindow? _returnTo;
-        private DateTime _appsCheckedAt = DateTime.MinValue;
-        private bool _checkingApps;
+        private bool _detectionQueued;
+        private bool _searchMenuOpen;
+        private DispatcherTimer? _catalogTimer;
         private DispatcherTimer? _statusTimer;
         private bool? _networkUp;
 
@@ -59,6 +56,7 @@ namespace Conch.Views
             SearchBox.LostFocus += (_, _) => Dispatcher.UIThread.Post(CloseSearchIfFocusLeft);
             SearchResults.AddHandler(KeyDownEvent, OnSearchKeyDown, RoutingStrategies.Tunnel);
             SearchResults.Tapped += OnSearchResultTapped;
+            RightClick.Attach(SearchResults, SearchResultMenu);
 
             Loaded += OnLoaded;
             StartStatusArea();
@@ -71,7 +69,8 @@ namespace Conch.Views
         private void OnLoaded(object? sender, RoutedEventArgs e)
         {
             SearchArea.DataContext = _search = new ShellSearchViewModel(
-                ShellItems, InstalledApps, text => () => Apps.LaunchCommandLine(text));
+                ShellItems, InstalledApps, text => () => Apps.LaunchCommandLine(text),
+                () => App.Settings.Pinned);
 
             // Here rather than in the constructor: the panel's windows live in its template,
             // which exists only once it has been laid out.
@@ -80,12 +79,25 @@ namespace Conch.Views
             App.Settings.Changed += (_, _) => ApplySettings();
             ApplySettings();
             CheckRoleIndicatorsAsync();
+            DetectAppsAtStartup();
             StartControl();
         }
 
         /// <summary>Brings the bar up to date with Preferences: icons or words, which indicators.</summary>
         private void ApplySettings()
         {
+            // Pins live in settings; a pin or unpin shows at once.
+            _search?.Reload();
+            if (SearchPopup.IsOpen)
+            {
+                var selected = _search?.SelectedResult?.Id;
+                _search?.Refresh();
+                if (selected != null && _search?.Results.FirstOrDefault(r => r.Id == selected) is { } again)
+                {
+                    _search.SelectedResult = again;
+                }
+            }
+
             ConchMenu.Header = App.Settings.StatusAsText ? "Conch" : "🐚";
             SearchButton.Content = App.Settings.StatusAsText ? "search" : "🔍";
             ShowNetwork();
@@ -142,21 +154,21 @@ namespace Conch.Views
             var ownsSession = CommandLineOptions.Current.OwnsSession;
 
             yield return new(SearchItemKind.Shell, "Files", "Browse folders",
-                ["explorer", "folders", "directory"], () => OpenRole(ShellRoles.FileExplorer));
+                ["explorer", "folders", "directory"], () => OpenRole(ShellRoles.FileExplorer)) { Id = "conch:files" };
             yield return new(SearchItemKind.Shell, "Terminal", "A new shell",
-                ["shell", "console", "command prompt", "bash"], () => Apps.LaunchShell());
+                ["shell", "console", "command prompt", "bash"], () => Apps.LaunchShell()) { Id = "conch:terminal" };
             yield return new(SearchItemKind.Shell, ShellRoles.DisplayName(ShellRoles.AppManager),
                 "Find, install and remove apps", ["install", "apps", "store", "catalog", "manager", "app center"],
-                () => OpenRole(ShellRoles.AppManager));
+                () => OpenRole(ShellRoles.AppManager)) { Id = "conch:software" };
 
             yield return new(SearchItemKind.Setting, "Network settings", "Wi-Fi and connections",
-                ["wifi", "ethernet", "internet"], () => OpenRole(ShellRoles.NetworkConfig));
+                ["wifi", "ethernet", "internet"], () => OpenRole(ShellRoles.NetworkConfig)) { Id = "conch:network" };
             yield return new(SearchItemKind.Setting, "Display settings", "Font, size and resolution",
-                ["screen", "font", "resolution", "monitor"], () => OpenRole(ShellRoles.DisplayConfig));
+                ["screen", "font", "resolution", "monitor"], () => OpenRole(ShellRoles.DisplayConfig)) { Id = "conch:display" };
             yield return new(SearchItemKind.Setting, "Audio settings", "Volume and devices",
-                ["sound", "volume", "speaker"], () => OpenRole(ShellRoles.AudioConfig));
+                ["sound", "volume", "speaker"], () => OpenRole(ShellRoles.AudioConfig)) { Id = "conch:audio" };
             yield return new(SearchItemKind.Setting, "Preferences", "Default apps, keyboard and appearance",
-                ["conch", "settings", "hotkeys", "keyboard", "shortcuts", "theme", "default apps"], () => ShowPreferences());
+                ["conch", "settings", "hotkeys", "keyboard", "shortcuts", "theme", "default apps"], () => ShowPreferences()) { Id = "conch:preferences" };
 
             yield return new(SearchItemKind.Command, "Conch log", "What Conch has been doing",
                 ["log", "errors"], ShowLog);
@@ -219,7 +231,6 @@ namespace Conch.Views
                 SearchBox.SelectAll();
             }, DispatcherPriority.Input);
 
-            CheckAppsAsync();
         }
 
         /// <summary>
@@ -235,34 +246,66 @@ namespace Conch.Views
         }
 
         /// <summary>
-        /// Looks for installed apps when nothing has looked recently, and refreshes the
-        /// results when it is done.
+        /// Looks for every app in the background once, at startup; then only for definitions
+        /// the catalog adds or replaces, and when someone presses RECHECK in Software.
         /// </summary>
         /// <remarks>
-        /// What the Apps window did on every open. Detection does not clear what it already
-        /// knows while it probes, so the list never empties and refills.
+        /// A pass is ~270 probes -- on Windows a wsl.exe each for the Linux ones -- and what is
+        /// installed only changes when something installs it. Software updates the list itself
+        /// when it installs or removes an app, so the only change a pass can find is an install
+        /// done outside Conch, which RECHECK is for. Detection keeps what it already knows while
+        /// it probes, so nothing empties and refills.
         /// </remarks>
-        private async void CheckAppsAsync()
+        private async void DetectAppsAtStartup()
         {
-            if (_checkingApps || DateTime.UtcNow - _appsCheckedAt < AppRecheckInterval)
+            App.Tools.CollectionChanged += (_, args) =>
+            {
+                // The GitHub refresh replaces definitions with new objects, nobody has looked for.
+                if (args.NewItems != null)
+                {
+                    QueueDetection();
+                }
+            };
+
+            await ToolDetector.RefreshAsync(App.Tools.Where(t => t.IsAvailableHere));
+            AppsDetected();
+
+            // The catalog refreshed itself at startup; after that, hourly. An unchanged catalog
+            // costs one request GitHub answers 304, and whatever did change is looked for by
+            // the CollectionChanged handler above.
+            _catalogTimer = new DispatcherTimer(TimeSpan.FromHours(1), DispatcherPriority.Background,
+                (_, _) => _ = App.Tools.RefreshFromGitHubAsync());
+            _catalogTimer.Start();
+            Closed += (_, _) => _catalogTimer?.Stop();
+        }
+
+        /// <summary>Probes the apps nothing has looked for yet, once a burst of catalog changes settles.</summary>
+        private void QueueDetection()
+        {
+            if (_detectionQueued)
             {
                 return;
             }
 
-            _checkingApps = true;
-            try
+            _detectionQueued = true;
+            DispatcherTimer.RunOnce(async () =>
             {
-                await ToolDetector.RefreshAsync(App.Tools.Where(t => t.IsAvailableHere));
-                _appsCheckedAt = DateTime.UtcNow;
-            }
-            finally
-            {
-                _checkingApps = false;
-            }
+                _detectionQueued = false;
+                var pending = App.Tools.Where(t => !t.IsDetected && t.IsAvailableHere).ToList();
+                if (pending.Count > 0)
+                {
+                    await ToolDetector.RefreshAsync(pending);
+                    AppsDetected();
+                }
+            }, TimeSpan.FromSeconds(1));
+        }
 
+        /// <summary>Catches the bar up with what detection found.</summary>
+        private void AppsDetected()
+        {
+            _search?.Reload();
             if (SearchPopup.IsOpen)
             {
-                _search?.Reload();
                 _search?.Refresh();
             }
 
@@ -288,7 +331,47 @@ namespace Conch.Views
                     CloseSearch(returnFocus: true);
                     e.Handled = true;
                     break;
+
+                case Key.P when e.KeyModifiers == KeyModifiers.Control:
+                    TogglePin(_search?.SelectedResult);
+                    e.Handled = true;
+                    break;
             }
+        }
+
+        /// <summary>Pins a result to the top of search, or unpins it.</summary>
+        private void TogglePin(SearchItem? item)
+        {
+            if (item?.Id is { } id)
+            {
+                App.Settings.SetPinned(id, !item.IsPinned);
+            }
+        }
+
+        /// <summary>The right-click menu for a search result: pin or unpin it.</summary>
+        private ContextMenu? SearchResultMenu(object item)
+        {
+            if (item is not SearchItem { CanPin: true } result)
+            {
+                return null;
+            }
+
+            var pin = new MenuItem { Header = result.PinLabel };
+            pin.Click += (_, _) => TogglePin(result);
+            var menu = new ContextMenu { Items = { pin } };
+
+            // The menu takes the keyboard from the search box, and search closes when the
+            // keyboard leaves it -- taking the row, and the menu with it, before it was drawn.
+            menu.Opened += (_, _) => _searchMenuOpen = true;
+            menu.Closed += (_, _) =>
+            {
+                _searchMenuOpen = false;
+                if (SearchPopup.IsOpen)
+                {
+                    SearchBox.Focus();
+                }
+            };
+            return menu;
         }
 
         private void MoveSelection(int step)
@@ -370,6 +453,11 @@ namespace Conch.Views
         /// <summary>Closes the results once focus has gone somewhere other than the search.</summary>
         private void CloseSearchIfFocusLeft()
         {
+            if (_searchMenuOpen)
+            {
+                return;
+            }
+
             var focused = FocusManager?.GetFocusedElement() as Visual;
             if (SearchBox.IsKeyboardFocusWithin || focused == SearchResults
                 || (focused != null && SearchResults.IsVisualAncestorOf(focused)))

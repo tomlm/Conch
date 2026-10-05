@@ -13,11 +13,14 @@
         CanResize="False">
 	<Grid Margin="{console:OnPlatform Default='16', Console='1'}" RowDefinitions="Auto,Auto">
 		<TextBlock Grid.Row="0" x:Name="QuestionText" TextWrapping="Wrap" MinWidth="20" Margin="0 0 0 1"/>
-		<!-- Enter is Yes and Esc is No: the window manager presses the default and cancel buttons. -->
+		<!--
+		Enter is Yes and Esc is No: the window manager presses the default and cancel buttons.
+		Y and N answer too, with or without Alt, and are underlined to say so.
+		-->
 		<StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right"
 					Spacing="{console:OnPlatform Default='8',Console='1'}">
-			<Button x:Name="YesButton" Content="YES" Click="OnYes" IsDefault="True"/>
-			<Button x:Name="NoButton" Content="NO" Click="OnNo" IsCancel="True"/>
+			<Button x:Name="YesButton" Content="_YES" Click="OnYes" IsDefault="True"/>
+			<Button x:Name="NoButton" Content="_NO" Click="OnNo" IsCancel="True"/>
 		</StackPanel>
 	</Grid>
 </wm:ManagedWindow>
