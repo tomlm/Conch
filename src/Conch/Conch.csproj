@@ -9,6 +9,10 @@
     <AssemblyName>Conch</AssemblyName>
     <Product>Conch</Product>
     <Authors>Tom Laird-McConnell</Authors>
+    <!-- AVLN3001: a window with no parameterless constructor cannot be loaded from its
+         XAML alone. Conch's dialogs are always constructed in code, with arguments, and
+         their XAML is compiled in; only the designer preview would need one. -->
+    <NoWarn>$(NoWarn);AVLN3001</NoWarn>
   </PropertyGroup>
 
   <!-- Conch ships as a .NET global tool. Distro packaging lives in Conchix,
