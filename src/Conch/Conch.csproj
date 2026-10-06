@@ -40,10 +40,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Consolonia" Version="12.0.3.13" />
+    <PackageReference Include="Consolonia" Version="12.0.3.14" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-    <PackageReference Include="Consolonia.ManagedWindows" Version="12.0.3.13" />
-    <PackageReference Include="Iciclecreek.Avalonia.Terminal" Version="4.0.3" />
+    <PackageReference Include="Consolonia.ManagedWindows" Version="12.0.3.14" />
+    <PackageReference Include="Iciclecreek.Avalonia.Terminal" Version="4.0.4" />
     <PackageReference Include="Iciclecreek.Avalonia.WindowManager" Version="5.0.2" />
     <PackageReference Include="ObjectSearch.Net" Version="1.2.0" />
     <PackageReference Include="YamlConvert" Version="3.1.0" />
