@@ -7,7 +7,7 @@ namespace Conch.Utilities
     /// Everything Conch starts -- apps, terminals, detection probes -- inherits its PATH, and
     /// that PATH goes stale in two ways:
     ///
-    /// - Where Conch IS the login shell, as on Conchix, nothing reads /etc/profile,
+    /// - Where Conch IS the login shell, as on Cursix, nothing reads /etc/profile,
     ///   /etc/profile.d or ~/.profile at all: login execs Conch, and Conch is not bash. So
     ///   ~/.dotnet/tools (added by /etc/profile.d/dotnet.sh), ~/.local/bin (added by
     ///   ~/.profile, where pipx and pip put per-user commands) and anything else a package

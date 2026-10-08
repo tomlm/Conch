@@ -38,7 +38,7 @@
 					<MenuItem Header="_Software..." Click="OnManageApps"/>
 					<Separator/>
 					<!--
-					Each opens whatever serves the role (Conch's own Network, Conchix Display,
+					Each opens whatever serves the role (Conch's own Network, Cursix Display,
 					pulsemixer) and offers Preferences when nothing does.
 					-->
 					<MenuItem Header="_Network..." Click="OnShowNetwork"/>
@@ -115,7 +115,7 @@
 				<!--
 				One indicator per thing you would want to fix from here, each opening whatever
 				serves its role. Audio and Display appear only when something serves them: an
-				icon that only says "nothing is set up" is clutter, and Conchix has no audio.
+				icon that only says "nothing is set up" is clutter, and Cursix has no audio.
 				-->
 				<Button x:Name="NetworkIndicator"
 						Click="OnShowNetwork"

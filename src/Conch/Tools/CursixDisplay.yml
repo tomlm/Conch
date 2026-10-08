@@ -1,0 +1,28 @@
+id: cursix.display
+name: Cursix Display
+version: 1.0.0
+author: Cursix
+description: Console font, font size and resolution for Cursix's kmscon console
+license: MIT
+platforms:
+  # Part of the Cursix image, not something to install: it edits /etc/kmscon/kmscon.conf,
+  # which only exists where kmscon draws the console. Elsewhere it is simply not
+  # installed, and Tools > Display says nothing serves the role.
+  linux:
+    install: echo "Cursix Display comes with the Cursix image; it edits kmscon's settings and has nothing to configure elsewhere." && exit 1
+    uninstall: echo "Cursix Display is part of the Cursix image, so Conch does not remove it." && exit 1
+    detect: test -x /usr/bin/cursix-display
+command: cursix-display
+args: ""
+source: https://github.com/tomlm/Cursix
+website: https://github.com/tomlm/Cursix
+documentation: https://github.com/tomlm/Cursix#readme
+keywords:
+  - display
+  - font
+  - resolution
+  - kmscon
+  - console
+
+roles:
+  - display-config

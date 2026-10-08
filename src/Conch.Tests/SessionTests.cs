@@ -40,7 +40,7 @@ public class SessionTests
     public void PoweringOffOnLinuxTriesTheDirectRouteBeforeSudo()
     {
         // Whether a non-root user may power the machine down is polkit's answer, and it
-        // differs per machine: with polkitd present -- Conchix, since NetworkManager needs
+        // differs per machine: with polkitd present -- Cursix, since NetworkManager needs
         // it -- logind authorises a local seat user and there is nothing to type. Without it
         // the call fails authentication and sudo is the way through.
         //

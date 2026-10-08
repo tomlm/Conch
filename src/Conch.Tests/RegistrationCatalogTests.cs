@@ -266,7 +266,7 @@ public class RegistrationCatalogTests
     [Theory]
     [InlineData(ShellRoles.TextEditor, HostOs.Windows, "edit.exe")]
     [InlineData(ShellRoles.TextEditor, HostOs.Linux, "gnu.nano")]
-    [InlineData(ShellRoles.DisplayConfig, HostOs.Linux, "conchix.display")]
+    [InlineData(ShellRoles.DisplayConfig, HostOs.Linux, "cursix.display")]
     public void EachPreferredDefaultIsAShippedAppForThatRoleAndPlatform(string role, HostOs os, string expected)
     {
         // A preferred default naming an id the catalog does not ship, one that does not declare

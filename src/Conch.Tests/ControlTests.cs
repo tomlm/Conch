@@ -135,7 +135,7 @@ public class ConchCliTests
     [Fact]
     public void TheSessionFlagAWrapperAddsIsIgnored()
     {
-        // Conchix's /usr/bin/conch put CONCH_ARGS (--session) in front of every call.
+        // Cursix's /usr/bin/conch put CONCH_ARGS (--session) in front of every call.
         Assert.Equal("open", ConchCli.Parse(["--session", "open", "a.md"], null, Cwd).Request!.Verb);
     }
 

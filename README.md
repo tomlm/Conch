@@ -77,11 +77,11 @@ Windows are named by id, `self` (the window you are in, the default) or `active`
 `--json` for output a script can parse. `conch help` lists everything.
 
 Each terminal Conch opens is given `CONCH_SOCKET` and `CONCH_WINDOW`; outside Conch (an
-ssh session into Conchix, say) `conch` uses the one Conch you have running. The socket
+ssh session into Cursix, say) `conch` uses the one Conch you have running. The socket
 sits in a directory only you can read, and nothing listens on the network.
 
 `conch open` takes links too, opened by whatever declares their scheme (`opens: ["https:"]`;
-w3m and Browsh do). On Conchix, `xdg-open` and `start` are `conch open`, so programs that
+w3m and Browsh do). On Cursix, `xdg-open` and `start` are `conch open`, so programs that
 open a file or link "in the right app" -- `gh browse`, `git help --web` -- open it in a
 Conch window. With Conch running on Windows, a WSL shell inside it uses `conch.exe`: the
 socket reaches WSL through `WSLENV`, and a Linux process cannot dial a Windows socket
@@ -138,7 +138,7 @@ falls back to the built-in rather than leaving the role broken.
 `conch --session` tells Conch it *is* the session rather than one program among many,
 which adds Restart and Shut Down to the Conch menu. Logout is always there; outside a
 session it is called Exit.
-Conchix sets the flag through `CONCH_ARGS` in `/etc/default/conch`.
+Cursix sets the flag through `CONCH_ARGS` in `/etc/default/conch`.
 
 ## Building
 
@@ -150,9 +150,9 @@ dotnet pack src/Conch/Conch.csproj -c Release -o dist
 
 Releases go to NuGet through the `Publish Nuget` workflow.
 
-## Conchix
+## Cursix
 
-[Conchix](https://github.com/tomlm/Conchix) (*conk-ix*) is a minimal Debian
+[Cursix](https://github.com/tomlm/Cursix) is a minimal Debian
 distribution that boots to kmscon with Conch as the session shell. Everything
 distro-shaped — image recipe, Debian packaging, systemd units, kmscon and console
 configuration — lives there. This repo is just the shell, and is useful on its own.

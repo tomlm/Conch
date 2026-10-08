@@ -11,7 +11,7 @@ namespace Conch.Services.Control
     /// .NET has these on Windows 10 and later too, so both platforms share one transport.
     ///
     /// Inside Conch every terminal is told its socket (<see cref="SocketVariable"/>). Outside
-    /// -- an ssh session into Conchix -- the CLI uses the one Conch the user has running, which
+    /// -- an ssh session into Cursix -- the CLI uses the one Conch the user has running, which
     /// is how a script there can still reach the console.
     /// </remarks>
     public static class ControlEndpoint

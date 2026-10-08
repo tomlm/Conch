@@ -31,7 +31,7 @@ namespace Conch.Services
         /// </summary>
         /// <remarks>
         /// systemd asks polkit whether a non-root user may power the machine down, and the
-        /// answer depends on the machine. Where polkitd is installed -- Conchix, since
+        /// answer depends on the machine. Where polkitd is installed -- Cursix, since
         /// NetworkManager needs it, and most desktop systems -- logind authorises a local seat
         /// user and the direct call simply works, with nothing to type. Where it is absent the
         /// call fails authentication, and sudo is the way through for an account in the sudo

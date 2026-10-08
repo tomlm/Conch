@@ -3,7 +3,7 @@
 Conch (S:\github\Conch) is a TUI shell. Each app is one YAML file in
 `S:\github\Conch\src\Conch\Tools\<PascalName>.yml`. Read 3-4 existing ones first
 (Btop.yml, Nano.yml, Edit.NET.yml, Asciiquarium.yml, Dotnet10.yml) and match them.
-Conchix, the main Linux target, is **Debian 13 (trixie)**. On Windows, an app with only a
+Cursix, the main Linux target, is **Debian 13 (trixie)**. On Windows, an app with only a
 `linux:` entry runs inside WSL automatically, so a Windows entry is only for a NATIVE build.
 
 Source data: round 1 came from an `apps.json` scraped from

@@ -38,7 +38,7 @@ namespace Conch.Services.Roles
         public const string NetworkConfig = "network-config";
 
         /// <summary>
-        /// Configure audio. No built-in, and nothing to configure on Conchix yet -- its
+        /// Configure audio. No built-in, and nothing to configure on Cursix yet -- its
         /// package list carries no audio stack at all, so alsamixer and pulsemixer would
         /// have no server to reach.
         /// </summary>
@@ -47,7 +47,7 @@ namespace Conch.Services.Roles
         /// <summary>
         /// Configure the display: on a console, the font and its size, which decide how many
         /// columns and rows everything gets. No built-in, because where those live depends
-        /// entirely on what is drawing the console -- kmscon's config file on Conchix, a
+        /// entirely on what is drawing the console -- kmscon's config file on Cursix, a
         /// terminal emulator's own settings anywhere else -- and Conch knows nothing about
         /// either. A distribution fills the role with a tool of its own.
         /// </summary>
@@ -59,7 +59,7 @@ namespace Conch.Services.Roles
         /// <remarks>
         /// The editor each platform's own users already know. On Windows that is Microsoft's
         /// Edit -- mouse-driven, like Conch, and MS-DOS Edit's successor. On Linux it is nano:
-        /// Debian installs it by default and points <c>editor</c> at it, so a Conchix user has
+        /// Debian installs it by default and points <c>editor</c> at it, so a Cursix user has
         /// it before installing anything. vim-tiny is also there, and is not a default anybody
         /// wants to find themselves in.
         ///
@@ -71,9 +71,9 @@ namespace Conch.Services.Roles
             [(TextEditor, HostOs.Windows)] = "edit.exe",
             [(TextEditor, HostOs.Linux)] = "gnu.nano",
 
-            // Conchix's own tool. Conch does not detect Conchix: everywhere else this app is
+            // Cursix's own tool. Conch does not detect Cursix: everywhere else this app is
             // simply not installed, so the preference falls through to whatever is.
-            [(DisplayConfig, HostOs.Linux)] = "conchix.display",
+            [(DisplayConfig, HostOs.Linux)] = "cursix.display",
         };
 
         /// <summary>The registration id <paramref name="role"/> should default to on <paramref name="os"/>, if any.</summary>

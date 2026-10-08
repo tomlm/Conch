@@ -592,7 +592,7 @@ namespace Conch.Views
         /// <remarks>
         /// A glyph by default, words when Preferences says so: on a console whose font lacks
         /// the glyph it draws as a box, which is exactly the failure this project has already
-        /// been through once. Conchix ships Symbola for these, and Windows Terminal falls back
+        /// been through once. Cursix ships Symbola for these, and Windows Terminal falls back
         /// to Segoe UI Symbol.
         /// </remarks>
         private void ShowNetwork()
@@ -695,7 +695,7 @@ namespace Conch.Views
         /// </summary>
         /// <remarks>
         /// Detection otherwise runs only when the search box opens, so until then every catalog
-        /// app counted as not installed: Display said no app was set up even with Conchix
+        /// app counted as not installed: Display said no app was set up even with Cursix
         /// Display sitting in /usr/bin, and opening a file found no text editor. A role's
         /// candidates are a handful of probes, not the whole catalog -- which on Windows means a
         /// wsl.exe per Linux app -- and each is looked for once.
@@ -736,7 +736,7 @@ namespace Conch.Views
         /// </summary>
         /// <remarks>
         /// Nothing available is an ordinary state, not an error -- audio configuration has no
-        /// candidate at all until something is installed for it, and on Conchix there is not yet
+        /// candidate at all until something is installed for it, and on Cursix there is not yet
         /// an audio stack for anything to configure. Saying so and offering the place to fix it
         /// beats a click that does nothing.
         /// </remarks>
@@ -865,7 +865,7 @@ namespace Conch.Views
         /// Confirms, then runs a power command in a window that stays on screen.
         /// </summary>
         /// <remarks>
-        /// Visibly, through <see cref="AppLauncher.RunScript"/>, because on Conchix the
+        /// Visibly, through <see cref="AppLauncher.RunScript"/>, because on Cursix the
         /// command goes through sudo and may ask for a password. A prompt drawn where nobody
         /// can answer it is indistinguishable from a hang, and if the command fails instead,
         /// its reason stays readable.

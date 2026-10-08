@@ -36,7 +36,7 @@ namespace Conch.Services
         /// </summary>
         /// <remarks>
         /// Plain file reads of a few bytes each, with no process to spawn -- which matters on
-        /// Conchix, where the alternative would be shelling out to networkctl several times a
+        /// Cursix, where the alternative would be shelling out to networkctl several times a
         /// minute for the life of the session.
         ///
         /// Loopback is skipped: it is always up and would make the indicator meaningless.

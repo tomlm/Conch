@@ -13,7 +13,7 @@ namespace Conch.Utilities
         /// Conch is the session rather than one program among many.
         /// </summary>
         /// <remarks>
-        /// Set by Conchix through CONCH_ARGS in /etc/default/conch, which conch@.service reads
+        /// Set by Cursix through CONCH_ARGS in /etc/default/conch, which conch@.service reads
         /// as its EnvironmentFile and the package wrapper expands. It gates shutting the
         /// machine down and restarting it, so that a misclick on a development box -- where
         /// Conch is an ordinary application and the machine is being worked on -- cannot

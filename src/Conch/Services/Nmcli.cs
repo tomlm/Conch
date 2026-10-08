@@ -163,7 +163,7 @@ namespace Conch.Services
     /// pure and tested against captured output.
     ///
     /// Two privilege levels, measured from the polkit policy NetworkManager ships rather than
-    /// assumed -- these are the defaults in the file on the Conchix image:
+    /// assumed -- these are the defaults in the file on the Cursix image:
     ///
     ///   network-control          allow_active=yes              activating and deactivating
     ///   wifi.scan                allow_active=yes              rescanning
@@ -177,7 +177,7 @@ namespace Conch.Services
     /// sudo behind it; see <see cref="JoinWifiScript"/>.
     ///
     /// "Active" there means a session polkit counts as local, which is one with a seat. A login
-    /// at the Conchix console has seat0; SSH and WSL logins have none, and polkit falls through
+    /// at the Cursix console has seat0; SSH and WSL logins have none, and polkit falls through
     /// to allow_any, which is auth_admin. There an activation is refused too, and goes the same
     /// way as a first join; see <see cref="SudoScript"/>.
     /// </remarks>
@@ -252,7 +252,7 @@ namespace Conch.Services
         /// - Joining a network nmcli has no profile for writes a system connection, which polkit
         ///   guards with auth_admin_keep. A text session has no agent to answer that, so the
         ///   attempt fails with "Not authorized to control networking" and nothing to type into.
-        /// - The account that runs Conch on Conchix is in the sudo group, so sudo is the way
+        /// - The account that runs Conch on Cursix is in the sudo group, so sudo is the way
         ///   through -- and sudo may ask for a password, which needs somewhere to be asked.
         /// - The passphrase itself is asked for by nmcli's own <c>--ask</c>, in that same window.
         ///   Conch never holds it, never puts it on a command line where it would be visible in

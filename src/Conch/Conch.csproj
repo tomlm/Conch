@@ -15,7 +15,7 @@
     <NoWarn>$(NoWarn);AVLN3001</NoWarn>
   </PropertyGroup>
 
-  <!-- Conch ships as a .NET global tool. Distro packaging lives in Conchix,
+  <!-- Conch ships as a .NET global tool. Distro packaging lives in Cursix,
        which is free to acquire it however suits an image. -->
   <PropertyGroup>
     <PackAsTool>true</PackAsTool>

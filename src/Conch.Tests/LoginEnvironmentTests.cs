@@ -7,7 +7,7 @@ namespace Conch.Tests;
 /// How a login PATH is combined with Conch's own, and read out of a login shell's output.
 /// </summary>
 /// <remarks>
-/// Where Conch is the login shell (Conchix), nothing reads /etc/profile.d or ~/.profile, so
+/// Where Conch is the login shell (Cursix), nothing reads /etc/profile.d or ~/.profile, so
 /// ~/.dotnet/tools never reached Conch's PATH: Edit.NET installed and then could not be found.
 /// These cover the pure parts; the probe itself is one bash -lc call.
 /// </remarks>
