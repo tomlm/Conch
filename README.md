@@ -7,6 +7,8 @@ machine with no graphical stack still gets overlapping, movable, resizable windo
 Applications are described by `.yml` registration files that declare how to install,
 detect, and launch a terminal application.
 
+<img width="836" height="423" alt="image" src="https://github.com/user-attachments/assets/4a0c844a-8f85-47a2-8be9-da2d69f08def" />
+
 ## Install
 
 ```sh
